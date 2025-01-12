@@ -1,0 +1,231 @@
+/* Estilo Global */
+body {
+    background-color: #ffffff; /* Fondo blanco */
+    font-family: 'Inter', sans-serif;
+}
+
+/* Títulos */
+h1, h3 {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #8a260c; /* Rojo secundario */
+}
+
+/* Tarjetas */
+.card {
+    background: #f9f9f8; /* Fondo de tarjeta */
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: scale(1.02);
+}
+
+.card-header {
+    background: #8a260c; /* Fondo rojo */
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 15px;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+/* Formularios */
+.form-control,
+.form-select {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Botones */
+button {
+    font-size: 0.9rem;
+    border-radius: 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Botones secundarios */
+button.btn-secondary {
+    background: #ffda77; /* Amarillo */
+    color: #5b1f0a; /* Texto oscuro */
+    border: none;
+}
+
+button.btn-secondary:hover {
+    background: #d8ad09; /* Amarillo oscuro */
+    transform: scale(1.05);
+}
+
+/* Botones primarios */
+button.btn-primary {
+    background: #ffda77; /* Amarillo */
+    color: #5b1f0a; /* Texto oscuro */
+    border: 1px solid #8a260c;
+}
+
+button.btn-primary:hover {
+    background: #d8ad09;
+    border: 1px solid #8a260c;
+    transform: scale(1.05);
+}
+
+/* Botones de acción */
+button.btn-warning.edit-btn,
+button.btn-danger.delete-btn,
+button.btn-warning.actualizar-btn {
+    background: #ffda77; /* Amarillo */
+    color: #5b1f0a; /* Texto oscuro */
+    border: 1px solid #8a260c;
+}
+
+button.btn-warning.edit-btn:hover,
+button.btn-danger.delete-btn:hover,
+button.btn-warning.actualizar-btn:hover {
+    background: #d8ad09;
+    transform: scale(1.05);
+}
+
+/* Tablas */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    background: #faf3e0;
+}
+
+.table thead {
+    background: #8a260c; /* Fondo rojo */
+    color: white;
+    text-transform: uppercase;
+}
+
+/* Total por Paquete */
+#total-por-paquete {
+    font-weight: bold;
+    color: #8a260c; /* Rojo secundario */
+    font-size: 1.5rem;
+}
+
+/* Fondo total paquete */
+.bg-gradient {
+    background: linear-gradient(45deg, #5b1f0a, #8a260c); /* Degradado rojo-marrón */
+    color: white;
+    display: inline-block;
+    border-radius: 16px;
+    padding: 15px;
+    font-weight: bold;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: #faf3e0; /* Fondo claro uniforme */
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    padding: 25px;
+    display: none;
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Alinea contenido al centro horizontalmente */
+    justify-content: center; /* Centra contenido verticalmente */
+}
+
+.modal.visible {
+    display: flex;
+}
+
+.modal h2, .modal h3 {
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
+    color: #8a260c; /* Rojo */
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+/* Botón de cierre */
+.modal .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    color: #8a260c; /* Rojo */
+    cursor: pointer;
+}
+
+.modal .close:hover {
+    color: #d8ad09; /* Amarillo oscuro */
+}
+
+/* Formulario del Modal */
+.modal input[type="text"], 
+.modal input[type="number"] {
+    width: 70%;
+    padding: 12px;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    background: #faf3e0; /* Fondo uniforme */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-left: 70px;
+}
+
+/* Botón de actualizar */
+.modal button[type="submit"] {
+    background: #8a260c; /* Rojo */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    width: 30%;
+    margin-top: 8px;
+    margin-left: 150px;
+    text-align: center; /* Centrado de texto */
+}
+
+.modal button[type="submit"]:hover {
+    background: #d8ad09; /* Amarillo oscuro */
+    transform: scale(1.05);
+}
+
+/* Fondo oscuro */
+#fondo-oscuro {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Oscurecimiento */
+    z-index: 998;
+}
+.btn-success {
+background-color: #ffda77;
+color: #5b1f0a;
+}
+.btn-success:hover {
+    background: #d8ad09;
+    border: 1px solid #8a260c;
+    transform: scale(1.05);
+}

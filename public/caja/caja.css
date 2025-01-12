@@ -1,0 +1,144 @@
+body {
+    background-color: #ffffff; /* Fondo blanco */
+    font-family: 'Inter', sans-serif;
+    color: #5b1f0a; /* Color principal del texto */
+}
+
+#netTotal {
+    font-size: 20px;
+}
+
+h5 {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+header {
+    background-color: #eee8e8; /* Fondo rojo principal */
+    color: white; /* Texto blanco */
+    text-align: center;
+    padding: 30px 0;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+header nav a {
+    background-color: #a61b1b; /* Fondo rojo principal */
+    color: white; /* Texto blanco */
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+header nav a:hover {
+    background-color: #8d1212; /* Rojo oscuro para hover */
+    transform: scale(1.05);
+}
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+    background-color: #ffda77; /* Fondo amarillo */
+    color: #5b1f0a; /* Texto principal */
+    border: none;
+}
+
+.btn:hover {
+    background-color: #d8ad09; /* Amarillo más oscuro */
+    transform: translateY(-2px);
+}
+.bg-warning {
+    background-color: #ffda77 !important;
+}
+.btn-secondary {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #a61b1b; /* Fondo rojo principal */
+    border: 1px solid #8d1212; /* Rojo oscuro */
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-secondary:hover {
+    background-color: #8d1212; /* Rojo oscuro */
+    transform: scale(1.05);
+}
+
+.modal-header {
+    background-color: #a61b1b; /* Fondo rojo principal */
+    color: white;
+    border-bottom: 2px solid #8d1212; /* Rojo oscuro */
+}
+
+.modal-content {
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.table {
+    background-color: #faf3e0; /* Fondo similar a las tarjetas */
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table th {
+    background-color: #8d1212; /* Rojo oscuro */
+    color: white;
+}
+
+.table tbody tr:hover {
+    background-color: #fbe6d4; /* Color claro al hover */
+    cursor: pointer;
+}
+
+input, select {
+    border: 1px solid #b2bec3;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+input:focus, select:focus {
+    border-color: #a61b1b; /* Rojo principal */
+    box-shadow: 0px 0px 6px rgba(166, 27, 27, 0.5);
+    outline: none;
+}
+
+#cashResult, #monthlyClosure {
+    padding: 15px;
+    background-color: #faf3e0; /* Fondo similar a las tarjetas */
+    border-left: 4px solid #a61b1b; /* Rojo principal */
+    border-radius: 10px;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+#summary {
+    color: #a61b1b; /* Rojo principal */
+    font-size: 1.2rem;
+}

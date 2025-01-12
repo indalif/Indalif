@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control</title>
+    <!-- Google Fonts y Font Awesome para íconos -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #5b1f0a;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            color: #5b1f0a;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        header .logo-container {
+            position: absolute;
+            left: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header .logo-container img {
+            width: 100%;
+            height: auto;
+        }
+
+        header .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        header .btn-logout {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #a61b1b;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            right: 40px;
+        }
+
+        header .btn-logout i {
+            font-size: 20px;
+        }
+
+        header .btn-logout:hover {
+            background-color: #8d1212;
+        }
+
+        main {
+            flex: 1;
+            padding: 40px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #faf3e0;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            height: 270px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card .icon {
+            font-size: 3rem;
+            color: #a61b1b;
+            margin-bottom: 15px;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #8a260c;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #5b1f0a;
+            margin-bottom: 20px;
+        }
+
+        .card .btn {
+            background-color: #ffda77;
+            color: #5b1f0a;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+        }
+
+        .card .btn:hover {
+            background-color: #d8ad09;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            font-size: 0.9rem;
+            color: #5b1f0a;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="/inicio_empleado/aranda.jpg" alt="Logo Aranda">
+        </div>
+        <h1 class="logo">¡Bienvenido!</h1>
+        <a href="/login/login.html" class="btn-logout">
+            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </a>
+    </header>
+    <main>
+        <div class="card">
+            <i class="fas fa-exchange-alt icon"></i>
+            <h2>Cambios de Mercadería</h2>
+            <p>Gestiona y registra los cambios de mercadería.</p>
+            <a href="/inicio_empleado/cambios.html" class="btn">Entrar</a>
+        </div>
+        <div class="card">
+            <i class="fas fa-industry icon"></i>
+            <h2>Producción Diaria</h2>
+            <p>Consulta y registra la producción diaria de la fábrica.</p>
+            <a href="/inicio_empleado/produccion.html" class="btn">Entrar</a>
+        </div>
+        <div class="card">
+            <i class="fas fa-warehouse icon"></i>
+            <h2>Stock Materia Prima</h2>
+            <p>Consulta y actualiza el stock de materia prima.</p>
+            <a href="/inicio_empleado/stockmp.html" class="btn">Entrar</a>
+        </div>
+        <div class="card">
+            <i class="fas fa-box icon"></i>
+            <h2>Stock Mercadería</h2>
+            <p>Gestiona el stock de mercadería fácilmente.</p>
+            <a href="/inicio_empleado/mercaderia.html" class="btn">Entrar</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; Pastas Aranda 2025</p>
+    </footer>
+</body>
+
+</html>

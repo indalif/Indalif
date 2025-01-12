@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Producción Diaria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #faf3e0;
+            font-family: 'Inter', sans-serif;
+            color: #5b1f0a;
+        }
+
+        /* Header */
+        .header {
+            background-color: #ffda77;
+            color: #5b1f0a;
+            padding: 50px 20px;
+            text-align: center;
+            border-bottom: 3px solid #a61b1b;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: bold;
+        }
+
+        .header .btn-secondary {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #5b1f0a;
+            border: 1px solid #8a260c;
+            color: #ffffff;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .header .btn-secondary:hover {
+            background-color: #8a260c;
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        /* Tarjetas */
+        .form-card {
+            background: #ffffff;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .form-card:hover {
+            transform: scale(1.02);
+        }
+
+        /* Botón Registrar */
+        .btn-primary {
+            background-color: #ffda77;
+            border: 1px solid #8a260c;
+            color: #5b1f0a;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #d8ad09;
+            transform: scale(1.05);
+            color: #ffffff;
+        }
+
+        /* Tabla */
+        .table-container {
+            margin-top: 40px;
+        }
+
+        .table-bordered {
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .bg-primary {
+            background-color: #ffda77 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <a href="/inicio_empleado/inicio_empleado.html" class="btn btn-secondary">
+            <i class="fas fa-home me-2"></i>Volver a Inicio
+        </a>
+        <h1>Control de Producción Diaria</h1>
+    </header>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="form-card">
+                    <label for="filtroFecha" class="form-label"><i class="fas fa-calendar-alt me-2"></i>Filtrar por
+                        Fecha</label>
+                    <input type="date" id="filtroFecha" class="form-control">
+                    <button id="btnFiltrar" class="btn btn-primary w-100 mt-3"><i
+                            class="fa-solid fa-magnifying-glass"></i> Filtrar</button>
+                </div>
+            </div>
+        </div>
+
+        <form id="formProduccion" class="form-card mb-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="producto" class="form-label"><i class="fas fa-box-open me-2"></i>Producto</label>
+                    <select id="producto" class="form-select" required>
+                        <option value="" disabled selected>Seleccione un producto</option>
+                        <option value="tapas tradicionales">Tapas Tradicionales</option>
+                        <option value="tapas caseras">Tapas Caseras</option>
+                        <option value="tapas verdes">Tapas Verdes</option>
+                        <option value="pascualinas tradicionales">Pascualinas Tradicionales</option>
+                        <option value="pascualinas caseras">Pascualinas Caseras</option>
+                        <option value="pascualinas verdes">Pascualinas Verdes</option>
+                        <option value="fideos al huevo">Fideos al Huevo</option>
+                        <option value="fideos verdes">Fideos Verdes</option>
+                        <option value="ñoquis">Ñoquis</option>
+                        <option value="ravioles de ricota y jamón">Ravioles de Ricota y Jamón</option>
+                        <option value="ravioles de verdura y pollo">Ravioles de Verdura y Pollo</option>
+                        <option value="tapas de lasagna">Tapas de Lasagna</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="fecha" class="form-label"><i class="fas fa-calendar-alt me-2"></i>Fecha</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-primary text-white"><i class="fas fa-calendar-day"></i></span>
+                        <input type="date" id="fecha" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <label for="produccionDia" class="form-label"><i class="fas fa-cogs me-2"></i>Producción del
+                        Día</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-primary text-white"><i class="fas fa-chart-line"></i></span>
+                        <input type="number" id="produccionDia" class="form-control" placeholder="Cantidad producida"
+                            required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="fechaVencimiento" class="form-label"><i class="fas fa-calendar-check me-2"></i>Fecha de
+                        Vencimiento</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-primary text-white"><i class="fas fa-hourglass-end"></i></span>
+                        <input type="date" id="fechaVencimiento" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="numeroLote" class="form-label"><i class="fas fa-barcode me-2"></i>Número de Lote</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-primary text-white"><i class="fas fa-hashtag"></i></span>
+                        <input type="text" id="numeroLote" class="form-control" placeholder="Ingrese el lote" required>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-4">
+                <i class="fas fa-save me-2"></i>Registrar Producción
+            </button>
+        </form>
+        <h2 class="text-center mb-4">Producción Registrada</h2>
+        <div class="table-container">
+            <table class="table table-bordered table-hover text-center">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Fecha</th>
+                        <th>Producción del Día</th>
+                        <th>Fecha de Vencimiento</th>
+                        <th>Número de Lote</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProduccion">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="produccion.js"></script>
+</body>
+
+</html>

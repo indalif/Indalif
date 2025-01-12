@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arqueo de Caja</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="caja.css">
+</head>
+
+<body>
+    <header class="bg-warning text-dark text-center py-4">
+        <a href="/inicio/inicio.html" class="btn btn-secondary">
+            <i class="fas fa-home me-3"></i>Volver a Inicio
+        </a>
+        <h1 class="display-4">Arqueo de Caja</h1>
+    </header>
+
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Ingresos</h5>
+                        <form id="incomeForm">
+                            <div class="form-group">
+                                <label for="incomeDescription">Descripción:</label>
+                                <input type="text" class="form-control" id="incomeDescription" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="incomeAmount">Monto:</label>
+                                <input type="number" class="form-control" id="incomeAmount" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="incomeMethod">Método:</label>
+                                <select class="form-control" id="incomeMethod">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="addIncome()">Agregar Ingreso</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow border-danger">
+                    <div class="card-body">
+                        <h5 class="card-title">Egresos</h5>
+                        <form id="expenseForm">
+                            <div class="form-group">
+                                <label for="expenseDescription">Descripción:</label>
+                                <input type="text" class="form-control" id="expenseDescription" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseAmount">Monto:</label>
+                                <input type="number" class="form-control" id="expenseAmount" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expenseMethod">Método:</label>
+                                <select class="form-control" id="expenseMethod">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="transferencia">Transferencia</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-danger" onclick="addExpense()">Agregar Egreso</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4 shadow border-info">
+            <div class="card-body">
+                <h5 class="card-title">Resumen Diario</h5>
+                <div id="summary" class="font-weight-bold"></div>
+                <p id="netTotal">Total Neto del Día: $0.00</p>
+                <button class="btn btn-info mt-2" data-toggle="modal" data-target="#historyModal">Ver Historial por
+                    Fecha</button>
+            </div>
+        </div>
+        <div class="modal fade" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">Ver Historial por Fecha o Mes</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="historyForm">
+                            <div class="form-group">
+                                <label for="historyDate">Seleccionar Fecha:</label>
+                                <input type="date" class="form-control" id="historyDate">
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="viewHistoryByDate()">Ver
+                                Historial</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4 shadow border-secondary">
+            <div class="card-body">
+                <h5 class="card-title">Historial de Transacciones</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Método</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionHistory"></tbody>
+
+                </table>
+            </div>
+        </div>
+        <div class="card mb-4 shadow border-success">
+            <div class="card-body">
+                <h5 class="card-title">Control de Efectivo en Caja</h5>
+                <form id="cashControlForm">
+                    <div class="form-row">
+                        <div class="col">
+                            <label for="bill100">Billetes de $100:</label>
+                            <input type="number" class="form-control" id="bill100" min="0" value="0">
+                        </div>
+                        <div class="col">
+                            <label for="bill200">Billetes de $200:</label>
+                            <input type="number" class="form-control" id="bill200" min="0" value="0">
+                        </div>
+                        <div class="col">
+                            <label for="bill500">Billetes de $500:</label>
+                            <input type="number" class="form-control" id="bill500" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="form-row mt-2">
+                        <div class="col">
+                            <label for="bill1000">Billetes de $1000:</label>
+                            <input type="number" class="form-control" id="bill1000" min="0" value="0">
+                        </div>
+                        <div class="col">
+                            <label for="bill2000">Billetes de $2000:</label>
+                            <input type="number" class="form-control" id="bill2000" min="0" value="0">
+                        </div>
+                        <div class="col">
+                            <label for="bill10000">Billetes de $10000:</label>
+                            <input type="number" class="form-control" id="bill10000" min="0" value="0">
+                        </div>
+                        <div class="col">
+                            <label for="bill20000">Billetes de $20000:</label>
+                            <input type="number" class="form-control" id="bill20000" min="0" value="0">
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-info mt-3" onclick="calculateCash()">Calcular Total Efectivo</button>
+                </form>
+                <div id="cashResult" class="mt-3"></div>
+            </div>
+        </div>        
+        <div class="card mb-4 shadow border-primary">
+            <div class="card-body">
+                <h5 class="card-title">Cierre Mensual</h5>
+                <div class="form-group">
+                    <label for="year">Año:</label>
+                    <input type="number" id="year" class="form-control" value="2024" min="2000" max="2100">
+                </div>
+                <div class="form-group">
+                    <label for="month">Mes:</label>
+                    <select id="month" class="form-control">
+                        <option value="01">Enero</option>
+                        <option value="02">Febrero</option>
+                        <option value="03">Marzo</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Mayo</option>
+                        <option value="06">Junio</option>
+                        <option value="07">Julio</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="closeMonth()">Cerrar Mes</button>
+                <div id="monthlyClosure" style="margin-top: 20px;">
+                    <div id="monthlyClosureResult"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="caja.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

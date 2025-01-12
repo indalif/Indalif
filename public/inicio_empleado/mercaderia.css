@@ -1,0 +1,184 @@
+@import url('https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css');
+/* Estilos generales */
+body {
+    background-color: #ffffff;
+    color: #5b1f0a;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h3, h2 {
+    color: #8a260c;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Botón Volver a Inicio */
+.btn-secondary {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #ffda77; /* Amarillo pastel */
+    border: 1px solid #d8ad09; /* Amarillo oscuro */
+    color: #5b1f0a;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 25px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    z-index: 1000;
+}
+
+.btn-secondary:hover {
+    background-color: #d8ad09; /* Amarillo oscuro */
+    color: #5b1f0a;
+    transform: scale(1.05);
+}
+
+.btn-secondary:active {
+    background-color: #f0c040; /* Amarillo intermedio */
+    transform: scale(1);
+}
+
+/* Formulario de ingreso - Estilo en columna */
+#ingreso-form {
+    background-color: #faf3e0;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Espacio entre cada campo */
+}
+
+#ingreso-form label {
+    font-weight: 600;
+    color: #8a260c;
+}
+
+#ingreso-form input,
+#ingreso-form select {
+    padding: 12px;
+    border: 1px solid #c9b08a;
+    border-radius: 8px;
+    color: #5b1f0a;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#ingreso-form button {
+    background-color: #a61b1b;
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+#ingreso-form button:hover {
+    background-color: #8d1212;
+}
+
+/* Contenedor de pestañas, igual tamaño que el formulario */
+#tab-container {
+    background-color: #faf3e0;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    margin-bottom: 30px;
+}
+
+/* Botones de pestaña */
+.tab-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.tab-button {
+    background-color: #a61b1b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.tab-button:hover, .tab-button.active {
+    background-color: #8d1212;
+    transform: scale(1.05);
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #faf3e0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Información de stock */
+.stock-info {
+    font-weight: bold;
+    color: #8a260c;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+/* Detalles del stock */
+.stock-detalles {
+    background-color: #f2e7d5;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #5b1f0a;
+}
+
+/* Formulario de egreso */
+form label {
+    font-weight: bold;
+    color: #8a260c;
+}
+
+form input[type="date"],
+form input[type="number"] {
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+form button {
+    background-color: #a61b1b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+form button:hover {
+    background-color: #8d1212;
+}

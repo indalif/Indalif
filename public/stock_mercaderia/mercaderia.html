@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Stock de Mercadería</title>
+    <link rel="stylesheet" href="mercaderia.css">
+</head>
+
+<body>
+    <header>
+        <a href="/inicio/inicio.html" class="btn btn-secondary">
+            <i class="fas fa-home me-2"></i>Volver a Inicio
+        </a>
+    </header>
+    <form id="ingreso-form">
+        <h3>Registrar Ingreso</h3>
+        <label for="product">Producto:</label>
+        <select id="product">
+            <option value="tapas-tradicionales">Tapas Tradicionales</option>
+            <option value="tapas-caseras">Tapas Caseras</option>
+            <option value="tapas-verdes">Tapas Verdes</option>
+            <option value="pascualinas-tradicionales">Pascualinas Tradicionales</option>
+            <option value="pascualinas-caseras">Pascualinas Caseras</option>
+            <option value="pascualinas-verdes">Pascualinas Verdes</option>
+            <option value="fideos-al-huevo">Fideos al Huevo</option>
+            <option value="fideos-con-espinaca">Fideos con Espinaca</option>
+            <option value="ñoquis">Ñoquis</option>
+            <option value="ravioles-ricota-jamon">Ravioles Ricota y Jamón</option>
+            <option value="ravioles-vp">Ravioles V/P</option>
+            <option value="tapas-lasagna">Tapas de Lasagna</option>
+        </select>
+        <label for="production-date">Fecha de Producción:</label>
+        <input type="date" id="production-date">
+        <label for="expiry-date">Fecha de Vencimiento:</label>
+        <input type="date" id="expiry-date">
+        <label for="lote-number">Número de Lote:</label>
+        <input type="text" id="lote-number" placeholder="Ejemplo: 001">
+        <label for="quantity">Cantidad:</label>
+        <input type="number" id="quantity" min="1">
+        <button type="button" onclick="submitIngresoForm()">Registrar Ingreso</button>
+    </form>
+    </div>
+    <div id="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button" onclick="openTab(event, 'tapas-tradicionales')">Tapas Tradicionales</button>
+            <button class="tab-button" onclick="openTab(event, 'tapas-caseras')">Tapas Caseras</button>
+            <button class="tab-button" onclick="openTab(event, 'tapas-verdes')">Tapas Verdes</button>
+            <button class="tab-button" onclick="openTab(event, 'pascualinas-tradicionales')">Pascualinas
+                Tradicionales</button>
+            <button class="tab-button" onclick="openTab(event, 'pascualinas-caseras')">Pascualinas Caseras</button>
+            <button class="tab-button" onclick="openTab(event, 'pascualinas-verdes')">Pascualinas Verdes</button>
+            <button class="tab-button" onclick="openTab(event, 'fideos-al-huevo')">Fideos al Huevo</button>
+            <button class="tab-button" onclick="openTab(event, 'fideos-con-espinaca')">Fideos con Espinaca</button>
+            <button class="tab-button" onclick="openTab(event, 'ñoquis')">Ñoquis</button>
+            <button class="tab-button" onclick="openTab(event, 'ravioles-ricota-jamon')">Ravioles Ricota y
+                Jamón</button>
+            <button class="tab-button" onclick="openTab(event, 'ravioles-vp')">Ravioles V/P</button>
+            <button class="tab-button" onclick="openTab(event, 'tapas-lasagna')">Tapas de Lasagna</button>
+        </div>
+        <div id="tapas-tradicionales" class="tab-content">
+            <h2>Tapas Tradicionales</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'tapas-tradicionales')">
+                <label for="egreso-lote-tapas-tradicionales">Número de Lote:</label>
+                <input type="text" id="egreso-lote-tapas-tradicionales" placeholder="Ejemplo: 001">
+                <label for="egreso-date-tapas-tradicionales">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-tapas-tradicionales">
+                <label for="egreso-quantity-tapas-tradicionales">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-tapas-tradicionales" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="tapas-caseras" class="tab-content">
+            <h2>Tapas Caseras</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'tapas-caseras')">
+                <label for="egreso-lote-tapas-caseras">Número de Lote:</label>
+                <input type="text" id="egreso-lote-tapas-caseras" placeholder="Ejemplo: 001">
+                <label for="egreso-date-tapas-caseras">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-tapas-caseras">
+                <label for="egreso-quantity-tapas-caseras">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-tapas-caseras" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="tapas-verdes" class="tab-content">
+            <h2>Tapas Verdes</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'tapas-verdes')">
+                <label for="egreso-lote-tapas-verdes">Número de Lote:</label>
+                <input type="text" id="egreso-lote-tapas-verdes" placeholder="Ejemplo: 001">
+                <label for="egreso-date-tapas-verdes">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-tapas-verdes">
+                <label for="egreso-quantity-tapas-verdes">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-tapas-verdes" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="pascualinas-tradicionales" class="tab-content">
+            <h2>Pascualinas Tradicionales</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'pascualinas-tradicionales')">
+                <label for="egreso-lote-pascualinas-tradicionales">Número de Lote:</label>
+                <input type="text" id="egreso-lote-pascualinas-tradicionales" placeholder="Ejemplo: 001">
+                <label for="egreso-date-pascualinas-tradicionales">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-pascualinas-tradicionales">
+                <label for="egreso-quantity-pascualinas-tradicionales">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-pascualinas-tradicionales" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="pascualinas-caseras" class="tab-content">
+            <h2>Pascualinas Caseras</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'pascualinas-caseras')">
+                <label for="egreso-lote-pascualinas-caseras">Número de Lote:</label>
+                <input type="text" id="egreso-lote-pascualinas-caseras" placeholder="Ejemplo: 001">
+                <label for="egreso-date-pascualinas-caseras">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-pascualinas-caseras">
+                <label for="egreso-quantity-pascualinas-caseras">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-pascualinas-caseras" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="pascualinas-verdes" class="tab-content">
+            <h2>Pascualinas Verdes</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'pascualinas-verdes')">
+                <label for="egreso-lote-pascualinas-verdes">Número de Lote:</label>
+                <input type="text" id="egreso-lote-pascualinas-verdes" placeholder="Ejemplo: 001">
+                <label for="egreso-date-pascualinas-verdes">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-pascualinas-verdes">
+                <label for="egreso-quantity-pascualinas-verdes">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-pascualinas-verdes" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="fideos-al-huevo" class="tab-content">
+            <h2>Fideos al Huevo</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'fideos-al-huevo')">
+                <label for="egreso-lote-fideos-al-huevo">Número de Lote:</label>
+                <input type="text" id="egreso-lote-fideos-al-huevo" placeholder="Ejemplo: 001">
+                <label for="egreso-date-fideos-al-huevo">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-fideos-al-huevo">
+                <label for="egreso-quantity-fideos-al-huevo">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-fideos-al-huevo" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="fideos-con-espinaca" class="tab-content">
+            <h2>Fideos con Espinaca</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'fideos-con-espinaca')">
+                <label for="egreso-lote-fideos-con-espinaca">Número de Lote:</label>
+                <input type="text" id="egreso-lote-fideos-con-espinaca" placeholder="Ejemplo: 001">
+                <label for="egreso-date-fideos-con-espinaca">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-fideos-con-espinaca">
+                <label for="egreso-quantity-fideos-con-espinaca">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-fideos-con-espinaca" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="ñoquis" class="tab-content">
+            <h2>Ñoquis</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'ñoquis')">
+                <label for="egreso-lote-ñoquis">Número de Lote:</label>
+                <input type="text" id="egreso-lote-ñoquis" placeholder="Ejemplo: 001">
+                <label for="egreso-date-ñoquis">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-ñoquis">
+                <label for="egreso-quantity-ñoquis">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-ñoquis" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="ravioles-ricota-jamon" class="tab-content">
+            <h2>Ravioles Ricota y Jamón</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'ravioles-ricota-jamon')">
+                <label for="egreso-lote-ravioles-ricota-jamon">Número de Lote:</label>
+                <input type="text" id="egreso-lote-ravioles-ricota-jamon" placeholder="Ejemplo: 001">
+                <label for="egreso-date-ravioles-ricota-jamon">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-ravioles-ricota-jamon">
+                <label for="egreso-quantity-ravioles-ricota-jamon">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-ravioles-ricota-jamon" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="ravioles-vp" class="tab-content">
+            <h2>Ravioles Verdura y Pollo</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'ravioles-vp')">
+                <label for="egreso-lote-ravioles-vp">Número de Lote:</label>
+                <input type="text" id="egreso-lote-ravioles-vp" placeholder="Ejemplo: 001">
+                <label for="egreso-date-ravioles-vp">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-ravioles-vp">
+                <label for="egreso-quantity-ravioles-vp">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-ravioles-vp" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <div id="tapas-lasagna" class="tab-content">
+            <h2>Tapas de Lasagna</h2>
+            <p class="stock-info">Stock actual: 0</p>
+            <div class="stock-detalles"></div>
+            <form onsubmit="submitEgresoForm(event, 'tapas-lasagna')">
+                <label for="egreso-lote-tapas-lasagna">Número de Lote:</label>
+                <input type="text" id="egreso-lote-tapas-lasagna" placeholder="Ejemplo: 001">
+                <label for="egreso-date-tapas-lasagna">Fecha de Vencimiento:</label>
+                <input type="date" id="egreso-date-tapas-lasagna">
+                <label for="egreso-quantity-tapas-lasagna">Cantidad a Egresar:</label>
+                <input type="number" id="egreso-quantity-tapas-lasagna" min="1">
+                <button type="submit">Registrar Egreso</button>
+            </form>
+        </div>
+        <script src="mercaderia.js"></script>
+</body>
+
+</html>

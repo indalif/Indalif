@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes Mayoristas/Distribuidores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #ffffff;
+            /* Fondo blanco */
+            font-family: 'Inter', sans-serif;
+            /* Fuente */
+            color: #5b1f0a;
+            /* Color principal del texto */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 15px;
+            background: #faf3e0;
+            /* Fondo similar a las tarjetas */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            color: #5b1f0a;
+            /* Texto blanco */
+            padding: 30px;
+            text-align: center;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            border-radius: 30px;
+            font-size: 1rem;
+            padding: 12px 25px;
+            background-color: #ffda77;
+            /* Fondo amarillo */
+            border: none;
+            transition: background-color 0.3s ease-in-out, transform 0.2s;
+            color: #5b1f0a;
+            /* Color del texto */
+        }
+
+        .btn-primary:hover {
+            background-color: #d8ad09;
+            /* Amarillo más oscuro */
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            margin-top: 10px;
+            border-radius: 30px;
+            font-size: 1rem;
+            padding: 10px 20px;
+            background-color: #a61b1b;
+            /* Fondo rojo principal */
+            border: none;
+            transition: background-color 0.2s;
+            color: white;
+            /* Texto blanco */
+        }
+
+        .btn-secondary:hover {
+            background-color: #8d1212;
+            /* Rojo más oscuro */
+        }
+
+        .form-control {
+            border: 2px solid #d1d9e0;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #ffda77;
+            /* Amarillo */
+            box-shadow: none;
+        }
+
+        h2 {
+            color: #8a260c;
+            /* Color secundario */
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .list-group-item {
+            border: none;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
+            transition: transform 0.2s, background-color 0.2s;
+            color: #5b1f0a;
+            /* Color principal */
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-3px);
+            background-color: #f7f7f7;
+        }
+
+        @media (max-width: 576px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                font-size: 0.9rem;
+                padding: 8px 16px;
+            }
+        }
+
+        .btn-small {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background-color: #ffda77;
+            /* Fondo amarillo */
+            color: #5b1f0a;
+            /* Color del texto */
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s ease-in-out, transform 0.2s;
+            margin-left: 550px;
+            top: -20px;
+        }
+
+        .btn-small:hover {
+            background-color: #d8ad09;
+            /* Amarillo más oscuro */
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="mb-3">
+                <a href="/inicio/inicio.html" class="btn btn-small">
+                    <i class="bi bi-house-fill"></i> Volver a Inicio
+                </a>
+            </div>
+            <h1>Clientes Mayoristas/Distribuidores</h1>
+        </div>
+        <form id="clienteForm" class="mb-4">
+            <input type="hidden" id="idCliente">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre"
+                    required>
+            </div>
+            <div class="mb-3">
+                <label for="cuit" class="form-label">CUIT:</label>
+                <input type="text" class="form-control" id="cuit" name="cuit" placeholder="Ingrese el CUIT" required>
+            </div>
+            <div class="mb-3">
+                <label for="legajo_impositivo" class="form-label">Legajo Impositivo:</label>
+                <input type="text" class="form-control" id="legajo_impositivo" name="legajo_impositivo"
+                    placeholder="Ingrese el Legajo Impositivo" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" id="submitBtn">Agregar Cliente</button>
+        </form>
+        <form id="buscadorForm" class="mb-4">
+            <div class="mb-3">
+                <label for="nombreCliente" class="form-label">Buscar Cliente por Nombre:</label>
+                <input type="text" class="form-control" id="nombreCliente" name="nombreCliente"
+                    placeholder="Ingrese el nombre">
+            </div>
+            <div class="modal fade" id="cambiosModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalTitle"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="modalBody"></div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+        <h2 class="text-center">Lista de Clientes</h2>
+        <ul id="listaClientes" class="list-group mt-3">
+        </ul>
+    </div>
+    <!-- Modal para Plazos de Pago -->
+    <div class="modal fade" id="plazosPagoModal" tabindex="-1" aria-labelledby="plazosPagoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="plazosPagoLabel">Plazos de Pago</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="plazosPagoForm">
+                        <!-- Campo oculto para almacenar el id del plazo -->
+                        <input type="hidden" id="idPlazo">
+
+                        <div class="mb-3">
+                            <label for="formaPago" class="form-label">Forma de Pago:</label>
+                            <input type="text" class="form-control" id="formaPago" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalPagar" class="form-label">Total a Pagar:</label>
+                            <input type="number" class="form-control" id="totalPagar" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fechaPago" class="form-label">Fecha:</label>
+                            <input type="date" class="form-control" id="fechaPago" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pago" class="form-label">Pago:</label>
+                            <input type="number" class="form-control" id="pago">
+                        </div>
+                        <div class="mb-3">
+                            <label for="numeroComprobante" class="form-label">N° Comprobante:</label>
+                            <input type="text" class="form-control" id="numeroComprobante">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </form>
+                    <hr>
+                    <h5 class="mt-3">Historial de Plazos de Pago</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Forma de Pago</th>
+                                <th>Total</th>
+                                <th>Fecha</th>
+                                <th>Pago</th>
+                                <th>Comprobante</th>
+                                <th>Debe</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plazosPagoTabla"></tbody>
+                    </table>
+                    <div class="mt-3">
+                        <strong>Total Deuda:</strong> <span id="totalDeuda" class="text-danger">0.00</span>
+                    </div>                                        
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="mercaderiaModal" tabindex="-1" aria-labelledby="mercaderiaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mercaderiaLabel">Agregar Mercadería</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="mercaderiaForm">
+                        <div class="mb-3">
+                            <label for="producto" class="form-label">Producto:</label>
+                            <select class="form-select" id="producto" required>
+                                <option value="">Seleccione un producto</option>
+                                <option value="Tapas Tradicionales">Tapas Tradicionales</option>
+                                <option value="Tapas Caseras">Tapas Caseras</option>
+                                <option value="Tapas Verdes">Tapas Verdes</option>
+                                <option value="Pascualinas Tradicionales">Pascualinas Tradicionales</option>
+                                <option value="Pascualinas Caseras">Pascualinas Caseras</option>
+                                <option value="Pascualinas Verdes">Pascualinas Verdes</option>
+                                <option value="Fideos al Huevo">Fideos al Huevo</option>
+                                <option value="Fideos Verdes">Fideos Verdes</option>
+                                <option value="Ñoquis">Ñoquis</option>
+                                <option value="Ravioles de Ricota y Jamón">Ravioles de Ricota y Jamón</option>
+                                <option value="Ravioles de Verdura y Pollo">Ravioles de Verdura y Pollo</option>
+                                <option value="Tapas de Lasagna">Tapas de Lasagna</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="precio" class="form-label">Precio:</label>
+                            <input type="number" class="form-control" id="precio" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cantidad" class="form-label">Cantidad:</label>
+                            <input type="number" class="form-control" id="cantidad" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha" class="form-label">Fecha:</label>
+                            <input type="date" class="form-control" id="fecha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agregar</button>
+                    </form>
+                    <hr>
+                    <h5>Detalles de Mercadería</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Total</th>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mercaderiaTabla">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="clientes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>
