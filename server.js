@@ -697,8 +697,8 @@ app.post('/send-authorization-email', (req, res) => {
             <h1>Solicitud de Autorización</h1>
             <p>El usuario <strong>${username}</strong> ha solicitado registrarse como <strong>${userType}</strong> en el sistema.</p>
             <p>Por favor, autorice o rechace la solicitud:</p>
-            <a href="https://fabrica-production.up.railway.app/approve?username=${username}" style="margin-right: 10px;">Autorizar</a>
-            <a href="https://fabrica-production.up.railway.app/reject?username=${username}">Rechazar</a>
+            <a href="https://indalif-production.up.railway.app/approve?username=${username}" style="margin-right: 10px;">Autorizar</a>
+            <a href="https://indalif-production.up.railway.app/reject?username=${username}">Rechazar</a>
         `,
     };
 
