@@ -49,57 +49,6 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
     filtrarTablaPorProducto(producto);
     document.getElementById("ingredientes-form").reset();
 });
-
-// Actualizar funciones relacionadas
-function actualizarTotalPorPaquete(producto) {
-    let totalIngredientes = 0;
-    let totalPlasticos = 0;
-
-    document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0;
-        totalIngredientes += costoIngrediente;
-    });
-
-    document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0;
-        totalPlasticos += costoPlastico;
-    });
-
-    const totalPaquete = totalIngredientes + totalPlasticos;
-    document.getElementById("total-por-paquete").textContent =
-        `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
-}
-
-// Modificar la estructura HTML de las filas de ingredientes
-function mostrarDatosEnTablas(ingredientes, plasticos) {
-    const tableBody = document.getElementById("table-body");
-    tableBody.innerHTML = "";
-    ingredientes.forEach(row => {
-        const precioTotal = row.cantidad_utilizo * row.precio_unitario;
-        const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
-
-        const newRow = `
-            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
-                <td>${row.producto}</td>
-                <td>${row.ingrediente}</td>
-                <td>${row.precio_unitario.toFixed(2)}</td>
-                <td>${row.cantidad_kg}</td>
-                <td>${row.cantidad_utilizo}</td>
-                <td>${precioTotal.toFixed(2)}</td>
-                <td>${row.rinde}</td>
-                <td>${totalIngredientes}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
-            </tr>
-        `;
-        tableBody.insertAdjacentHTML("beforeend", newRow);
-    });
-    agregarEventosAcciones();
-    actualizarTotalPorPaquete(producto);
-}
-
 document.getElementById("agregar-plastico-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto-plastico").value;
     const tipoPlastico = document.getElementById("tipo-plastico").value;
@@ -436,4 +385,50 @@ function actualizarFilaIngredientes(fila, nuevoPrecio) {
 
 function actualizarFilaPlasticos(fila, nuevoPrecio) {
     fila.querySelector(".precio").textContent = nuevoPrecio.toFixed(2);
+}
+function actualizarTotalPorPaquete(producto) {
+    let totalIngredientes = 0;
+    let totalPlasticos = 0;
+
+    document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
+        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0;
+        totalIngredientes += costoIngrediente;
+    });
+
+    document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
+        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0;
+        totalPlasticos += costoPlastico;
+    });
+
+    const totalPaquete = totalIngredientes + totalPlasticos;
+    document.getElementById("total-por-paquete").textContent =
+        `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
+}
+function mostrarDatosEnTablas(ingredientes, plasticos) {
+    const tableBody = document.getElementById("table-body");
+    tableBody.innerHTML = "";
+    ingredientes.forEach(row => {
+        const precioTotal = row.cantidad_utilizo * row.precio_unitario;
+        const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
+
+        const newRow = `
+            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
+                <td>${row.producto}</td>
+                <td>${row.ingrediente}</td>
+                <td>${row.precio_unitario.toFixed(2)}</td>
+                <td>${row.cantidad_kg}</td>
+                <td>${row.cantidad_utilizo}</td>
+                <td>${precioTotal.toFixed(2)}</td>
+                <td>${row.rinde}</td>
+                <td>${totalIngredientes}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML("beforeend", newRow);
+    });
+    agregarEventosAcciones();
+    actualizarTotalPorPaquete(producto);
 }
