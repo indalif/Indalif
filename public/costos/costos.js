@@ -1,10 +1,10 @@
 let totalesIngredientes = {};
 let totalesPlasticos = {};
+
 document.getElementById("agregar-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto").value;
     const ingrediente = document.getElementById("ingrediente").value;
-    const cantidadBulto = parseFloat(document.getElementById("cantidad-bulto").value) || 0;
-    const precioBulto = parseFloat(document.getElementById("precio-bulto").value) || 0;
+    const precioUnitario = parseFloat(document.getElementById("precio-unitario").value) || 0;
     const cantidadKg = parseFloat(document.getElementById("cantidad-kg").value) || 0;
     const cantidadUtilizo = parseFloat(document.getElementById("cantidad-utilizo").value) || 0;
     const rinde = parseFloat(document.getElementById("rinde").value) || 1;
@@ -13,17 +13,16 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
         alert("Por favor, selecciona un producto y un ingrediente.");
         return;
     }
-    const precioUnitario = (cantidadBulto > 0 ? precioBulto / cantidadBulto : 0).toFixed(2);
+
     const precio = (cantidadUtilizo * precioUnitario).toFixed(2);
     const totalIngredientes = (precio / rinde).toFixed(2);
+
     const ingredientesTableBody = document.getElementById("table-body");
     const newRow = `
         <tr data-producto="${producto}">
             <td>${producto}</td>
             <td>${ingrediente}</td>
-            <td>${cantidadBulto}</td>
-            <td>${precioBulto}</td>
-            <td>${precioUnitario}</td>
+            <td>${precioUnitario.toFixed(2)}</td>
             <td>${cantidadKg}</td>
             <td>${cantidadUtilizo}</td>
             <td>${precio}</td>
@@ -32,6 +31,7 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
         </tr>
     `;
     ingredientesTableBody.insertAdjacentHTML("beforeend", newRow);
+
     if (!totalesIngredientes[producto]) {
         totalesIngredientes[producto] = 0;
     }
@@ -40,8 +40,7 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
     enviarDatosAlServidor({
         producto,
         ingrediente,
-        cantidad_bulto: cantidadBulto,
-        precio_bulto: precioBulto,
+        precio_unitario: precioUnitario,
         cantidad_kg: cantidadKg,
         cantidad_utilizo: cantidadUtilizo,
         rinde,
@@ -50,6 +49,57 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
     filtrarTablaPorProducto(producto);
     document.getElementById("ingredientes-form").reset();
 });
+
+// Actualizar funciones relacionadas
+function actualizarTotalPorPaquete(producto) {
+    let totalIngredientes = 0;
+    let totalPlasticos = 0;
+
+    document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
+        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0;
+        totalIngredientes += costoIngrediente;
+    });
+
+    document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
+        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0;
+        totalPlasticos += costoPlastico;
+    });
+
+    const totalPaquete = totalIngredientes + totalPlasticos;
+    document.getElementById("total-por-paquete").textContent =
+        `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
+}
+
+// Modificar la estructura HTML de las filas de ingredientes
+function mostrarDatosEnTablas(ingredientes, plasticos) {
+    const tableBody = document.getElementById("table-body");
+    tableBody.innerHTML = "";
+    ingredientes.forEach(row => {
+        const precioTotal = row.cantidad_utilizo * row.precio_unitario;
+        const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
+
+        const newRow = `
+            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
+                <td>${row.producto}</td>
+                <td>${row.ingrediente}</td>
+                <td>${row.precio_unitario.toFixed(2)}</td>
+                <td>${row.cantidad_kg}</td>
+                <td>${row.cantidad_utilizo}</td>
+                <td>${precioTotal.toFixed(2)}</td>
+                <td>${row.rinde}</td>
+                <td>${totalIngredientes}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML("beforeend", newRow);
+    });
+    agregarEventosAcciones();
+    actualizarTotalPorPaquete(producto);
+}
+
 document.getElementById("agregar-plastico-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto-plastico").value;
     const tipoPlastico = document.getElementById("tipo-plastico").value;
@@ -220,54 +270,7 @@ function cargarTodosLosDatos() {
             console.error("Error al cargar todos los datos:", error);
             mostrarDatosEnTablas([]); 
         });
-}
-function mostrarDatosEnTablas(ingredientes, plasticos) {
-    const tableBody = document.getElementById("table-body");
-    const plasticosTableBody = document.getElementById("plasticos-table-body");
-    tableBody.innerHTML = "";
-    plasticosTableBody.innerHTML = "";
-    ingredientes.forEach(row => {
-        const precioUnitario = row.cantidad_bulto > 0 ? row.precio_bulto / row.cantidad_bulto : 0;
-        const precioTotal = row.cantidad_utilizo * precioUnitario;
-        const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
-
-        const newRow = `
-            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
-                <td>${row.producto}</td>
-                <td>${row.ingrediente}</td>
-                <td>${row.cantidad_bulto}</td>
-                <td class="precio">${row.precio_bulto}</td>
-                <td>${precioUnitario.toFixed(2)}</td>
-                <td>${row.cantidad_kg}</td>
-                <td>${row.cantidad_utilizo}</td>
-                <td>${precioTotal.toFixed(2)}</td>
-                <td>${row.rinde}</td>
-                <td>${totalIngredientes}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
-            </tr>
-        `;
-        tableBody.insertAdjacentHTML("beforeend", newRow);
-    });
-    plasticos.forEach(row => {
-        const newRow = `
-            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="plasticos">
-                <td>${row.producto}</td>
-                <td>${row.tipo_plastico}</td>
-                <td class="precio">${parseFloat(row.precio_plastico).toFixed(2)}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
-            </tr>
-        `;
-        plasticosTableBody.insertAdjacentHTML("beforeend", newRow);
-    });
-    agregarEventosAcciones();
-    actualizarTotalPorPaquete(producto);
-}
+    }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
         .then(response => response.json())
@@ -356,28 +359,6 @@ document.addEventListener("click", (e) => {
         abrirModalActualizarPrecio(id, tipo, precioActual);
     }
 });
-function actualizarTotalPorPaquete(producto) {
-    let totalIngredientes = 0;
-    let totalPlasticos = 0;
-
-    // Sumar total de ingredientes desde la tabla
-    document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoIngrediente = parseFloat(row.children[9]?.textContent.trim()) || 0; // Índice ajustado según la columna
-        totalIngredientes += costoIngrediente;
-    });
-
-    // Sumar total de plásticos desde la tabla
-    document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0; // Índice ajustado según la columna
-        totalPlasticos += costoPlastico;
-    });
-
-    // Calcular y mostrar el total por paquete
-    const totalPaquete = totalIngredientes + totalPlasticos;
-    document.getElementById("total-por-paquete").textContent =
-        `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
-}
-
 function abrirModalActualizarPrecio(id, tipo, precioActual) {
     const modal = document.getElementById("modal-actualizar-precio");
     modal.style.display = "flex";    
