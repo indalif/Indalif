@@ -143,12 +143,13 @@ dbModulos.query(`
     if (err) throw err;
     console.log('Tabla productos actualizada/verificada.');
 });
-dbModulos.query(
-    `CREATE TABLE IF NOT EXISTS costos1 (
+dbModulos.query(`
+    CREATE TABLE IF NOT EXISTS costos (
         id INT AUTO_INCREMENT PRIMARY KEY,
         producto VARCHAR(50) NOT NULL,
         ingrediente VARCHAR(50) DEFAULT NULL,
-        precio_unitario DECIMAL(10, 2) DEFAULT NULL,
+        cantidad_bulto DECIMAL(10, 2) DEFAULT NULL,
+        precio_bulto DECIMAL(10, 2) DEFAULT NULL,
         cantidad_kg DECIMAL(10, 2) DEFAULT NULL,
         cantidad_utilizo DECIMAL(10, 2) DEFAULT NULL,
         rinde DECIMAL(10, 2) DEFAULT NULL,
@@ -156,11 +157,11 @@ dbModulos.query(
         precio_plastico DECIMAL(10, 2) DEFAULT NULL,
         tipo ENUM('ingrediente', 'plastico') NOT NULL,
         fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`, (err) => {
-        if (err) throw err;
-        console.log('Tabla costos1 verificada/creada.');
-    });
-
+    )
+`, (err) => {
+    if (err) throw err;
+    console.log('Tabla costos verificada/creada.');
+});
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS pedidos (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -813,7 +814,7 @@ const verificarEmpleado = (req, res, next) => {
 };
 app.post('/registrar_costos', (req, res) => {
     const {
-        producto, ingrediente, precio_unitario, 
+        producto, ingrediente, cantidad_bulto, precio_bulto,
         cantidad_kg, cantidad_utilizo, rinde,
         tipo_plastico, precio_plastico
     } = req.body;
@@ -824,14 +825,15 @@ app.post('/registrar_costos', (req, res) => {
 
     const tipo = ingrediente ? 'ingrediente' : 'plastico';
 
-    const sql = 
-        `INSERT INTO costos (
-            producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, 
+    const sql = `
+        INSERT INTO costos (
+            producto, ingrediente, cantidad_bulto, precio_bulto,
+            cantidad_kg, cantidad_utilizo, rinde, 
             tipo_plastico, precio_plastico, tipo
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
     dbModulos.query(sql, [
-        producto, ingrediente || null, precio_unitario || null,
+        producto, ingrediente || null, cantidad_bulto || null, precio_bulto || null,
         cantidad_kg || null, cantidad_utilizo || null, rinde || null,
         tipo_plastico || null, precio_plastico || null, tipo
     ], (err, result) => {
@@ -845,16 +847,17 @@ app.post('/registrar_costos', (req, res) => {
 app.get('/obtener_costos_producto/:producto', (req, res) => {
     const { producto } = req.params;
 
-    const sqlIngredientes = 
-        `SELECT id, producto, ingrediente, precio_unitario, cantidad_kg, 
+    const sqlIngredientes = `
+        SELECT id, producto, ingrediente, cantidad_bulto, precio_bulto, cantidad_kg, 
                cantidad_utilizo, rinde, fecha 
         FROM costos 
-        WHERE tipo = 'ingrediente' AND producto = ?`;
-
-    const sqlPlasticos = 
-        `SELECT id, producto, tipo_plastico, precio_plastico, fecha 
+        WHERE tipo = 'ingrediente' AND producto = ?
+    `;
+    const sqlPlasticos = `
+        SELECT id, producto, tipo_plastico, precio_plastico, fecha 
         FROM costos 
-        WHERE tipo = 'plastico' AND producto = ?`;
+        WHERE tipo = 'plastico' AND producto = ?
+    `;
 
     dbModulos.query(sqlIngredientes, [producto], (err, ingredientes) => {
         if (err) {
@@ -875,13 +878,13 @@ app.get('/obtener_costos_producto/:producto', (req, res) => {
 app.get('/total_por_paquete/:producto', (req, res) => {
     const { producto } = req.params;
 
-    const sql = 
-        `SELECT
-            SUM(COALESCE(precio_unitario * cantidad_utilizo, 0)) AS total_ingredientes,
+    const sql = `
+        SELECT
             SUM(COALESCE(precio_plastico, 0)) AS total_plasticos,
-            SUM(COALESCE(precio_unitario * cantidad_utilizo, 0)) + SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
+            SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
         FROM costos
-        WHERE producto = ?`;
+        WHERE producto = ?
+    `;
 
     dbModulos.query(sql, [producto], (err, results) => {
         if (err) {
@@ -894,14 +897,14 @@ app.get('/total_por_paquete/:producto', (req, res) => {
     });
 });
 app.get('/obtener_todos_costos', (req, res) => {
-    const sql = 
-        `SELECT 
+    const sql = `
+        SELECT 
             producto,
-            SUM(COALESCE(precio_unitario * cantidad_utilizo, 0)) AS total_ingredientes,
             SUM(COALESCE(precio_plastico, 0)) AS total_plasticos,
-            SUM(COALESCE(precio_unitario * cantidad_utilizo, 0)) + SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
+            SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
         FROM costos
-        GROUP BY producto`;
+        GROUP BY producto
+    `;
 
     dbModulos.query(sql, (err, results) => {
         if (err) {
