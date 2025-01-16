@@ -93,10 +93,9 @@ function submitEgresoForm(event, productName) {
         alert('Hubo un problema al registrar el egreso.');
     });
 }
-
 function realizarEgreso(productoSeleccionado, fechaVencimientoSeleccionada, cantidadEgreso) {
     const stockDetalles = document.querySelector(`#${productoSeleccionado} .stock-detalles`);
-    stockDetalles.innerHTML = ''; 
+    stockDetalles.innerHTML = '';
     let cantidadRestanteEgreso = cantidadEgreso;
 
     if (!stockData[productoSeleccionado] || !Array.isArray(stockData[productoSeleccionado])) {
@@ -105,17 +104,18 @@ function realizarEgreso(productoSeleccionado, fechaVencimientoSeleccionada, cant
     }
 
     stockData[productoSeleccionado].forEach(item => {
-        if (item.fecha_vencimiento === fechaVencimientoSeleccionada) {
-            const formattedDate = new Date(item.fecha_vencimiento + "T00:00:00Z").toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        
-            const stockItem = document.createElement("div");
-            stockItem.textContent = `Fecha de vencimiento: ${formattedDate} - Cantidad: ${item.cantidad}`;
-            stockDetalles.appendChild(stockItem);
-        }        
+        if (item.fecha_vencimiento === fechaVencimientoSeleccionada && cantidadRestanteEgreso > 0) {
+            if (item.cantidad >= cantidadRestanteEgreso) {
+                item.cantidad -= cantidadRestanteEgreso;
+                cantidadRestanteEgreso = 0;
+            } else {
+                cantidadRestanteEgreso -= item.cantidad;
+                item.cantidad = 0;
+            }
+        }
+        const stockItem = document.createElement("div");
+        stockItem.textContent = `Fecha de vencimiento: ${item.fecha_vencimiento} - Cantidad: ${item.cantidad}`;
+        stockDetalles.appendChild(stockItem);
     });
 
     if (cantidadRestanteEgreso > 0) {
@@ -145,7 +145,6 @@ function fetchProductData(product) {
         })
         .catch(error => console.error('Error al obtener los datos de mercadería:', error));
 }
-
 function updateStockDisplay(product, data) {
     const stockInfo = document.querySelector(`#${product} .stock-info`);
     const stockDetalles = document.querySelector(`#${product} .stock-detalles`);
@@ -155,15 +154,11 @@ function updateStockDisplay(product, data) {
 
     stockDetalles.innerHTML = "";
     data.forEach(item => {
-        // Convertir la fecha para evitar problemas con zonas horarias
-        const formattedDate = new Date(item.fecha_vencimiento + "T00:00:00Z").toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    
+        // Trabajar directamente con la fecha en formato ISO (sin ajustes de zona horaria)
+        const formattedDate = item.fecha_vencimiento.split('-').reverse().join('/'); // Formato DD/MM/YYYY
+
         const stockItem = document.createElement("div");
         stockItem.textContent = `Lote: ${item.lote} - Fecha de vencimiento: ${formattedDate} - Cantidad: ${item.cantidad}`;
         stockDetalles.appendChild(stockItem);
-    });    
+    });
 }
