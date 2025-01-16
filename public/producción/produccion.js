@@ -1,17 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
     const formProduccion = document.getElementById("formProduccion");
     const tablaProduccion = document.getElementById("tablaProduccion");
-    const filtroFecha = document.getElementById("filtroFecha"); 
-    const btnFiltrar = document.getElementById("btnFiltrar"); 
+    const filtroFecha = document.getElementById("filtroFecha");
+    const btnFiltrar = document.getElementById("btnFiltrar");
 
     let editId = null;
     const formatearFecha = (fechaISO) => {
         const fecha = new Date(fechaISO);
-        const dia = fecha.getDate().toString().padStart(2, '0');
-        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); 
-        const anio = fecha.getFullYear();
+        const dia = fecha.getUTCDate().toString().padStart(2, '0'); // Usar UTC
+        const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); // Usar UTC
+        const anio = fecha.getUTCFullYear();
         return `${dia}/${mes}/${anio}`;
     };
+
     const cargarProduccion = async (fecha = null) => {
         try {
             const url = fecha
@@ -45,8 +46,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     cargarProduccion();
     btnFiltrar.addEventListener("click", () => {
-        const fecha = filtroFecha.value; 
-        cargarProduccion(fecha); 
+        const fecha = filtroFecha.value;
+        cargarProduccion(fecha);
     });
     formProduccion.addEventListener("submit", async (e) => {
         e.preventDefault();
