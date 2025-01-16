@@ -105,18 +105,17 @@ function realizarEgreso(productoSeleccionado, fechaVencimientoSeleccionada, cant
     }
 
     stockData[productoSeleccionado].forEach(item => {
-        if (item.fecha_vencimiento === fechaVencimientoSeleccionada && cantidadRestanteEgreso > 0) {
-            if (item.cantidad >= cantidadRestanteEgreso) {
-                item.cantidad -= cantidadRestanteEgreso;
-                cantidadRestanteEgreso = 0;
-            } else {
-                cantidadRestanteEgreso -= item.cantidad;
-                item.cantidad = 0;
-            }
-        }
-        const stockItem = document.createElement("div");
-        stockItem.textContent = `Fecha de vencimiento: ${item.fecha_vencimiento} - Cantidad: ${item.cantidad}`;
-        stockDetalles.appendChild(stockItem);
+        if (item.fecha_vencimiento === fechaVencimientoSeleccionada) {
+            const formattedDate = new Date(item.fecha_vencimiento + "T00:00:00Z").toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        
+            const stockItem = document.createElement("div");
+            stockItem.textContent = `Fecha de vencimiento: ${formattedDate} - Cantidad: ${item.cantidad}`;
+            stockDetalles.appendChild(stockItem);
+        }        
     });
 
     if (cantidadRestanteEgreso > 0) {
@@ -156,13 +155,14 @@ function updateStockDisplay(product, data) {
 
     stockDetalles.innerHTML = "";
     data.forEach(item => {
-        const stockItem = document.createElement("div");
-        const formattedDate = new Date(item.fecha_vencimiento).toLocaleDateString('es-ES', {
+        // Convertir la fecha para evitar problemas con zonas horarias
+        const formattedDate = new Date(item.fecha_vencimiento + "T00:00:00Z").toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
         });
     
+        const stockItem = document.createElement("div");
         stockItem.textContent = `Lote: ${item.lote} - Fecha de vencimiento: ${formattedDate} - Cantidad: ${item.cantidad}`;
         stockDetalles.appendChild(stockItem);
     });    

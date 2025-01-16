@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tablaProduccion = document.getElementById("tablaProduccion");
     const filtroFecha = document.getElementById("filtroFecha");
     const btnFiltrar = document.getElementById("btnFiltrar");
-
     let editId = null;
     const formatearFecha = (fechaISO) => {
         const fecha = new Date(fechaISO);
@@ -12,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const anio = fecha.getUTCFullYear();
         return `${dia}/${mes}/${anio}`;
     };
-
     const cargarProduccion = async (fecha = null) => {
         try {
             const url = fecha
