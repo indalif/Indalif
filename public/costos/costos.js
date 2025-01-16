@@ -437,7 +437,6 @@ document.getElementById("form-actualizar-precio").addEventListener("submit", (e)
             alert("No se pudo conectar con el servidor.");
         });
 });
-
 function actualizarFilaIngredientes(fila, nuevoPrecio) {
     const cantidadBulto = parseFloat(fila.children[2].textContent) || 0;
     const cantidadUtilizo = parseFloat(fila.children[6].textContent) || 0;
