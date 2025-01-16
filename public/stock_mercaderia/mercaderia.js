@@ -154,11 +154,13 @@ function updateStockDisplay(product, data) {
 
     stockDetalles.innerHTML = "";
     data.forEach(item => {
-        // Trabajar directamente con la fecha en formato ISO (sin ajustes de zona horaria)
-        const formattedDate = item.fecha_vencimiento.split('-').reverse().join('/'); // Formato DD/MM/YYYY
+        // Tomar la fecha original y quitar cualquier hora o información extra
+        const [year, month, day] = item.fecha_vencimiento.split('T')[0].split('-'); // Extraer AAAA-MM-DD
+        const formattedDate = `${day}/${month}/${year}`; // Formato DD/MM/AAAA
 
         const stockItem = document.createElement("div");
         stockItem.textContent = `Lote: ${item.lote} - Fecha de vencimiento: ${formattedDate} - Cantidad: ${item.cantidad}`;
         stockDetalles.appendChild(stockItem);
     });
 }
+
