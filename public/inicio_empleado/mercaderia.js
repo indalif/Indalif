@@ -12,18 +12,21 @@ const stockData = {
     "ravioles-vp": 100,
     "tapas-lasagna": 100,
 };
+
 function updateStockDisplay(productId) {
     const stockInfoElement = document.querySelector(`#${productId} .stock-info`);
     stockInfoElement.textContent = `Stock actual: ${stockData[productId]}`;
 }
+
 document.addEventListener("DOMContentLoaded", () => {
     Object.keys(stockData).forEach(productId => updateStockDisplay(productId));
 });
+
 function submitIngresoForm() {
     const product = document.getElementById("product").value;
     const productionDate = document.getElementById("production-date").value;
     const expiryDate = document.getElementById("expiry-date").value;
-    const loteNumber = document.getElementById("lote-number").value; // Captura el lote
+    const loteNumber = document.getElementById("lote-number").value;
     const quantity = parseInt(document.getElementById("quantity").value);
 
     if (product && productionDate && expiryDate && loteNumber && quantity > 0) {
@@ -34,14 +37,13 @@ function submitIngresoForm() {
                 producto: product,
                 fecha_produccion: productionDate,
                 fecha_vencimiento: expiryDate,
-                lote: loteNumber, // Envía el número de lote
+                lote: loteNumber,
                 cantidad: quantity
             })
         })
         .then(response => response.json())
         .then(data => {
             console.log(data.message);
-            // Limpiar los campos del formulario
             document.getElementById("product").value = '';
             document.getElementById("production-date").value = '';
             document.getElementById("expiry-date").value = '';
@@ -54,26 +56,21 @@ function submitIngresoForm() {
         alert("Por favor, complete todos los campos correctamente.");
     }
 }
+
 function submitEgresoForm(event, productName) {
-    event.preventDefault(); // Evita el envío predeterminado del formulario
-
-    const form = event.currentTarget; // Captura el formulario actual
-
-    // Obtener valores de los inputs
+    event.preventDefault();
+    const form = event.currentTarget;
     const lote = form.querySelector(`#egreso-lote-${productName}`).value;
     const fechaVencimiento = form.querySelector(`#egreso-date-${productName}`).value;
     const cantidad = parseInt(form.querySelector(`#egreso-quantity-${productName}`).value);
 
-    // Validar que los campos no estén vacíos
     if (!lote || !fechaVencimiento || cantidad <= 0) {
         alert('Por favor, completa todos los campos con valores válidos.');
         return;
     }
 
-    // Mostrar datos en consola para depuración
     console.log(`Producto: ${productName}, Lote: ${lote}, Fecha: ${fechaVencimiento}, Cantidad: ${cantidad}`);
 
-    // Simular envío al servidor (reemplazar por la llamada fetch real)
     fetch('/mercaderia/egreso', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -96,11 +93,9 @@ function submitEgresoForm(event, productName) {
         alert('Hubo un problema al registrar el egreso.');
     });
 }
-
 function realizarEgreso(productoSeleccionado, fechaVencimientoSeleccionada, cantidadEgreso) {
     const stockDetalles = document.querySelector(`#${productoSeleccionado} .stock-detalles`);
-    stockDetalles.innerHTML = ''; 
-
+    stockDetalles.innerHTML = '';
     let cantidadRestanteEgreso = cantidadEgreso;
 
     if (!stockData[productoSeleccionado] || !Array.isArray(stockData[productoSeleccionado])) {
@@ -122,28 +117,26 @@ function realizarEgreso(productoSeleccionado, fechaVencimientoSeleccionada, cant
         stockItem.textContent = `Fecha de vencimiento: ${item.fecha_vencimiento} - Cantidad: ${item.cantidad}`;
         stockDetalles.appendChild(stockItem);
     });
+
     if (cantidadRestanteEgreso > 0) {
         alert('La cantidad seleccionada para el egreso supera la cantidad disponible en el stock.');
     }
-
     updateStockDisplay(productoSeleccionado);
 }
+
 function openTab(event, productId) {
     const tabContents = document.querySelectorAll(".tab-content");
-    tabContents.forEach(tabContent => {
-        tabContent.style.display = "none";
-    });
+    tabContents.forEach(tabContent => tabContent.style.display = "none");
 
     const tabButtons = document.querySelectorAll(".tab-button");
-    tabButtons.forEach(tabButton => {
-        tabButton.classList.remove("active");
-    });
+    tabButtons.forEach(tabButton => tabButton.classList.remove("active"));
 
     document.getElementById(productId).style.display = "block";
     event.currentTarget.classList.add("active");
 
     fetchProductData(productId);
 }
+
 function fetchProductData(product) {
     fetch(`/mercaderia/${product}`)
         .then(response => response.json())
@@ -161,14 +154,13 @@ function updateStockDisplay(product, data) {
 
     stockDetalles.innerHTML = "";
     data.forEach(item => {
+        // Tomar la fecha original y quitar cualquier hora o información extra
+        const [year, month, day] = item.fecha_vencimiento.split('T')[0].split('-'); // Extraer AAAA-MM-DD
+        const formattedDate = `${day}/${month}/${year}`; // Formato DD/MM/AAAA
+
         const stockItem = document.createElement("div");
-        const formattedDate = new Date(item.fecha_vencimiento).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    
         stockItem.textContent = `Lote: ${item.lote} - Fecha de vencimiento: ${formattedDate} - Cantidad: ${item.cantidad}`;
         stockDetalles.appendChild(stockItem);
-    });    
+    });
 }
+
