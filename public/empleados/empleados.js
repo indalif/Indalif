@@ -38,11 +38,15 @@ function registrarEmpleado(empleado) {
 }
 function convertirMinutosAHoras(minutosTotales) {
     if (!minutosTotales || isNaN(minutosTotales)) return "0h 0m";
-
     const horas = Math.floor(minutosTotales / 60);
     const minutos = minutosTotales % 60;
-    
     return `${horas}h ${minutos}m`;
+}
+function calcularPagoPorHora(minutosTrabajados, salarioPorHora) {
+    if (!minutosTrabajados || isNaN(minutosTrabajados) || !salarioPorHora || isNaN(salarioPorHora)) {
+        return 0;
+    }
+    return ((minutosTrabajados / 60) * salarioPorHora).toFixed(2); // Convierte a horas y multiplica
 }
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
@@ -60,8 +64,17 @@ function mostrarEmpleados() {
                 const row = document.createElement('tr');
                 row.setAttribute('data-id', empleado.id);
 
-                const totalPago = parseFloat(empleado.total_pago) || 0;
+                // Convertir horas trabajadas a formato HHh MMm
+                const horasTrabajadas = convertirMinutosAHoras(empleado.horas_trabajadas);
+
+                // Calcular total de pago
+                let totalPago = parseFloat(empleado.total_pago) || 0;
                 
+                // Si es por hora, recalcular correctamente el pago
+                if (empleado.tipo_pago === 'Por Hora') {
+                    totalPago = calcularPagoPorHora(empleado.horas_trabajadas, empleado.salario_base);
+                }
+
                 row.innerHTML = `
                     <td>${empleado.tipo_pago}</td>
                     <td>${empleado.nombre}</td>
@@ -69,8 +82,8 @@ function mostrarEmpleados() {
                     <td>${empleado.legajo}</td>
                     <td>${empleado.telefono}</td>
                     <td class="salario_base">${empleado.salario_base}</td>
-                    <td>${convertirMinutosAHoras(empleado.horas_trabajadas)}</td>
-                    <td>${empleado.total_pago || 0}</td>
+                    <td>${horasTrabajadas}</td>
+                    <td>${totalPago}</td>
                     <td>${empleado.descuento || 0}</td>
                     <td>
                         <button class="btn btn-info btn-sm" onclick="registrarAsistencia(${empleado.id}, '${empleado.tipo_pago}')">Registrar Asistencia</button>
@@ -81,10 +94,10 @@ function mostrarEmpleados() {
                 `;
                 
                 if (empleado.tipo_pago === 'Mensual') {
-                    totalMensuales += totalPago;
+                    totalMensuales += parseFloat(totalPago);
                     tablaMensuales.appendChild(row);
                 } else {
-                    totalPorHora += totalPago;
+                    totalPorHora += parseFloat(totalPago);
                     tablaPorHora.appendChild(row);
                 }
             });
