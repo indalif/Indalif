@@ -46,7 +46,8 @@ function calcularPagoPorHora(minutosTrabajados, salarioPorHora) {
     if (!minutosTrabajados || isNaN(minutosTrabajados) || !salarioPorHora || isNaN(salarioPorHora)) {
         return 0;
     }
-    return ((minutosTrabajados / 60) * salarioPorHora).toFixed(2); // Convierte a horas y multiplica
+    const horasDecimal = minutosTrabajados / 60; // Convertir minutos a horas
+    return (horasDecimal * salarioPorHora).toFixed(2); // Multiplicar por el salario y redondear
 }
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
@@ -64,14 +65,13 @@ function mostrarEmpleados() {
                 const row = document.createElement('tr');
                 row.setAttribute('data-id', empleado.id);
 
-                // Convertir horas trabajadas a formato HHh MMm
+                // Convertir las horas trabajadas a formato HHh MMm para la tabla
                 const horasTrabajadas = convertirMinutosAHoras(empleado.horas_trabajadas);
 
-                // Calcular total de pago
                 let totalPago = parseFloat(empleado.total_pago) || 0;
                 
-                // Si es por hora, recalcular correctamente el pago
-                if (empleado.tipo_pago === 'Por Hora') {
+                // Si el empleado es "Por Hora", recalcular correctamente el pago
+                if (empleado.tipo_pago === 'PorHora') {
                     totalPago = calcularPagoPorHora(empleado.horas_trabajadas, empleado.salario_base);
                 }
 
