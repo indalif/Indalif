@@ -191,11 +191,11 @@ function calcularHoras(horaIngreso, horaEgreso) {
     egreso.setHours(egresoHora, egresoMinuto, 0, 0);
 
     const diferenciaMs = egreso - ingreso;
-    const horasTrabajadas = (diferenciaMs / (1000 * 60 * 60)).toFixed(2); // Formato con 2 decimales
-
-    return horasTrabajadas;
+    const horas = Math.floor(diferenciaMs / (1000 * 60 * 60));
+    const minutos = Math.floor((diferenciaMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${horas}h ${minutos}m`;
 }
-
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleadoId = document.getElementById('empleadoId').value;
