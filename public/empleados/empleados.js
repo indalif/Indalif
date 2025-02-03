@@ -11,7 +11,6 @@ document.getElementById('formMensual').addEventListener('submit', function (even
     registrarEmpleado(empleado);
     event.target.reset();
 });
-
 document.getElementById('formPorHora').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleado = {
@@ -25,7 +24,6 @@ document.getElementById('formPorHora').addEventListener('submit', function (even
     registrarEmpleado(empleado);
     event.target.reset();
 });
-
 function registrarEmpleado(empleado) {
     fetch('/registrar-empleado', {
         method: 'POST',
@@ -38,7 +36,14 @@ function registrarEmpleado(empleado) {
         })
         .catch((error) => console.error('Error:', error));
 }
+function convertirMinutosAHoras(minutosTotales) {
+    if (!minutosTotales || isNaN(minutosTotales)) return "0h 0m";
 
+    const horas = Math.floor(minutosTotales / 60);
+    const minutos = minutosTotales % 60;
+    
+    return `${horas}h ${minutos}m`;
+}
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
         .then(response => response.json())
@@ -64,7 +69,7 @@ function mostrarEmpleados() {
                     <td>${empleado.legajo}</td>
                     <td>${empleado.telefono}</td>
                     <td class="salario_base">${empleado.salario_base}</td>
-                    <td>${empleado.horas_trabajadas || 0}</td>
+                    <td>${convertirMinutosAHoras(empleado.horas_trabajadas)}</td>
                     <td>${empleado.total_pago || 0}</td>
                     <td>${empleado.descuento || 0}</td>
                     <td>
@@ -83,6 +88,7 @@ function mostrarEmpleados() {
                     tablaPorHora.appendChild(row);
                 }
             });
+
             document.getElementById('totalMensuales').textContent = `Total Mensuales: $${totalMensuales.toFixed(2)}`;
             document.getElementById('totalPorHora').textContent = `Total Por Hora: $${totalPorHora.toFixed(2)}`;
         })
@@ -91,9 +97,7 @@ function mostrarEmpleados() {
             alert('Hubo un problema al cargar los empleados.');
         });
 }
-
 mostrarEmpleados();
-
 function mostrarActualizarSueldo(id, tipoPago, salarioActual) {
     document.getElementById('actualizarEmpleadoId').value = id;
     document.getElementById('actualizarTipoPago').value = tipoPago;
@@ -180,10 +184,15 @@ function calcularHoras(horaIngreso, horaEgreso) {
     const egreso = new Date();
     egreso.setHours(egresoHora, egresoMinuto, 0, 0);
 
+    if (egreso < ingreso) {
+        alert("La hora de egreso no puede ser menor a la de ingreso.");
+        return "0h 0m";
+    }
+
     const diferenciaMs = egreso - ingreso;
     const horas = Math.floor(diferenciaMs / (1000 * 60 * 60));
     const minutos = Math.floor((diferenciaMs % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     return `${horas}h ${minutos}m`;
 }
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
