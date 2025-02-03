@@ -185,16 +185,17 @@ function calcularHoras(horaIngreso, horaEgreso) {
     const [egresoHora, egresoMinuto] = horaEgreso.split(':').map(Number);
 
     const ingreso = new Date();
-    ingreso.setHours(ingresoHora, ingresoMinuto);
+    ingreso.setHours(ingresoHora, ingresoMinuto, 0, 0);
 
     const egreso = new Date();
-    egreso.setHours(egresoHora, egresoMinuto);
+    egreso.setHours(egresoHora, egresoMinuto, 0, 0);
 
     const diferenciaMs = egreso - ingreso;
-    const horasTrabajadas = diferenciaMs / (1000 * 60 * 60); // Convertir ms a horas
+    const horasTrabajadas = (diferenciaMs / (1000 * 60 * 60)).toFixed(2); // Formato con 2 decimales
 
     return horasTrabajadas;
 }
+
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleadoId = document.getElementById('empleadoId').value;
@@ -209,13 +210,13 @@ document.getElementById('formAsistencia').addEventListener('submit', function (e
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ horasTrabajadas, tipoPago })
     })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            $('#asistenciaModal').modal('hide');
-            mostrarEmpleados();
-        })
-        .catch(error => console.error('Error:', error));
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        $('#asistenciaModal').modal('hide');
+        mostrarEmpleados();
+    })
+    .catch(error => console.error('Error:', error));
 });
 document.getElementById('cerrarSemana').addEventListener('click', function () {
     if (confirm("¿Estás seguro de que quieres cerrar la semana? Esto reiniciará las horas trabajadas, descuentos y el total a pagar para los empleados por hora.")) {
