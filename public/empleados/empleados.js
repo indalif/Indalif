@@ -1,29 +1,31 @@
 document.getElementById('formMensual').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleado = {
-        tipo: 'Mensual',
+        tipo_pago: 'Mensual',
         nombre: document.getElementById('nombreMensual').value,
         dni: document.getElementById('dniMensual').value,
         legajo: document.getElementById('legajoMensual').value,
         telefono: document.getElementById('telefonoMensual').value,
-        sueldo: document.getElementById('sueldoMensual').value,
+        salario_base: document.getElementById('sueldoMensual').value,
     };
     registrarEmpleado(empleado);
     event.target.reset();
 });
+
 document.getElementById('formPorHora').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleado = {
-        tipo: 'PorHora',
+        tipo_pago: 'PorHora',
         nombre: document.getElementById('nombreHora').value,
         dni: document.getElementById('dniHora').value,
         legajo: document.getElementById('legajoHora').value,
         telefono: document.getElementById('telefonoHora').value,
-        pagoHora: document.getElementById('pagoHora').value,
+        salario_base: document.getElementById('pagoHora').value,
     };
     registrarEmpleado(empleado);
     event.target.reset();
 });
+
 function registrarEmpleado(empleado) {
     fetch('/registrar-empleado', {
         method: 'POST',
@@ -36,6 +38,7 @@ function registrarEmpleado(empleado) {
         })
         .catch((error) => console.error('Error:', error));
 }
+
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
         .then(response => response.json())
@@ -50,49 +53,33 @@ function mostrarEmpleados() {
 
             empleados.forEach((empleado) => {
                 const row = document.createElement('tr');
-                row.setAttribute('data-id', empleado.id); // Asocia la fila al ID del empleado
+                row.setAttribute('data-id', empleado.id);
 
                 const totalPago = parseFloat(empleado.total_pago) || 0;
-
+                
+                row.innerHTML = `
+                    <td>${empleado.tipo_pago}</td>
+                    <td>${empleado.nombre}</td>
+                    <td>${empleado.dni}</td>
+                    <td>${empleado.legajo}</td>
+                    <td>${empleado.telefono}</td>
+                    <td class="salario_base">${empleado.salario_base}</td>
+                    <td>${empleado.horas_trabajadas || 0}</td>
+                    <td>${empleado.total_pago || 0}</td>
+                    <td>${empleado.descuento || 0}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="registrarAsistencia(${empleado.id}, '${empleado.tipo_pago}')">Registrar Asistencia</button>
+                        <button class="btn btn-warning btn-sm" onclick="aplicarDescuento(${empleado.id})">Aplicar Descuento</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
+                        <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
+                    </td>                
+                `;
+                
                 if (empleado.tipo_pago === 'Mensual') {
                     totalMensuales += totalPago;
-                    row.innerHTML = `
-                        <td>${empleado.tipo_pago}</td>
-                        <td>${empleado.nombre}</td>
-                        <td>${empleado.dni}</td>
-                        <td>${empleado.legajo}</td>
-                        <td>${empleado.telefono}</td>
-                        <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas || 0}</td>
-                        <td>${empleado.total_pago || 0}</td>
-                        <td>${empleado.descuento || 0}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="registrarAsistencia(${empleado.id}, '${empleado.tipo_pago}')">Registrar Asistencia</button>
-                            <button class="btn btn-warning btn-sm" onclick="aplicarDescuento(${empleado.id})">Aplicar Descuento</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
-                            <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
-                        </td>                
-                    `;
                     tablaMensuales.appendChild(row);
-                } else if (empleado.tipo_pago === 'PorHora') {
+                } else {
                     totalPorHora += totalPago;
-                    row.innerHTML = `
-                        <td>${empleado.tipo_pago}</td>
-                        <td>${empleado.nombre}</td>
-                        <td>${empleado.dni}</td>
-                        <td>${empleado.legajo}</td>
-                        <td>${empleado.telefono}</td>
-                        <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas || 0}</td>
-                        <td>${empleado.total_pago || 0}</td>
-                        <td>${empleado.descuento || 0}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="registrarAsistencia(${empleado.id}, '${empleado.tipo_pago}')">Registrar Asistencia</button>
-                            <button class="btn btn-warning btn-sm" onclick="aplicarDescuento(${empleado.id})">Aplicar Descuento</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
-                            <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
-                        </td>                
-                    `;
                     tablaPorHora.appendChild(row);
                 }
             });
@@ -101,9 +88,12 @@ function mostrarEmpleados() {
         })
         .catch(error => {
             console.error('Error al obtener los empleados:', error);
-            alert('Hubo un problema al cargar los empleados. Por favor, intenta nuevamente.');
+            alert('Hubo un problema al cargar los empleados.');
         });
 }
+
+mostrarEmpleados();
+
 function mostrarActualizarSueldo(id, tipoPago, salarioActual) {
     document.getElementById('actualizarEmpleadoId').value = id;
     document.getElementById('actualizarTipoPago').value = tipoPago;
