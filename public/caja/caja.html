@@ -127,39 +127,56 @@
             <div class="card-body">
                 <h5 class="card-title">Control de Efectivo en Caja</h5>
                 <form id="cashControlForm">
-                    <div class="form-row">
-                        <div class="col">
-                            <label for="bill100">Billetes de $100:</label>
-                            <input type="number" class="form-control" id="bill100" min="0" value="0">
-                        </div>
-                        <div class="col">
-                            <label for="bill200">Billetes de $200:</label>
-                            <input type="number" class="form-control" id="bill200" min="0" value="0">
-                        </div>
-                        <div class="col">
-                            <label for="bill500">Billetes de $500:</label>
-                            <input type="number" class="form-control" id="bill500" min="0" value="0">
-                        </div>
-                    </div>
-                    <div class="form-row mt-2">
-                        <div class="col">
-                            <label for="bill1000">Billetes de $1000:</label>
-                            <input type="number" class="form-control" id="bill1000" min="0" value="0">
-                        </div>
-                        <div class="col">
-                            <label for="bill2000">Billetes de $2000:</label>
-                            <input type="number" class="form-control" id="bill2000" min="0" value="0">
-                        </div>
-                        <div class="col">
-                            <label for="bill10000">Billetes de $10000:</label>
-                            <input type="number" class="form-control" id="bill10000" min="0" value="0">
-                        </div>
-                        <div class="col">
-                            <label for="bill20000">Billetes de $20000:</label>
-                            <input type="number" class="form-control" id="bill20000" min="0" value="0">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-info mt-3" onclick="calculateCash()">Calcular Total Efectivo</button>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Denominación</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>$100</td>
+                                <td><input type="number" class="form-control bill-input" id="bill100" min="0" value="0" oninput="updateCash()"></td>
+                                <td id="subtotal100">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td>$200</td>
+                                <td><input type="number" class="form-control bill-input" id="bill200" min="0" value="0" oninput="updateCash()"></td>
+                                <td id="subtotal200">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td>$500</td>
+                                <td><input type="number" class="form-control bill-input" id="bill500" min="0" value="0" oninput="updateCash()"></td>
+                                <td id="subtotal500">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td>$1000</td>
+                                <td><input type="number" class="form-control bill-input" id="bill1000" min="0" value="0" oninput="updateCash()"></td>
+                                <td id="subtotal1000">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td>$2000</td>
+                                <td><input type="number" class="form-control bill-input" id="bill2000" min="0" value="0" oninput="updateCash()"></td>
+                                <td id="subtotal2000">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td>$10000</td>
+                                <td><input type="number" class="form-control bill-input" id="bill10000" min="0" value="0" oninput="updateCash()"></td>
+                                <td id="subtotal10000">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td>$20000</td>
+                                <td><input type="number" class="form-control bill-input" id="bill20000" min="0" value="0" oninput="updateCash()"></td>
+                                <td id="subtotal20000">$0.00</td>
+                            </tr>
+                            <tr class="table-success">
+                                <td><strong>Total en Caja</strong></td>
+                                <td colspan="2"><strong id="totalCash">$0.00</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </form>
                 <div id="cashResult" class="mt-3"></div>
             </div>
