@@ -4,10 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTransactionHistory();
     updateSummary(); // Se mantiene la actualización automática
     loadTransactions();
-    cargarValoresBilletero(); // Cargar valores guardados
 });
+
 let totalIncome = 0;  
 let totalExpenses = 0;
+
 function resetDailySummary() {
     const today = new Date().toISOString().slice(0, 10); // Fecha actual en formato YYYY-MM-DD
     fetch(`/transactions/date/${today}`)
@@ -27,6 +28,7 @@ function resetDailySummary() {
             console.error('Error al reiniciar el resumen diario:', error);
         });
 }
+
 function updateSummary() {
     fetch('/summary')
         .then(response => response.json())
@@ -49,6 +51,7 @@ function updateSummary() {
         })
         .catch(error => console.error('Error al obtener el resumen:', error));
 }
+
 function addIncome() {
     const description = document.getElementById('incomeDescription').value;
     const amount = parseFloat(document.getElementById('incomeAmount').value);
@@ -111,6 +114,7 @@ function saveTransaction(transaction) {
         console.error('Error al guardar la transacción:', error);
     });
 }
+
 function updateTransactionHistory() {
     fetch('/transactions')
         .then(response => {
@@ -188,54 +192,26 @@ function closeDay() {
             alert('Hubo un error al cerrar el día.');
         });
 }
+
 function resetDailyTotals() {
     const netTotalEl = document.getElementById('netTotal');
     if (netTotalEl) netTotalEl.innerText = 'Total Neto del Día: $0.00';
     console.log('Totales diarios restablecidos a 0.');
 }
-function cargarValoresBilletero() {
-    const billetes = ['bill100', 'bill200', 'bill500', 'bill1000', 'bill2000', 'bill10000', 'bill20000'];
-    billetes.forEach(id => {
-        const valorGuardado = localStorage.getItem(id);
-        if (valorGuardado !== null) {
-            document.getElementById(id).value = valorGuardado;
-        }
-    });
-}
-function guardarValoresBilletero() {
-    const billetes = ['bill100', 'bill200', 'bill500', 'bill1000', 'bill2000', 'bill10000', 'bill20000'];
-    billetes.forEach(id => {
-        const valor = document.getElementById(id).value;
-        localStorage.setItem(id, valor);
-    });
-}
-document.querySelectorAll('input[type=number]').forEach(input => {
-    input.addEventListener('input', guardarValoresBilletero);
-});
-function calculateCash() {
-    const valores = {
-        bill100: 100, bill200: 200, bill500: 500,
-        bill1000: 1000, bill2000: 2000, bill10000: 10000, bill20000: 20000
-    };
-    let totalCash = 0;
-    for (const id in valores) {
-        totalCash += (parseInt(document.getElementById(id).value) || 0) * valores[id];
-    }
 
-    fetch('/summary')
-        .then(response => response.json())
-        .then(summaryData => {
-            let totalIncome = 0, totalExpenses = 0;
-            summaryData.forEach(row => {
-                if (row.type === 'Ingreso') totalIncome += parseFloat(row.total);
-                if (row.type === 'Egreso') totalExpenses += parseFloat(row.total);
-            });
-            const netTotal = totalIncome - totalExpenses;
-            mostrarResultado(totalCash, netTotal);
-        })
-        .catch(error => console.error('Error al obtener el resumen:', error));
-}
-function mostrarResultado(totalCash, netTotal) {
+function calculateCash() {
+    const bill100 = parseInt(document.getElementById('bill100').value) || 0;
+    const bill200 = parseInt(document.getElementById('bill200').value) || 0;
+    const bill500 = parseInt(document.getElementById('bill500').value) || 0;
+    const bill1000 = parseInt(document.getElementById('bill1000').value) || 0;
+    const bill2000 = parseInt(document.getElementById('bill2000').value) || 0;
+    const bill10000 = parseInt(document.getElementById('bill10000').value) || 0;
+    const bill20000 = parseInt(document.getElementById('bill20000').value) || 0; // Nuevo billete de 20,000
+
+    const totalCash = (bill100 * 100) + (bill200 * 200) + (bill500 * 500) + 
+                      (bill1000 * 1000) + (bill2000 * 2000) + (bill10000 * 10000) + (bill20000 * 20000);
+
+    const netTotal = totalIncome - totalExpenses; 
     const cashResult = document.getElementById('cashResult');
     if (totalCash === netTotal) {
         cashResult.innerHTML = `<span class="text-success">El efectivo en caja coincide con el total neto del día: $${totalCash.toFixed(2)}</span>`;

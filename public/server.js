@@ -6,6 +6,8 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const PORT = process.env.PORT || 3000;
 const path = require('path');
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -243,53 +245,6 @@ dbModulos.query(`
 `, (err) => {
     if (err) throw err;
     console.log('Tabla de mercaderiaClientes verificada/creada.');
-});
-dbModulos.query(`
-    CREATE TABLE IF NOT EXISTS billetero (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    denominacion DECIMAL(10, 2) NOT NULL,
-    cantidad INT NOT NULL,
-    fecha DATE DEFAULT (CURRENT_DATE)
-);
-`, (err) => {
-    if (err) throw err;
-    console.log('Tabla de billetero verificada/creada.');
-});
-app.post('/billetero', (req, res) => {
-    const { denominacion, cantidad } = req.body;
-    const sql = `
-        INSERT INTO billetero (denominacion, cantidad, fecha) 
-        VALUES (?, ?, CURRENT_DATE) 
-        ON DUPLICATE KEY UPDATE cantidad = ?`;
-    dbModulos.query(sql, [denominacion, cantidad, cantidad], (err, result) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Billetes actualizados' });
-    });
-});
-app.get('/billetero', (req, res) => {
-    const sql = 'SELECT * FROM billetero WHERE fecha = CURRENT_DATE';
-    dbModulos.query(sql, (err, rows) => {
-        if (err) return res.status(400).json({ error: err.message });
-        res.json(rows);
-    });
-});
-app.get('/billetero/total', (req, res) => {
-    const sqlTotalBilletes = 'SELECT SUM(denominacion * cantidad) AS totalBilletes FROM billetero WHERE fecha = CURRENT_DATE';
-    const sqlTotalCaja = "SELECT SUM(CASE WHEN type = 'Ingreso' THEN amount ELSE -amount END) AS totalCaja FROM caja WHERE DATE(date) = CURRENT_DATE";
-
-    dbModulos.query(sqlTotalBilletes, (err1, result1) => {
-        if (err1) return res.status(500).json({ error: err1.message });
-
-        dbModulos.query(sqlTotalCaja, (err2, result2) => {
-            if (err2) return res.status(500).json({ error: err2.message });
-
-            res.json({
-                totalBilletes: result1[0].totalBilletes || 0,
-                totalCaja: result2[0].totalCaja || 0,
-                diferencia: (result1[0].totalBilletes || 0) - (result2[0].totalCaja || 0)
-            });
-        });
-    });
 });
 app.post('/mercaderiaCliente', (req, res) => {
     const { idCliente, descripcion, cantidad, precio, fecha } = req.body;
