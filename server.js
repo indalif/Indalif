@@ -1085,7 +1085,16 @@ app.get('/obtener-empleados', (req, res) => {
             console.error('Error al obtener empleados:', err);
             return res.status(500).json({ message: 'Error al obtener empleados.' });
         }
-        res.json(rows);
+        const empleadosFormateados = rows.map(empleado => {
+            if (empleado.horas_trabajadas !== null) {
+                let horas = Math.floor(empleado.horas_trabajadas / 60);
+                let minutos = empleado.horas_trabajadas % 60;
+                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
+            }
+            return empleado;
+        });
+
+        res.json(empleadosFormateados);
     });
 });
 app.get('/obtener-empleado/:id', (req, res) => {
@@ -1094,9 +1103,22 @@ app.get('/obtener-empleado/:id', (req, res) => {
     dbModulos.query(query, [empleadoId], (err, result) => {
         if (err) {
             console.error('Error al obtener empleado:', err);
-            res.status(500).json({ message: 'Error al obtener empleado' });
+            return res.status(500).json({ message: 'Error al obtener empleado' });
+        }
+
+        if (result.length > 0) {
+            let empleado = result[0];
+
+            // Convertir minutos a hh:mm
+            if (empleado.horas_trabajadas !== null) {
+                let horas = Math.floor(empleado.horas_trabajadas / 60);
+                let minutos = empleado.horas_trabajadas % 60;
+                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
+            }
+
+            res.json(empleado);
         } else {
-            res.status(200).json(result[0]);
+            res.status(404).json({ message: 'Empleado no encontrado' });
         }
     });
 });
@@ -1138,25 +1160,23 @@ app.put('/registrar-asistencia/:id', (req, res) => {
 
     const horas = parseInt(match[1], 10);
     const minutos = match[2] ? parseInt(match[2], 10) : 0;
-    const segundosTotales = (horas * 60 + minutos) * 60;
-
+    const minutosTotales = horas * 60 + minutos;
     const query = `
     UPDATE empleados 
-    SET horas_trabajadas = SEC_TO_TIME(
-        TIME_TO_SEC(IFNULL(horas_trabajadas, '00:00:00')) + ?
-    ) 
+    SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? 
     WHERE id = ? AND tipo_pago = ?
 `;
-    console.log("📢 Ejecutando consulta SQL:", query);
-    console.log("📌 Parámetros:", [segundosTotales, empleadoId, tipoPago]);
 
-    dbModulos.query(query, [segundosTotales, empleadoId, tipoPago], (err, results) => {
-        if (err) {
-            console.error("❌ Error en MySQL:", err);
-            return res.status(500).json({ message: 'Error al registrar asistencia', error: err.message });
-        }
-        res.json({ message: 'Asistencia registrada con éxito' });
-    });
+console.log("📢 Ejecutando consulta SQL:", query);
+console.log("📌 Parámetros:", [minutosTotales, empleadoId, tipoPago]);
+
+dbModulos.query(query, [minutosTotales, empleadoId, tipoPago], (err, results) => {
+    if (err) {
+        console.error("❌ Error en MySQL:", err);
+        return res.status(500).json({ message: 'Error al registrar asistencia', error: err.message });
+    }
+    res.json({ message: 'Asistencia registrada con éxito' });
+});
 });
 
 app.put('/reiniciar-datos/:tipoPago', (req, res) => {
