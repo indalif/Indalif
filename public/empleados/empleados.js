@@ -185,15 +185,15 @@ function calcularHoras(horaIngreso, horaEgreso) {
     const [egresoHora, egresoMinuto] = horaEgreso.split(':').map(Number);
 
     const ingreso = new Date();
-    ingreso.setHours(ingresoHora, ingresoMinuto);
+    ingreso.setHours(ingresoHora, ingresoMinuto, 0, 0);
 
     const egreso = new Date();
-    egreso.setHours(egresoHora, egresoMinuto);
+    egreso.setHours(egresoHora, egresoMinuto, 0, 0);
 
     const diferenciaMs = egreso - ingreso;
-    const horasTrabajadas = diferenciaMs / (1000 * 60 * 60); // Convertir ms a horas
+    const horasTrabajadas = diferenciaMs / (1000 * 60 * 60); // Convertir ms a horas con decimales
 
-    return horasTrabajadas;
+    return horasTrabajadas.toFixed(2); // Mantiene los minutos exactos sin redondear
 }
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
