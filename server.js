@@ -1090,6 +1090,8 @@ app.get('/obtener-empleados', (req, res) => {
                 let horas = Math.floor(empleado.horas_trabajadas / 60);
                 let minutos = empleado.horas_trabajadas % 60;
                 empleado.horas_trabajadas = `${horas}h ${minutos}m`;
+            } else {
+                empleado.horas_trabajadas = "0h 0m"; // Si es NULL, mostrar "0h 0m"
             }
             return empleado;
         });
@@ -1109,11 +1111,13 @@ app.get('/obtener-empleado/:id', (req, res) => {
         if (result.length > 0) {
             let empleado = result[0];
 
-            // Convertir minutos a hh:mm
+            // Convertir minutos a hh:mm solo si horas_trabajadas tiene un valor
             if (empleado.horas_trabajadas !== null) {
                 let horas = Math.floor(empleado.horas_trabajadas / 60);
                 let minutos = empleado.horas_trabajadas % 60;
                 empleado.horas_trabajadas = `${horas}h ${minutos}m`;
+            } else {
+                empleado.horas_trabajadas = "0h 0m"; // Si es NULL, mostrar "0h 0m"
             }
 
             res.json(empleado);
