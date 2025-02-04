@@ -1141,13 +1141,12 @@ app.put('/registrar-asistencia/:id', (req, res) => {
     const segundosTotales = (horas * 60 + minutos) * 60;
 
     const query = `
-        UPDATE empleados 
-        SET horas_trabajadas = SEC_TO_TIME(
-            IFNULL(TIME_TO_SEC(horas_trabajadas), 0) + ?
-        ) 
-        WHERE id = ? AND tipo_pago = ?
-    `;
-
+    UPDATE empleados 
+    SET horas_trabajadas = SEC_TO_TIME(
+        TIME_TO_SEC(IFNULL(horas_trabajadas, '00:00:00')) + ?
+    ) 
+    WHERE id = ? AND tipo_pago = ?
+`;
     console.log("📢 Ejecutando consulta SQL:", query);
     console.log("📌 Parámetros:", [segundosTotales, empleadoId, tipoPago]);
 
