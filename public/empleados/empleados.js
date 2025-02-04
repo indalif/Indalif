@@ -181,37 +181,26 @@ function registrarAsistencia(empleadoId, tipoPago) {
     $('#asistenciaModal').modal('show');
 }
 function calcularHoras(horaIngreso, horaEgreso) {
-    const regexHora = /^([01]?\d|2[0-3]):([0-5]\d)$/; // Valida formato HH:mm
-    
-    if (!regexHora.test(horaIngreso) || !regexHora.test(horaEgreso)) {
-        alert("Formato de hora incorrecto. Usa HH:mm (ejemplo: 08:30)." );
-        return 0;
-    }
-    
-    const [ingresoHora, ingresoMinuto] = horaIngreso.split(':').map(Number);
-    const [egresoHora, egresoMinuto] = horaEgreso.split(':').map(Number);
+    const [h1, m1] = horaIngreso.split(":").map(Number);
+    const [h2, m2] = horaEgreso.split(":").map(Number);
 
-    const ingreso = new Date();
-    ingreso.setHours(ingresoHora, ingresoMinuto, 0, 0);
+    let minutosTotales = (h2 * 60 + m2) - (h1 * 60 + m1);
+    if (minutosTotales < 0) minutosTotales += 24 * 60; // Manejo si pasa la medianoche
 
-    const egreso = new Date();
-    egreso.setHours(egresoHora, egresoMinuto, 0, 0);
+    const horas = Math.floor(minutosTotales / 60);
+    const minutos = minutosTotales % 60;
 
-    const diferenciaMs = egreso - ingreso;
-    const horasTrabajadas = diferenciaMs / (1000 * 60 * 60); // Convertir ms a horas con decimales
-
-    return horasTrabajadas.toFixed(2); // Mantiene los minutos exactos sin redondear
+    return `${horas}:${minutos < 10 ? "0" : ""}${minutos}`; // Formato "HH:mm"
 }
-
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleadoId = document.getElementById('empleadoId').value;
     const tipoPago = document.getElementById('tipoPago').value;
     const horaIngreso = document.getElementById('horaIngreso').value;
     const horaEgreso = document.getElementById('horaEgreso').value;
-
     const horasTrabajadas = calcularHoras(horaIngreso, horaEgreso);
-
+    console.log("Horas trabajadas calculadas:", horasTrabajadas);
+    
     fetch(`/registrar-asistencia/${empleadoId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
