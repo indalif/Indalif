@@ -36,6 +36,12 @@ function registrarEmpleado(empleado) {
         })
         .catch((error) => console.error('Error:', error));
 }
+// Convertir minutos totales a formato "h:mm"
+function formatoHoras(minutosTotales) {
+    const horas = Math.floor(minutosTotales / 60);
+    const minutos = minutosTotales % 60;
+    return `${horas}:${minutos.toString().padStart(2, '0')}`;
+}
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
         .then(response => response.json())
@@ -63,7 +69,7 @@ function mostrarEmpleados() {
                         <td>${empleado.legajo}</td>
                         <td>${empleado.telefono}</td>
                         <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas || 0}</td>
+                        <td>${empleado.horas_trabajadas ? formatoHoras(empleado.horas_trabajadas) : '0:00'}</td>
                         <td>${empleado.total_pago || 0}</td>
                         <td>${empleado.descuento || 0}</td>
                         <td>
@@ -83,7 +89,7 @@ function mostrarEmpleados() {
                         <td>${empleado.legajo}</td>
                         <td>${empleado.telefono}</td>
                         <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas || 0}</td>
+                        <td>${empleado.horas_trabajadas ? formatoHoras(empleado.horas_trabajadas) : '0:00'}</td>
                         <td>${empleado.total_pago || 0}</td>
                         <td>${empleado.descuento || 0}</td>
                         <td>
