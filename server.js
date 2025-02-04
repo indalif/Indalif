@@ -1131,10 +1131,12 @@ app.put('/registrar-asistencia/:id', (req, res) => {
     // Convertimos a segundos
     const segundosTotales = (horas * 60 + minutos) * 60;
 
-    // Consulta SQL corregida
+    // 💡 Solución: Convertimos `horas_trabajadas` a segundos antes de sumarlo
     const query = `
         UPDATE empleados 
-        SET horas_trabajadas = SEC_TO_TIME(TIME_TO_SEC(IFNULL(horas_trabajadas, '00:00:00')) + ?) 
+        SET horas_trabajadas = SEC_TO_TIME(
+            IFNULL(TIME_TO_SEC(horas_trabajadas), 0) + ?
+        ) 
         WHERE id = ? AND tipo_pago = ?
     `;
 
