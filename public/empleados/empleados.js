@@ -65,14 +65,14 @@ function mostrarEmpleados() {
                 const row = document.createElement('tr');
                 row.setAttribute('data-id', empleado.id);
 
-                // Convertir las horas trabajadas a formato HHh MMm para la tabla
-                const horasTrabajadas = convertirMinutosAHoras(empleado.horas_trabajadas);
-
+                let horasTrabajadas = empleado.horas_trabajadas || 0;
                 let totalPago = parseFloat(empleado.total_pago) || 0;
-                
-                // Si el empleado es "Por Hora", recalcular correctamente el pago
+
                 if (empleado.tipo_pago === 'PorHora') {
+                    horasTrabajadas = convertirMinutosAHoras(empleado.horas_trabajadas);
                     totalPago = calcularPagoPorHora(empleado.horas_trabajadas, empleado.salario_base);
+                } else {
+                    horasTrabajadas = "-"; // Los empleados mensuales no tienen horas trabajadas registradas
                 }
 
                 row.innerHTML = `
@@ -92,11 +92,11 @@ function mostrarEmpleados() {
                         <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
                     </td>                
                 `;
-                
+
                 if (empleado.tipo_pago === 'Mensual') {
                     totalMensuales += parseFloat(totalPago);
                     tablaMensuales.appendChild(row);
-                } else {
+                } else if (empleado.tipo_pago === 'PorHora') {
                     totalPorHora += parseFloat(totalPago);
                     tablaPorHora.appendChild(row);
                 }
