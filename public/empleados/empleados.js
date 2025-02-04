@@ -42,6 +42,15 @@ function formatoHoras(minutosTotales) {
     const minutos = minutosTotales % 60;
     return `${horas}:${minutos.toString().padStart(2, '0')}`;
 }
+function convertirAHoras(horasString) {
+    const match = horasString.match(/(\d+)h\s*(\d*)m?/);
+    if (!match) return 0; // Si no coincide, retorna 0 minutos.
+    
+    const horas = parseInt(match[1]) || 0;
+    const minutos = parseInt(match[2]) || 0;
+    
+    return horas * 60 + minutos;
+}
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
         .then(response => response.json())
@@ -69,7 +78,7 @@ function mostrarEmpleados() {
                         <td>${empleado.legajo}</td>
                         <td>${empleado.telefono}</td>
                         <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas ? formatoHoras(empleado.horas_trabajadas) : '0:00'}</td>
+                        <td>${empleado.horas_trabajadas ? formatoHoras(convertirAHoras(empleado.horas_trabajadas)) : '0:00'}</td>
                         <td>${empleado.total_pago || 0}</td>
                         <td>${empleado.descuento || 0}</td>
                         <td>
@@ -89,7 +98,7 @@ function mostrarEmpleados() {
                         <td>${empleado.legajo}</td>
                         <td>${empleado.telefono}</td>
                         <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas ? formatoHoras(empleado.horas_trabajadas) : '0:00'}</td>
+                        <td>${empleado.horas_trabajadas ? formatoHoras(convertirAHoras(empleado.horas_trabajadas)) : '0:00'}</td>
                         <td>${empleado.total_pago || 0}</td>
                         <td>${empleado.descuento || 0}</td>
                         <td>
