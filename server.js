@@ -1153,12 +1153,13 @@ app.put('/registrar-asistencia/:id', (req, res) => {
 
     dbModulos.query(query, [segundosTotales, empleadoId, tipoPago], (err, results) => {
         if (err) {
-            console.error("❌ Error al registrar asistencia:", err);
+            console.error("❌ Error en MySQL:", err);
             return res.status(500).json({ message: 'Error al registrar asistencia', error: err.message });
         }
         res.json({ message: 'Asistencia registrada con éxito' });
     });
 });
+
 app.put('/reiniciar-datos/:tipoPago', (req, res) => {
     const { tipoPago } = req.params;
     const reiniciarCampos = {
