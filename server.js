@@ -1128,19 +1128,17 @@ app.put('/registrar-asistencia/:id', (req, res) => {
     const horas = parseInt(match[1], 10);
     const minutos = match[2] ? parseInt(match[2], 10) : 0;
     
-    // Convertimos horas y minutos a formato "hh:mm"
-    const minutosTotales = horas * 60 + minutos;
+    // Convertimos a segundos
+    const segundosTotales = (horas * 60 + minutos) * 60;
 
-    // Consulta corregida: sumamos las horas correctamente
+    // Consulta SQL corregida
     const query = `
         UPDATE empleados 
         SET horas_trabajadas = SEC_TO_TIME(TIME_TO_SEC(IFNULL(horas_trabajadas, '00:00:00')) + ?) 
         WHERE id = ? AND tipo_pago = ?
     `;
-    
-    const params = [minutosTotales * 60, empleadoId, tipoPago]; // Convertimos minutos a segundos
 
-    dbModulos.query(query, params, (err, results) => {
+    dbModulos.query(query, [segundosTotales, empleadoId, tipoPago], (err, results) => {
         if (err) {
             console.error('Error al registrar asistencia:', err);
             return res.status(500).json({ message: 'Error al registrar asistencia' });
