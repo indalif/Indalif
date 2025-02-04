@@ -181,6 +181,13 @@ function registrarAsistencia(empleadoId, tipoPago) {
     $('#asistenciaModal').modal('show');
 }
 function calcularHoras(horaIngreso, horaEgreso) {
+    const regexHora = /^([01]?\d|2[0-3]):([0-5]\d)$/; // Valida formato HH:mm
+    
+    if (!regexHora.test(horaIngreso) || !regexHora.test(horaEgreso)) {
+        alert("Formato de hora incorrecto. Usa HH:mm (ejemplo: 08:30)." );
+        return 0;
+    }
+    
     const [ingresoHora, ingresoMinuto] = horaIngreso.split(':').map(Number);
     const [egresoHora, egresoMinuto] = horaEgreso.split(':').map(Number);
 
@@ -195,6 +202,7 @@ function calcularHoras(horaIngreso, horaEgreso) {
 
     return horasTrabajadas.toFixed(2); // Mantiene los minutos exactos sin redondear
 }
+
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleadoId = document.getElementById('empleadoId').value;
