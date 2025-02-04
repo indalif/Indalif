@@ -36,7 +36,6 @@ function registrarEmpleado(empleado) {
         })
         .catch((error) => console.error('Error:', error));
 }
-// Convertir minutos totales a formato "h:mm"
 function formatoHoras(minutosTotales) {
     const horas = Math.floor(minutosTotales / 60);
     const minutos = minutosTotales % 60;
@@ -44,12 +43,12 @@ function formatoHoras(minutosTotales) {
 }
 function convertirAHoras(horasString) {
     const match = horasString.match(/(\d+)h\s*(\d*)m?/);
-    if (!match) return 0; // Si no coincide, retorna 0 minutos.
-    
+    if (!match) return 0; // Si no coincide, retorna 0 horas.
+
     const horas = parseInt(match[1]) || 0;
     const minutos = parseInt(match[2]) || 0;
-    
-    return horas * 60 + minutos;
+
+    return horas + minutos / 60; // Ahora devuelve horas decimales
 }
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
@@ -205,7 +204,8 @@ function calcularHoras(horaIngreso, horaEgreso) {
     const horas = Math.floor(minutosTotales / 60);
     const minutos = minutosTotales % 60;
 
-    return `${horas}h ${minutos}m`; // Devuelve "8h 30m"
+    // Se envía directamente en formato decimal al backend
+    return `${horas}h ${minutos}m`; 
 }
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();

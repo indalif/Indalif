@@ -1149,7 +1149,7 @@ app.put('/aplicar-descuento/:empleadoId', (req, res) => {
         res.json({ success: true, message: 'Descuento aplicado correctamente.' });
     });
 });
-app.put('/registrar-asistencia/:id', (req, res) => {
+app.put('/registrar-asistencia/:id', (req, res) => { 
     const { horasTrabajadas, tipoPago } = req.body;
     const empleadoId = req.params.id;
 
@@ -1163,33 +1163,34 @@ app.put('/registrar-asistencia/:id', (req, res) => {
         return res.status(400).json({ message: 'Faltan datos para registrar asistencia' });
     }
 
+    // Extraer horas y minutos correctamente
     const match = horasTrabajadas.match(/(\d+)h\s*(\d*)m?/);
     if (!match) {
         console.error("⚠️ Error: Formato de horas incorrecto");
         return res.status(400).json({ message: 'Formato de horas incorrecto' });
     }
 
-    const horas = parseInt(match[1], 10);
+    const horas = parseInt(match[1], 10) || 0;
     const minutos = match[2] ? parseInt(match[2], 10) : 0;
-    const minutosTotales = horas * 60 + minutos;
+    const horasDecimales = horas + minutos / 60; // Ahora se convierte correctamente a decimales
+
     const query = `
-    UPDATE empleados 
-    SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? 
-    WHERE id = ? AND tipo_pago = ?
-`;
+        UPDATE empleados 
+        SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? 
+        WHERE id = ? AND tipo_pago = ?
+    `;
 
-console.log("📢 Ejecutando consulta SQL:", query);
-console.log("📌 Parámetros:", [minutosTotales, empleadoId, tipoPago]);
+    console.log("📢 Ejecutando consulta SQL:", query);
+    console.log("📌 Parámetros:", [horasDecimales, empleadoId, tipoPago]);
 
-dbModulos.query(query, [minutosTotales, empleadoId, tipoPago], (err, results) => {
-    if (err) {
-        console.error("❌ Error en MySQL:", err);
-        return res.status(500).json({ message: 'Error al registrar asistencia', error: err.message });
-    }
-    res.json({ message: 'Asistencia registrada con éxito' });
+    dbModulos.query(query, [horasDecimales, empleadoId, tipoPago], (err, results) => {
+        if (err) {
+            console.error("❌ Error en MySQL:", err);
+            return res.status(500).json({ message: 'Error al registrar asistencia', error: err.message });
+        }
+        res.json({ message: 'Asistencia registrada con éxito' });
+    });
 });
-});
-
 app.put('/reiniciar-datos/:tipoPago', (req, res) => {
     const { tipoPago } = req.params;
     const reiniciarCampos = {
