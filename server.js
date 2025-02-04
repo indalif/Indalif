@@ -1119,19 +1119,27 @@ app.put('/aplicar-descuento/:empleadoId', (req, res) => {
 app.put('/registrar-asistencia/:id', (req, res) => {
     const { horasTrabajadas, tipoPago } = req.body;
     const empleadoId = req.params.id;
-    
+
+    console.log("🛠 Datos recibidos en el backend:");
+    console.log("Empleado ID:", empleadoId);
+    console.log("Tipo de Pago:", tipoPago);
+    console.log("Horas Trabajadas:", horasTrabajadas);
+
+    if (!horasTrabajadas || !tipoPago || !empleadoId) {
+        console.error("⚠️ Error: Datos faltantes");
+        return res.status(400).json({ message: 'Faltan datos para registrar asistencia' });
+    }
+
     const match = horasTrabajadas.match(/(\d+)h\s*(\d*)m?/);
     if (!match) {
+        console.error("⚠️ Error: Formato de horas incorrecto");
         return res.status(400).json({ message: 'Formato de horas incorrecto' });
     }
 
     const horas = parseInt(match[1], 10);
     const minutos = match[2] ? parseInt(match[2], 10) : 0;
-    
-    // Convertimos a segundos
     const segundosTotales = (horas * 60 + minutos) * 60;
 
-    // 💡 Solución: Convertimos `horas_trabajadas` a segundos antes de sumarlo
     const query = `
         UPDATE empleados 
         SET horas_trabajadas = SEC_TO_TIME(
@@ -1140,10 +1148,13 @@ app.put('/registrar-asistencia/:id', (req, res) => {
         WHERE id = ? AND tipo_pago = ?
     `;
 
+    console.log("📢 Ejecutando consulta SQL:", query);
+    console.log("📌 Parámetros:", [segundosTotales, empleadoId, tipoPago]);
+
     dbModulos.query(query, [segundosTotales, empleadoId, tipoPago], (err, results) => {
         if (err) {
-            console.error('Error al registrar asistencia:', err);
-            return res.status(500).json({ message: 'Error al registrar asistencia' });
+            console.error("❌ Error al registrar asistencia:", err);
+            return res.status(500).json({ message: 'Error al registrar asistencia', error: err.message });
         }
         res.json({ message: 'Asistencia registrada con éxito' });
     });

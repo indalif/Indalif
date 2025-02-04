@@ -205,20 +205,25 @@ document.getElementById('formAsistencia').addEventListener('submit', function (e
     const horaIngreso = document.getElementById('horaIngreso').value;
     const horaEgreso = document.getElementById('horaEgreso').value;
     const horasTrabajadas = calcularHoras(horaIngreso, horaEgreso);
-    console.log("Horas trabajadas calculadas:", horasTrabajadas);
-    
+
+    console.log("🚀 Enviando datos al backend:");
+    console.log("Empleado ID:", empleadoId);
+    console.log("Tipo de Pago:", tipoPago);
+    console.log("Horas trabajadas:", horasTrabajadas);
+
     fetch(`/registrar-asistencia/${empleadoId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ horasTrabajadas, tipoPago })
     })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-            $('#asistenciaModal').modal('hide');
-            mostrarEmpleados();
-        })
-        .catch(error => console.error('Error:', error));
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Respuesta del servidor:", data);
+        alert(data.message);
+        $('#asistenciaModal').modal('hide');
+        mostrarEmpleados();
+    })
+    .catch(error => console.error('❌ Error en el fetch:', error));
 });
 document.getElementById('cerrarSemana').addEventListener('click', function () {
     if (confirm("¿Estás seguro de que quieres cerrar la semana? Esto reiniciará las horas trabajadas, descuentos y el total a pagar para los empleados por hora.")) {
