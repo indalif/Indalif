@@ -1119,9 +1119,7 @@ app.put('/aplicar-descuento/:empleadoId', (req, res) => {
 app.put('/registrar-asistencia/:id', (req, res) => {
     const { horasTrabajadas, tipoPago } = req.body;
     const empleadoId = req.params.id;
-
-    // Validar formato "HH:mm"
-    const match = horasTrabajadas.match(/^(\d{1,2}):(\d{2})$/);
+    const match = horasTrabajadas.match(/(\d+)h\s*(\d+)m/);
     if (!match) {
         return res.status(400).json({ message: 'Formato de horas incorrecto' });
     }

@@ -190,7 +190,7 @@ function calcularHoras(horaIngreso, horaEgreso) {
     const horas = Math.floor(minutosTotales / 60);
     const minutos = minutosTotales % 60;
 
-    return `${horas}:${minutos < 10 ? "0" : ""}${minutos}`; // Formato "HH:mm"
+    return `${horas}h ${minutos}m`; // Devuelve "8h 30m"
 }
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
