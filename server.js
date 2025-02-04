@@ -1085,51 +1085,18 @@ app.get('/obtener-empleados', (req, res) => {
             console.error('Error al obtener empleados:', err);
             return res.status(500).json({ message: 'Error al obtener empleados.' });
         }
-
-        const empleadosFormateados = rows.map(empleado => {
-            console.log(`ID: ${empleado.id}, Horas Trabajadas:`, empleado.horas_trabajadas); // Debug
-
-            // Verificar si es un número válido
-            if (empleado.horas_trabajadas === null || isNaN(empleado.horas_trabajadas)) {
-                empleado.horas_trabajadas = "0h 0m"; // Si es NULL o inválido, mostrar "0h 0m"
-            } else {
-                let horas = Math.floor(Number(empleado.horas_trabajadas) / 60);
-                let minutos = Number(empleado.horas_trabajadas) % 60;
-                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
-            }
-
-            return empleado;
-        });
-
-        res.json(empleadosFormateados);
+        res.json(rows);
     });
 });
 app.get('/obtener-empleado/:id', (req, res) => {
     const empleadoId = req.params.id;
     const query = 'SELECT * FROM empleados WHERE id = ?';
-
     dbModulos.query(query, [empleadoId], (err, result) => {
         if (err) {
             console.error('Error al obtener empleado:', err);
-            return res.status(500).json({ message: 'Error al obtener empleado' });
-        }
-
-        if (result.length > 0) {
-            let empleado = result[0];
-
-            console.log(`ID: ${empleado.id}, Horas Trabajadas:`, empleado.horas_trabajadas); // Debug
-
-            if (empleado.horas_trabajadas === null || isNaN(empleado.horas_trabajadas)) {
-                empleado.horas_trabajadas = "0h 0m";
-            } else {
-                let horas = Math.floor(Number(empleado.horas_trabajadas) / 60);
-                let minutos = Number(empleado.horas_trabajadas) % 60;
-                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
-            }
-
-            res.json(empleado);
+            res.status(500).json({ message: 'Error al obtener empleado' });
         } else {
-            res.status(404).json({ message: 'Empleado no encontrado' });
+            res.status(200).json(result[0]);
         }
     });
 });
@@ -1153,41 +1120,26 @@ app.put('/registrar-asistencia/:id', (req, res) => {
     const { horasTrabajadas, tipoPago } = req.body;
     const empleadoId = req.params.id;
 
-    console.log("🛠 Datos recibidos en el backend:");
-    console.log("Empleado ID:", empleadoId);
-    console.log("Tipo de Pago:", tipoPago);
-    console.log("Horas Trabajadas:", horasTrabajadas);
-
-    if (!horasTrabajadas || !tipoPago || !empleadoId) {
-        console.error("⚠️ Error: Datos faltantes");
-        return res.status(400).json({ message: 'Faltan datos para registrar asistencia' });
-    }
-
-    // Extraer horas y minutos correctamente
+    // Convertir el formato "Xh Ym" a minutos totales
     const match = horasTrabajadas.match(/(\d+)h\s*(\d*)m?/);
     if (!match) {
-        console.error("⚠️ Error: Formato de horas incorrecto");
         return res.status(400).json({ message: 'Formato de horas incorrecto' });
     }
 
-    const horas = parseInt(match[1], 10) || 0;
+    const horas = parseInt(match[1], 10);
     const minutos = match[2] ? parseInt(match[2], 10) : 0;
-    const horasDecimales = horas + minutos / 60; // Ahora se convierte correctamente a decimales
+    const minutosTotales = horas * 60 + minutos; // Guardar en minutos totales
 
-    const query = `
-    UPDATE empleados 
-    SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? 
-    WHERE id = ? AND tipo_pago = ?
-`;
-    console.log("📢 Ejecutando consulta SQL:", query);
-    console.log("📌 Parámetros:", [horasDecimales, empleadoId, tipoPago]);
+    const query = 'UPDATE empleados SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? WHERE id = ? AND tipo_pago = ?';
+    const params = [minutosTotales, empleadoId, tipoPago];
 
-    dbModulos.query(query, [horasDecimales, empleadoId, tipoPago], (err, results) => {
+    dbModulos.query(query, params, (err, results) => {
         if (err) {
-            console.error("❌ Error en MySQL:", err);
-            return res.status(500).json({ message: 'Error al registrar asistencia', error: err.message });
+            console.error('Error al registrar asistencia:', err);
+            res.status(500).json({ message: 'Error al registrar asistencia' });
+        } else {
+            res.json({ message: 'Asistencia registrada con éxito' });
         }
-        res.json({ message: 'Asistencia registrada con éxito' });
     });
 });
 app.put('/reiniciar-datos/:tipoPago', (req, res) => {

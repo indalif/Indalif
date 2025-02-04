@@ -1,12 +1,12 @@
 document.getElementById('formMensual').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleado = {
-        tipo: 'Mensual',
+        tipo_pago: 'Mensual',
         nombre: document.getElementById('nombreMensual').value,
         dni: document.getElementById('dniMensual').value,
         legajo: document.getElementById('legajoMensual').value,
         telefono: document.getElementById('telefonoMensual').value,
-        sueldo: document.getElementById('sueldoMensual').value,
+        salario_base: document.getElementById('sueldoMensual').value,
     };
     registrarEmpleado(empleado);
     event.target.reset();
@@ -14,12 +14,12 @@ document.getElementById('formMensual').addEventListener('submit', function (even
 document.getElementById('formPorHora').addEventListener('submit', function (event) {
     event.preventDefault();
     const empleado = {
-        tipo: 'PorHora',
+        tipo_pago: 'PorHora',
         nombre: document.getElementById('nombreHora').value,
         dni: document.getElementById('dniHora').value,
         legajo: document.getElementById('legajoHora').value,
         telefono: document.getElementById('telefonoHora').value,
-        pagoHora: document.getElementById('pagoHora').value,
+        salario_base: document.getElementById('pagoHora').value,
     };
     registrarEmpleado(empleado);
     event.target.reset();
@@ -36,19 +36,17 @@ function registrarEmpleado(empleado) {
         })
         .catch((error) => console.error('Error:', error));
 }
-function formatoHoras(minutosTotales) {
+function convertirMinutosAHoras(minutosTotales) {
+    if (!minutosTotales || isNaN(minutosTotales)) return "0h 0m";
     const horas = Math.floor(minutosTotales / 60);
     const minutos = minutosTotales % 60;
-    return `${horas}:${minutos.toString().padStart(2, '0')}`;
+    return `${horas}h ${minutos}m`;
 }
-function convertirAHoras(horasString) {
-    const match = horasString.match(/(\d+)h\s*(\d*)m?/);
-    if (!match) return 0;
-
-    const horas = parseInt(match[1]) || 0;
-    const minutos = parseInt(match[2]) || 0;
-
-    return horas + (minutos / 60);  // Convertir minutos en fracción de hora correctamente
+function calcularPagoPorHora(minutosTrabajados, salarioPorHora) {
+    if (!minutosTrabajados || isNaN(minutosTrabajados) || !salarioPorHora || isNaN(salarioPorHora)) {
+        return 0;
+    }
+    return ((minutosTrabajados / 60) * salarioPorHora).toFixed(2); // Convierte a horas y multiplica
 }
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
@@ -64,60 +62,55 @@ function mostrarEmpleados() {
 
             empleados.forEach((empleado) => {
                 const row = document.createElement('tr');
-                row.setAttribute('data-id', empleado.id); // Asocia la fila al ID del empleado
+                row.setAttribute('data-id', empleado.id);
 
-                const totalPago = parseFloat(empleado.total_pago) || 0;
+                // Convertir horas trabajadas a formato HHh MMm
+                const horasTrabajadas = convertirMinutosAHoras(empleado.horas_trabajadas);
 
+                // Calcular total de pago
+                let totalPago = parseFloat(empleado.total_pago) || 0;
+                
+                // Si es por hora, recalcular correctamente el pago
+                if (empleado.tipo_pago === 'Por Hora') {
+                    totalPago = calcularPagoPorHora(empleado.horas_trabajadas, empleado.salario_base);
+                }
+
+                row.innerHTML = `
+                    <td>${empleado.tipo_pago}</td>
+                    <td>${empleado.nombre}</td>
+                    <td>${empleado.dni}</td>
+                    <td>${empleado.legajo}</td>
+                    <td>${empleado.telefono}</td>
+                    <td class="salario_base">${empleado.salario_base}</td>
+                    <td>${horasTrabajadas}</td>
+                    <td>${totalPago}</td>
+                    <td>${empleado.descuento || 0}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="registrarAsistencia(${empleado.id}, '${empleado.tipo_pago}')">Registrar Asistencia</button>
+                        <button class="btn btn-warning btn-sm" onclick="aplicarDescuento(${empleado.id})">Aplicar Descuento</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
+                        <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
+                    </td>                
+                `;
+                
                 if (empleado.tipo_pago === 'Mensual') {
-                    totalMensuales += totalPago;
-                    row.innerHTML = `
-                        <td>${empleado.tipo_pago}</td>
-                        <td>${empleado.nombre}</td>
-                        <td>${empleado.dni}</td>
-                        <td>${empleado.legajo}</td>
-                        <td>${empleado.telefono}</td>
-                        <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas ? formatoHoras(convertirAHoras(empleado.horas_trabajadas)) : '0:00'}</td>
-                        <td>${empleado.total_pago || 0}</td>
-                        <td>${empleado.descuento || 0}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="registrarAsistencia(${empleado.id}, '${empleado.tipo_pago}')">Registrar Asistencia</button>
-                            <button class="btn btn-warning btn-sm" onclick="aplicarDescuento(${empleado.id})">Aplicar Descuento</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
-                            <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
-                        </td>                
-                    `;
+                    totalMensuales += parseFloat(totalPago);
                     tablaMensuales.appendChild(row);
-                } else if (empleado.tipo_pago === 'PorHora') {
-                    totalPorHora += totalPago;
-                    row.innerHTML = `
-                        <td>${empleado.tipo_pago}</td>
-                        <td>${empleado.nombre}</td>
-                        <td>${empleado.dni}</td>
-                        <td>${empleado.legajo}</td>
-                        <td>${empleado.telefono}</td>
-                        <td class="salario_base">${empleado.salario_base}</td>
-                        <td>${empleado.horas_trabajadas ? formatoHoras(convertirAHoras(empleado.horas_trabajadas)) : '0:00'}</td>
-                        <td>${empleado.total_pago || 0}</td>
-                        <td>${empleado.descuento || 0}</td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="registrarAsistencia(${empleado.id}, '${empleado.tipo_pago}')">Registrar Asistencia</button>
-                            <button class="btn btn-warning btn-sm" onclick="aplicarDescuento(${empleado.id})">Aplicar Descuento</button>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado(${empleado.id})">Eliminar</button>
-                            <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
-                        </td>                
-                    `;
+                } else {
+                    totalPorHora += parseFloat(totalPago);
                     tablaPorHora.appendChild(row);
                 }
             });
+
             document.getElementById('totalMensuales').textContent = `Total Mensuales: $${totalMensuales.toFixed(2)}`;
             document.getElementById('totalPorHora').textContent = `Total Por Hora: $${totalPorHora.toFixed(2)}`;
         })
         .catch(error => {
             console.error('Error al obtener los empleados:', error);
-            alert('Hubo un problema al cargar los empleados. Por favor, intenta nuevamente.');
+            alert('Hubo un problema al cargar los empleados.');
         });
 }
+mostrarEmpleados();
 function mostrarActualizarSueldo(id, tipoPago, salarioActual) {
     document.getElementById('actualizarEmpleadoId').value = id;
     document.getElementById('actualizarTipoPago').value = tipoPago;
@@ -195,17 +188,25 @@ function registrarAsistencia(empleadoId, tipoPago) {
     $('#asistenciaModal').modal('show');
 }
 function calcularHoras(horaIngreso, horaEgreso) {
-    const [h1, m1] = horaIngreso.split(":").map(Number);
-    const [h2, m2] = horaEgreso.split(":").map(Number);
+    const [ingresoHora, ingresoMinuto] = horaIngreso.split(':').map(Number);
+    const [egresoHora, egresoMinuto] = horaEgreso.split(':').map(Number);
 
-    let minutosTotales = (h2 * 60 + m2) - (h1 * 60 + m1);
-    if (minutosTotales < 0) minutosTotales += 24 * 60;
+    const ingreso = new Date();
+    ingreso.setHours(ingresoHora, ingresoMinuto, 0, 0);
 
-    const horas = Math.floor(minutosTotales / 60);
-    const minutos = minutosTotales % 60;
+    const egreso = new Date();
+    egreso.setHours(egresoHora, egresoMinuto, 0, 0);
 
-    // Enviar correctamente en formato `0.25` en lugar de `0:0.15`
-    return (horas + minutos / 60).toFixed(2);  
+    if (egreso < ingreso) {
+        alert("La hora de egreso no puede ser menor a la de ingreso.");
+        return "0h 0m";
+    }
+
+    const diferenciaMs = egreso - ingreso;
+    const horas = Math.floor(diferenciaMs / (1000 * 60 * 60));
+    const minutos = Math.floor((diferenciaMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${horas}h ${minutos}m`;
 }
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -213,12 +214,8 @@ document.getElementById('formAsistencia').addEventListener('submit', function (e
     const tipoPago = document.getElementById('tipoPago').value;
     const horaIngreso = document.getElementById('horaIngreso').value;
     const horaEgreso = document.getElementById('horaEgreso').value;
-    const horasTrabajadas = calcularHoras(horaIngreso, horaEgreso);
 
-    console.log("🚀 Enviando datos al backend:");
-    console.log("Empleado ID:", empleadoId);
-    console.log("Tipo de Pago:", tipoPago);
-    console.log("Horas trabajadas:", horasTrabajadas);
+    const horasTrabajadas = calcularHoras(horaIngreso, horaEgreso);
 
     fetch(`/registrar-asistencia/${empleadoId}`, {
         method: 'PUT',
@@ -227,12 +224,11 @@ document.getElementById('formAsistencia').addEventListener('submit', function (e
     })
     .then(response => response.json())
     .then(data => {
-        console.log("✅ Respuesta del servidor:", data);
         alert(data.message);
         $('#asistenciaModal').modal('hide');
         mostrarEmpleados();
     })
-    .catch(error => console.error('❌ Error en el fetch:', error));
+    .catch(error => console.error('Error:', error));
 });
 document.getElementById('cerrarSemana').addEventListener('click', function () {
     if (confirm("¿Estás seguro de que quieres cerrar la semana? Esto reiniciará las horas trabajadas, descuentos y el total a pagar para los empleados por hora.")) {
