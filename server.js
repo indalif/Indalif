@@ -1120,15 +1120,15 @@ app.put('/registrar-asistencia/:id', (req, res) => {
     const { horasTrabajadas, tipoPago } = req.body;
     const empleadoId = req.params.id;
 
-    // Convertir el formato "Xh Ym" a minutos totales
-    const match = horasTrabajadas.match(/(\d+)h\s*(\d*)m?/);
+    // Validar formato "HH:mm"
+    const match = horasTrabajadas.match(/^(\d{1,2}):(\d{2})$/);
     if (!match) {
         return res.status(400).json({ message: 'Formato de horas incorrecto' });
     }
 
     const horas = parseInt(match[1], 10);
-    const minutos = match[2] ? parseInt(match[2], 10) : 0;
-    const minutosTotales = horas * 60 + minutos; // Guardar en minutos totales
+    const minutos = parseInt(match[2], 10);
+    const minutosTotales = horas * 60 + minutos;
 
     const query = 'UPDATE empleados SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? WHERE id = ? AND tipo_pago = ?';
     const params = [minutosTotales, empleadoId, tipoPago];
