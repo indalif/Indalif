@@ -1107,7 +1107,7 @@ app.get('/obtener-empleados', (req, res) => {
 app.get('/obtener-empleado/:id', (req, res) => {
     const empleadoId = req.params.id;
     const query = 'SELECT * FROM empleados WHERE id = ?';
-    
+
     dbModulos.query(query, [empleadoId], (err, result) => {
         if (err) {
             console.error('Error al obtener empleado:', err);
@@ -1149,7 +1149,7 @@ app.put('/aplicar-descuento/:empleadoId', (req, res) => {
         res.json({ success: true, message: 'Descuento aplicado correctamente.' });
     });
 });
-app.put('/registrar-asistencia/:id', (req, res) => { 
+app.put('/registrar-asistencia/:id', (req, res) => {
     const { horasTrabajadas, tipoPago } = req.body;
     const empleadoId = req.params.id;
 
@@ -1175,11 +1175,10 @@ app.put('/registrar-asistencia/:id', (req, res) => {
     const horasDecimales = horas + minutos / 60; // Ahora se convierte correctamente a decimales
 
     const query = `
-        UPDATE empleados 
-        SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? 
-        WHERE id = ? AND tipo_pago = ?
-    `;
-
+    UPDATE empleados 
+    SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? 
+    WHERE id = ? AND tipo_pago = ?
+`;
     console.log("📢 Ejecutando consulta SQL:", query);
     console.log("📌 Parámetros:", [horasDecimales, empleadoId, tipoPago]);
 

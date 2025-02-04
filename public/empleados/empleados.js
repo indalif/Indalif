@@ -43,12 +43,12 @@ function formatoHoras(minutosTotales) {
 }
 function convertirAHoras(horasString) {
     const match = horasString.match(/(\d+)h\s*(\d*)m?/);
-    if (!match) return 0; // Si no coincide, retorna 0 horas.
+    if (!match) return 0;
 
     const horas = parseInt(match[1]) || 0;
     const minutos = parseInt(match[2]) || 0;
 
-    return horas + minutos / 60; // Ahora devuelve horas decimales
+    return horas + (minutos / 60);  // Convertir minutos en fracción de hora correctamente
 }
 function mostrarEmpleados() {
     fetch('/obtener-empleados')
@@ -199,13 +199,13 @@ function calcularHoras(horaIngreso, horaEgreso) {
     const [h2, m2] = horaEgreso.split(":").map(Number);
 
     let minutosTotales = (h2 * 60 + m2) - (h1 * 60 + m1);
-    if (minutosTotales < 0) minutosTotales += 24 * 60; // Manejo si pasa la medianoche
+    if (minutosTotales < 0) minutosTotales += 24 * 60;
 
     const horas = Math.floor(minutosTotales / 60);
     const minutos = minutosTotales % 60;
 
-    // Se envía directamente en formato decimal al backend
-    return `${horas}h ${minutos}m`; 
+    // Enviar correctamente en formato `0.25` en lugar de `0:0.15`
+    return (horas + minutos / 60).toFixed(2);  
 }
 document.getElementById('formAsistencia').addEventListener('submit', function (event) {
     event.preventDefault();
