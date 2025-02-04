@@ -1085,14 +1085,19 @@ app.get('/obtener-empleados', (req, res) => {
             console.error('Error al obtener empleados:', err);
             return res.status(500).json({ message: 'Error al obtener empleados.' });
         }
+
         const empleadosFormateados = rows.map(empleado => {
-            if (empleado.horas_trabajadas !== null) {
-                let horas = Math.floor(empleado.horas_trabajadas / 60);
-                let minutos = empleado.horas_trabajadas % 60;
-                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
+            console.log(`ID: ${empleado.id}, Horas Trabajadas:`, empleado.horas_trabajadas); // Debug
+
+            // Verificar si es un número válido
+            if (empleado.horas_trabajadas === null || isNaN(empleado.horas_trabajadas)) {
+                empleado.horas_trabajadas = "0h 0m"; // Si es NULL o inválido, mostrar "0h 0m"
             } else {
-                empleado.horas_trabajadas = "0h 0m"; // Si es NULL, mostrar "0h 0m"
+                let horas = Math.floor(Number(empleado.horas_trabajadas) / 60);
+                let minutos = Number(empleado.horas_trabajadas) % 60;
+                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
             }
+
             return empleado;
         });
 
@@ -1102,6 +1107,7 @@ app.get('/obtener-empleados', (req, res) => {
 app.get('/obtener-empleado/:id', (req, res) => {
     const empleadoId = req.params.id;
     const query = 'SELECT * FROM empleados WHERE id = ?';
+    
     dbModulos.query(query, [empleadoId], (err, result) => {
         if (err) {
             console.error('Error al obtener empleado:', err);
@@ -1111,13 +1117,14 @@ app.get('/obtener-empleado/:id', (req, res) => {
         if (result.length > 0) {
             let empleado = result[0];
 
-            // Convertir minutos a hh:mm solo si horas_trabajadas tiene un valor
-            if (empleado.horas_trabajadas !== null) {
-                let horas = Math.floor(empleado.horas_trabajadas / 60);
-                let minutos = empleado.horas_trabajadas % 60;
-                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
+            console.log(`ID: ${empleado.id}, Horas Trabajadas:`, empleado.horas_trabajadas); // Debug
+
+            if (empleado.horas_trabajadas === null || isNaN(empleado.horas_trabajadas)) {
+                empleado.horas_trabajadas = "0h 0m";
             } else {
-                empleado.horas_trabajadas = "0h 0m"; // Si es NULL, mostrar "0h 0m"
+                let horas = Math.floor(Number(empleado.horas_trabajadas) / 60);
+                let minutos = Number(empleado.horas_trabajadas) % 60;
+                empleado.horas_trabajadas = `${horas}h ${minutos}m`;
             }
 
             res.json(empleado);
