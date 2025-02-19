@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const PORT = process.env.PORT || 3000;
 const path = require('path');
 
+
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,62 +25,31 @@ app.use((err, req, res, next) => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login', 'login.html'));
 });
-
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Error interno del servidor' });
+});
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'fabricaaranda@gmail.com',
-        pass: 'tfww odff zsxy zyzp',
+        pass: 'tfww odff zsxy zyzp',      
     },
 });
-
-const dbModulos = mysql.createPool({
+const dbModulos = mysql.createConnection({
     host: 'monorail.proxy.rlwy.net',
     user: 'root',
     password: 'laciwNIOYaUINFlnIDakqawFAeQpeNYn',
     database: 'railway',
-    port: 45617,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    port:45617
 });
-
-dbModulos.getConnection((err, connection) => {
+dbModulos.connect(err => {
     if (err) {
-        console.error('Error al conectar a MySQL:', err);
+        console.error('Error connecting to MySQL:', err);
         process.exit(1);
     }
     console.log('Conectado a la base de datos MySQL (aranda_db)');
-    connection.release(); // Liberar conexión al pool
 });
-
-function handleDisconnect() {
-    dbModulos.getConnection((err, connection) => {
-        if (err) {
-            console.error('Error al intentar reconectar a MySQL:', err);
-            setTimeout(handleDisconnect, 2000); // Reintentar conexión tras 2 segundos
-        } else {
-            console.log('Reconectado a la base de datos MySQL');
-            connection.release();
-        }
-    });
-}
-
-dbModulos.on('error', err => {
-    console.error('Error en la base de datos:', err);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-        handleDisconnect(); // Reconexión
-    } else {
-        throw err;
-    }
-});
-
-// Mantener viva la conexión con una consulta periódica
-setInterval(() => {
-    dbModulos.query('SELECT 1', (err) => {
-        if (err) console.error('Error en consulta de keep-alive:', err);
-    });
-}, 5000); // Consulta cada 5 segundos
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS usuarios (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -727,8 +697,8 @@ app.post('/send-authorization-email', (req, res) => {
             <h1>Solicitud de Autorización</h1>
             <p>El usuario <strong>${username}</strong> ha solicitado registrarse como <strong>${userType}</strong> en el sistema.</p>
             <p>Por favor, autorice o rechace la solicitud:</p>
-            <a href="https://indalif-production.up.railway.app/approve?username=${username}" style="margin-right: 10px;">Autorizar</a>
-            <a href="https://indalif-production.up.railway.app/reject?username=${username}">Rechazar</a>
+            <a href="https://fabrica-production.up.railway.app/approve?username=${username}" style="margin-right: 10px;">Autorizar</a>
+            <a href="https://fabrica-production.up.railway.app/reject?username=${username}">Rechazar</a>
         `,
     };
 
@@ -1120,18 +1090,8 @@ app.put('/registrar-asistencia/:id', (req, res) => {
     const { horasTrabajadas, tipoPago } = req.body;
     const empleadoId = req.params.id;
 
-    // Convertir el formato "Xh Ym" a minutos totales
-    const match = horasTrabajadas.match(/(\d+)h\s*(\d*)m?/);
-    if (!match) {
-        return res.status(400).json({ message: 'Formato de horas incorrecto' });
-    }
-
-    const horas = parseInt(match[1], 10);
-    const minutos = match[2] ? parseInt(match[2], 10) : 0;
-    const minutosTotales = horas * 60 + minutos; // Guardar en minutos totales
-
     const query = 'UPDATE empleados SET horas_trabajadas = IFNULL(horas_trabajadas, 0) + ? WHERE id = ? AND tipo_pago = ?';
-    const params = [minutosTotales, empleadoId, tipoPago];
+    const params = [horasTrabajadas, empleadoId, tipoPago];
 
     dbModulos.query(query, params, (err, results) => {
         if (err) {
