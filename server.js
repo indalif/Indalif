@@ -270,7 +270,6 @@ dbModulos.query(`
     if (err) throw err;
     console.log('Tabla de billetes verificada/creada.');
 });
-// Endpoint para actualizar la cantidad de billetes
 app.post('/billetes', (req, res) => {
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
    
@@ -282,8 +281,6 @@ app.post('/billetes', (req, res) => {
         res.json({ id: result.insertId, message: 'Registro de billetes agregado con éxito' });
     });
 });
-
-// Endpoint para obtener el total de billetes registrados
 app.get('/billetes', (req, res) => {
     const sql = 'SELECT * FROM billetes ORDER BY id DESC LIMIT 1';
     dbModulos.query(sql, (err, rows) => {
@@ -291,8 +288,6 @@ app.get('/billetes', (req, res) => {
         res.json(rows[0]);
     });
 });
-
-// Endpoint para actualizar las cantidades de billetes existentes
 app.put('/billetes/:id', (req, res) => {
     const { id } = req.params;
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
