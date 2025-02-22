@@ -367,4 +367,4 @@ function saveBilletes() {
     .then(data => console.log(data.message))
     .catch(error => console.error('Error al guardar billetes:', error));
 }
-setInterval(loadBilletes, 2000);
+setInterval(loadBilletes, 500);
