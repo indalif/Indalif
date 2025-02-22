@@ -311,11 +311,13 @@ function closeMonth() {
             alert('Hubo un error al realizar el cierre mensual.');
         });
 }
+let isEditing = false;
+
 function loadBilletes() {
     fetch('/billetes')
         .then(response => response.json())
         .then(data => {
-            if (data) {
+            if (data && !isEditing) {
                 document.getElementById('bill100').value = data.billete_100;
                 document.getElementById('bill200').value = data.billete_200;
                 document.getElementById('bill500').value = data.billete_500;
@@ -328,6 +330,7 @@ function loadBilletes() {
         })
         .catch(error => console.error('Error al cargar los billetes:', error));
 }
+
 function updateTotal() {
     const bill100 = parseInt(document.getElementById('bill100').value) || 0;
     const bill200 = parseInt(document.getElementById('bill200').value) || 0;
@@ -341,12 +344,15 @@ function updateTotal() {
                   (bill1000 * 1000) + (bill2000 * 2000) + (bill10000 * 10000) + (bill20000 * 20000);
     document.getElementById('cashResult').innerText = `Total en billetes: $${total.toFixed(2)}`;
 }
+
 document.querySelectorAll('input[type=number]').forEach(input => {
-    input.addEventListener('input', () => {
-        updateTotal();
+    input.addEventListener('focus', () => isEditing = true);
+    input.addEventListener('blur', () => {
+        isEditing = false;
         saveBilletes();
     });
 });
+
 function saveBilletes() {
     const billetes = {
         billete_100: parseInt(document.getElementById('bill100').value) || 0,
@@ -360,12 +366,11 @@ function saveBilletes() {
 
     fetch('/billetes', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(billetes)
     })
     .then(response => response.json())
     .then(data => console.log(data.message))
     .catch(error => console.error('Error al guardar billetes:', error));
 }
+setInterval(loadBilletes, 2000);

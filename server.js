@@ -272,20 +272,22 @@ dbModulos.query(`
 });
 app.post('/billetes', (req, res) => {
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
-   
-    const sql = `INSERT INTO billetes (billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
-   
-    dbModulos.query(sql, [billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000], (err, result) => {
+
+    const sql = `
+        REPLACE INTO billetes (id, billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000)
+        VALUES (1, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    dbModulos.query(sql, [billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000], (err) => {
         if (err) return res.status(500).json({ error: err.message });
-        res.json({ id: result.insertId, message: 'Registro de billetes agregado con éxito' });
+        res.json({ message: 'Billetes actualizados correctamente' });
     });
 });
 app.get('/billetes', (req, res) => {
-    const sql = 'SELECT * FROM billetes ORDER BY id DESC LIMIT 1';
+    const sql = 'SELECT * FROM billetes WHERE id = 1 LIMIT 1';
     dbModulos.query(sql, (err, rows) => {
         if (err) return res.status(400).json({ error: err.message });
-        res.json(rows[0]);
+        res.json(rows[0] || {});
     });
 });
 app.put('/billetes/:id', (req, res) => {
