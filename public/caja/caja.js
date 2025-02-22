@@ -359,7 +359,7 @@ function saveBilletes() {
     };
 
     fetch('/billetes', {
-        method: 'PUT',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
