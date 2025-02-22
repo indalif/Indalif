@@ -950,19 +950,41 @@ app.put('/actualizar_costo', (req, res) => {
 app.get('/obtener_todos_costos', (req, res) => {
     const sql = `
         SELECT 
+            id,
             producto,
-            SUM(COALESCE(precio_plastico, 0)) AS total_plasticos,
-            SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
+            ingrediente,
+            precio_unitario,
+            cantidad_kg,
+            cantidad_utilizo,
+            rinde
         FROM costos
-        GROUP BY producto
+        WHERE tipo = 'ingrediente'
     `;
 
-    dbModulos.query(sql, (err, results) => {
+    dbModulos.query(sql, (err, ingredientes) => {
         if (err) {
-            console.error('Error al obtener todos los costos:', err.message);
-            return res.status(500).json({ error: 'Error al obtener los costos' });
+            console.error('Error al obtener los costos de ingredientes:', err.message);
+            return res.status(500).json({ error: 'Error al obtener los costos de ingredientes' });
         }
-        res.json(results || []);
+
+        const sqlPlasticos = `
+            SELECT 
+                id,
+                producto,
+                tipo_plastico,
+                precio_plastico
+            FROM costos
+            WHERE tipo = 'plastico'
+        `;
+
+        dbModulos.query(sqlPlasticos, (err, plasticos) => {
+            if (err) {
+                console.error('Error al obtener los costos de plásticos:', err.message);
+                return res.status(500).json({ error: 'Error al obtener los costos de plásticos' });
+            }
+
+            res.json({ ingredientes, plasticos });
+        });
     });
 });
 app.delete('/eliminar_costo/:id', (req, res) => {

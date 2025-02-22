@@ -204,16 +204,16 @@ function cargarTodosLosDatos() {
     fetch("/obtener_todos_costos")
         .then(response => response.json())
         .then(data => {
-            if (Array.isArray(data)) {
-                mostrarDatosEnTablas(data); 
+            if (data.ingredientes && data.plasticos) {
+                mostrarDatosEnTablas(data.ingredientes, data.plasticos); 
             } else {
-                console.error("Los datos no son un arreglo:", data);
-                mostrarDatosEnTablas([]); 
+                console.error("Los datos no tienen la estructura esperada:", data);
+                mostrarDatosEnTablas([], []);
             }
         })
         .catch(error => {
             console.error("Error al cargar todos los datos:", error);
-            mostrarDatosEnTablas([]); 
+            mostrarDatosEnTablas([], []);
         });
 }
 function mostrarDatosEnTablas(ingredientes, plasticos) {
