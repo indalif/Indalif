@@ -867,23 +867,26 @@ const verificarEmpleado = (req, res, next) => {
 app.post('/registrar_costos', (req, res) => {
     const {
         producto, ingrediente, precio_unitario,
-        cantidad_kg, cantidad_utilizo, rinde
+        cantidad_kg, cantidad_utilizo, rinde,
+        tipo_plastico, precio_plastico
     } = req.body;
 
     if (!producto || !ingrediente || !precio_unitario) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
-
+    const tipo = ingrediente ? 'ingrediente' : 'plastico';
     const sql = `
         INSERT INTO costos (
             producto, ingrediente, precio_unitario,
-            cantidad_kg, cantidad_utilizo, rinde, tipo
-        ) VALUES (?, ?, ?, ?, ?, ?, 'ingrediente')
+            cantidad_kg, cantidad_utilizo, rinde, 
+            tipo_plastico, precio_plastico, tipo
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     dbModulos.query(sql, [
         producto, ingrediente, precio_unitario,
-        cantidad_kg, cantidad_utilizo, rinde
+        cantidad_kg, cantidad_utilizo, rinde,
+        tipo_plastico, precio_plastico, tipo
     ], (err, result) => {
         if (err) {
             console.error('Error al registrar costos:', err.message);
@@ -901,20 +904,33 @@ app.get('/obtener_costos_producto/:producto', (req, res) => {
         FROM costos 
         WHERE tipo = 'ingrediente' AND producto = ?
     `;
-
+    const sqlPlasticos = `
+    SELECT id, producto, tipo_plastico, precio_plastico, fecha 
+    FROM costos 
+    WHERE tipo = 'plastico' AND producto = ?
+`;
     dbModulos.query(sqlIngredientes, [producto], (err, ingredientes) => {
         if (err) {
             console.error('Error al obtener costos de ingredientes:', err.message);
             return res.status(500).json({ error: 'Error al obtener costos de ingredientes' });
         }
-        res.json({ ingredientes });
+        dbModulos.query(sqlPlasticos, [producto], (err, plasticos) => {
+            if (err) {
+                console.error('Error al obtener costos de plásticos:', err.message);
+                return res.status(500).json({ error: 'Error al obtener costos de plásticos' });
+            }
+
+            res.json({ ingredientes, plasticos });
+        });
     });
 });
 app.get('/total_por_paquete/:producto', (req, res) => {
     const { producto } = req.params;
 
     const sql = `
-        SELECT SUM(precio_unitario * cantidad_utilizo / rinde) AS total_por_paquete
+      SELECT
+            SUM(COALESCE(precio_plastico, 0)) AS total_plasticos,
+            SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
         FROM costos
         WHERE producto = ?
     `;
@@ -930,15 +946,20 @@ app.get('/total_por_paquete/:producto', (req, res) => {
     });
 });
 app.put('/actualizar_costo', (req, res) => {
-    const { id, precio_unitario } = req.body;
+    const { id, tipo, nuevoPrecio } = req.body;
 
-    if (!id || !precio_unitario) {
-        return res.status(400).json({ error: 'ID y precio unitario son obligatorios.' });
+    // Validar tipo
+    if (!['ingredientes', 'plasticos'].includes(tipo)) {
+        return res.status(400).json({ error: 'Tipo de tabla inválido.' });
     }
 
-    const query = `UPDATE costos SET precio_unitario = ? WHERE id = ?`;
+    // Determinar el campo a actualizar
+    const campo = tipo === 'ingredientes' ? 'precio_unitario' : 'precio_plastico';
 
-    dbModulos.query(query, [precio_unitario, id], (err, result) => {
+    // Consulta SQL ajustada
+    const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
+
+    dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
         if (err) {
             console.error(err);
             res.status(500).json({ error: 'Error al actualizar el costo' });
@@ -976,7 +997,6 @@ app.get('/obtener_todos_costos', (req, res) => {
             FROM costos
             WHERE tipo = 'plastico'
         `;
-
         dbModulos.query(sqlPlasticos, (err, plasticos) => {
             if (err) {
                 console.error('Error al obtener los costos de plásticos:', err.message);
@@ -986,7 +1006,6 @@ app.get('/obtener_todos_costos', (req, res) => {
             res.json({ ingredientes, plasticos });
         });
     });
-    console.log("Ingredientes obtenidos:", ingredientes);
 });
 app.delete('/eliminar_costo/:id', (req, res) => {
     const { id } = req.params;

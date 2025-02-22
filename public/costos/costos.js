@@ -234,6 +234,10 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
                 <td>${(row.cantidad_utilizo * row.precio_unitario).toFixed(2)}</td>
                 <td>${row.rinde}</td>
                 <td>${((row.cantidad_utilizo * row.precio_unitario) / row.rinde).toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
             </tr>
         `;
         tableBody.insertAdjacentHTML("beforeend", newRow);
@@ -245,10 +249,16 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
                 <td>${row.producto}</td>
                 <td>${row.tipo_plastico}</td>
                 <td>${parseFloat(row.precio_plastico).toFixed(2)}</td>
+                 <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
             </tr>
         `;
         plasticosTableBody.insertAdjacentHTML("beforeend", newRow);
     });
+    agregarEventosAcciones();
+    actualizarTotalPorPaquete(producto);
 }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
