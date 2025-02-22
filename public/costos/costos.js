@@ -220,24 +220,25 @@ function cargarTodosLosDatos() {
 function mostrarDatosEnTablas(ingredientes, plasticos) {
     const tableBody = document.getElementById("table-body");
     const plasticosTableBody = document.getElementById("plasticos-table-body");
-    tableBody.innerHTML = ""; // Borra las filas existentes
+
+    tableBody.innerHTML = "";
     plasticosTableBody.innerHTML = "";
 
     ingredientes.forEach(row => {
+        const precioUnitario = parseFloat(row.precio_unitario) || 0;
+        const precioTotal = row.cantidad_utilizo * precioUnitario;
+        const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
+
         const newRow = `
-            <tr data-producto="${row.producto}">
+            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
                 <td>${row.producto}</td>
                 <td>${row.ingrediente}</td>
-                <td>${parseFloat(row.precio_unitario).toFixed(2)}</td>
+                <td>${precioUnitario.toFixed(2)}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
-                <td>${(row.cantidad_utilizo * row.precio_unitario).toFixed(2)}</td>
+                <td>${precioTotal.toFixed(2)}</td>
                 <td>${row.rinde}</td>
-                <td>${((row.cantidad_utilizo * row.precio_unitario) / row.rinde).toFixed(2)}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
+                <td>${totalIngredientes}</td>
             </tr>
         `;
         tableBody.insertAdjacentHTML("beforeend", newRow);
@@ -245,20 +246,14 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
 
     plasticos.forEach(row => {
         const newRow = `
-            <tr data-producto="${row.producto}">
+            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="plasticos">
                 <td>${row.producto}</td>
                 <td>${row.tipo_plastico}</td>
                 <td>${parseFloat(row.precio_plastico).toFixed(2)}</td>
-                 <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
             </tr>
         `;
         plasticosTableBody.insertAdjacentHTML("beforeend", newRow);
     });
-    agregarEventosAcciones();
-    actualizarTotalPorPaquete(producto);
 }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
