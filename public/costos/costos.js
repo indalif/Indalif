@@ -3,27 +3,25 @@ let totalesPlasticos = {};
 document.getElementById("agregar-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto").value;
     const ingrediente = document.getElementById("ingrediente").value;
-    const cantidadBulto = parseFloat(document.getElementById("cantidad-bulto").value) || 0;
-    const precioBulto = parseFloat(document.getElementById("precio-bulto").value) || 0;
+    const precioUnitario = parseFloat(document.getElementById("precio-unitario").value) || 0;
     const cantidadKg = parseFloat(document.getElementById("cantidad-kg").value) || 0;
     const cantidadUtilizo = parseFloat(document.getElementById("cantidad-utilizo").value) || 0;
     const rinde = parseFloat(document.getElementById("rinde").value) || 1;
 
-    if (!producto || !ingrediente) {
-        alert("Por favor, selecciona un producto y un ingrediente.");
+    if (!producto || !ingrediente || precioUnitario <= 0) {
+        alert("Por favor, completa todos los campos correctamente.");
         return;
     }
-    const precioUnitario = (cantidadBulto > 0 ? precioBulto / cantidadBulto : 0).toFixed(2);
+
     const precio = (cantidadUtilizo * precioUnitario).toFixed(2);
     const totalIngredientes = (precio / rinde).toFixed(2);
+
     const ingredientesTableBody = document.getElementById("table-body");
     const newRow = `
         <tr data-producto="${producto}">
             <td>${producto}</td>
             <td>${ingrediente}</td>
-            <td>${cantidadBulto}</td>
-            <td>${precioBulto}</td>
-            <td>${precioUnitario}</td>
+            <td>${precioUnitario.toFixed(2)}</td>
             <td>${cantidadKg}</td>
             <td>${cantidadUtilizo}</td>
             <td>${precio}</td>
@@ -32,21 +30,23 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
         </tr>
     `;
     ingredientesTableBody.insertAdjacentHTML("beforeend", newRow);
+
     if (!totalesIngredientes[producto]) {
         totalesIngredientes[producto] = 0;
     }
     totalesIngredientes[producto] += parseFloat(totalIngredientes);
     actualizarTotalPorPaquete(producto);
+
     enviarDatosAlServidor({
         producto,
         ingrediente,
-        cantidad_bulto: cantidadBulto,
-        precio_bulto: precioBulto,
+        precio_unitario: precioUnitario,
         cantidad_kg: cantidadKg,
         cantidad_utilizo: cantidadUtilizo,
         rinde,
         total_ingredientes: parseFloat(totalIngredientes),
     });
+
     filtrarTablaPorProducto(producto);
     document.getElementById("ingredientes-form").reset();
 });
@@ -100,7 +100,6 @@ function filtrarTablaPorProducto(producto) {
 document.addEventListener("DOMContentLoaded", () => {
     cargarTodosLosDatos(); // Carga los datos al inicio
 });
-
 function cargarDatosProducto(producto) {
     fetch(`/obtener_costos_producto/${producto}`)
         .then(response => response.json())
@@ -110,7 +109,6 @@ function cargarDatosProducto(producto) {
         })
         .catch(error => console.error("Error al cargar datos del producto:", error));
 }
-
 function recalcularTotalesProducto(producto) {
     // Recalcular totales a partir de las filas en las tablas
     let totalIngredientes = 0;
@@ -129,7 +127,6 @@ function recalcularTotalesProducto(producto) {
 
     actualizarTotalPorPaquete(producto); // Reflejar el total recalculado
 }
-
 document.getElementById("producto").addEventListener("change", () => {
     const productoSeleccionado = document.getElementById("producto").value;
     if (productoSeleccionado) {
@@ -139,7 +136,6 @@ document.getElementById("producto").addEventListener("change", () => {
         document.getElementById("total-por-paquete").textContent = "Selecciona un producto para ver el total.";
     }
 });
-
 function enviarDatosAlServidor(datos) {
     fetch("/registrar_costos", {
         method: "POST",
@@ -204,7 +200,6 @@ function agregarEventosAcciones() {
         });
     });
 }
-
 function cargarTodosLosDatos() {
     fetch("/obtener_todos_costos")
         .then(response => response.json())
@@ -360,24 +355,18 @@ function actualizarTotalPorPaquete(producto) {
     let totalIngredientes = 0;
     let totalPlasticos = 0;
 
-    // Sumar total de ingredientes desde la tabla
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoIngrediente = parseFloat(row.children[9]?.textContent.trim()) || 0; // Índice ajustado según la columna
-        totalIngredientes += costoIngrediente;
+        totalIngredientes += parseFloat(row.children[7]?.textContent.trim()) || 0;
     });
 
-    // Sumar total de plásticos desde la tabla
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0; // Índice ajustado según la columna
-        totalPlasticos += costoPlastico;
+        totalPlasticos += parseFloat(row.children[2]?.textContent.trim()) || 0;
     });
 
-    // Calcular y mostrar el total por paquete
     const totalPaquete = totalIngredientes + totalPlasticos;
     document.getElementById("total-por-paquete").textContent =
         `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
 }
-
 function abrirModalActualizarPrecio(id, tipo, precioActual) {
     const modal = document.getElementById("modal-actualizar-precio");
     modal.style.display = "flex";    
@@ -385,7 +374,6 @@ function abrirModalActualizarPrecio(id, tipo, precioActual) {
     document.getElementById("tipo-tabla").value = tipo;
     document.getElementById("nuevo-precio").value = precioActual;
 }
-
 document.getElementById("form-actualizar-precio").addEventListener("submit", (e) => {
     e.preventDefault(); 
     const id = document.getElementById("fila-id").value;
@@ -451,7 +439,6 @@ function actualizarFilaIngredientes(fila, nuevoPrecio) {
     fila.children[7].textContent = precioTotal.toFixed(2);   
     fila.children[9].textContent = totalIngredientes;       
 }
-
 function actualizarFilaPlasticos(fila, nuevoPrecio) {
     fila.querySelector(".precio").textContent = nuevoPrecio.toFixed(2);
 }

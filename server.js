@@ -33,7 +33,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'fabricaaranda@gmail.com',
-        pass: 'tfww odff zsxy zyzp',      
+        pass: 'tfww odff zsxy zyzp',
     },
 });
 const dbModulos = mysql.createConnection({
@@ -41,7 +41,7 @@ const dbModulos = mysql.createConnection({
     user: 'root',
     password: 'laciwNIOYaUINFlnIDakqawFAeQpeNYn',
     database: 'railway',
-    port:45617
+    port: 45617
 });
 dbModulos.connect(err => {
     if (err) {
@@ -144,19 +144,16 @@ dbModulos.query(`
     console.log('Tabla productos actualizada/verificada.');
 });
 dbModulos.query(`
-    CREATE TABLE IF NOT EXISTS costos (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        producto VARCHAR(50) NOT NULL,
-        ingrediente VARCHAR(50) DEFAULT NULL,
-        cantidad_bulto DECIMAL(10, 2) DEFAULT NULL,
-        precio_bulto DECIMAL(10, 2) DEFAULT NULL,
-        cantidad_kg DECIMAL(10, 2) DEFAULT NULL,
-        cantidad_utilizo DECIMAL(10, 2) DEFAULT NULL,
-        rinde DECIMAL(10, 2) DEFAULT NULL,
-        tipo_plastico VARCHAR(50) DEFAULT NULL,
-        precio_plastico DECIMAL(10, 2) DEFAULT NULL,
-        tipo ENUM('ingrediente', 'plastico') NOT NULL,
-        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS costos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    producto VARCHAR(50) NOT NULL,
+    ingrediente VARCHAR(50) DEFAULT NULL,
+    precio_unitario DECIMAL(10, 2) NOT NULL,
+    cantidad_kg DECIMAL(10, 2) DEFAULT NULL,
+    cantidad_utilizo DECIMAL(10, 2) DEFAULT NULL,
+    rinde DECIMAL(10, 2) DEFAULT NULL,
+    tipo ENUM('ingrediente', 'plastico') NOT NULL,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
 `, (err) => {
     if (err) throw err;
@@ -293,9 +290,9 @@ app.get('/billetes', (req, res) => {
 app.put('/billetes/:id', (req, res) => {
     const { id } = req.params;
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
-   
+
     const sql = `UPDATE billetes SET billete_100 = ?, billete_200 = ?, billete_500 = ?, billete_1000 = ?, billete_2000 = ?, billete_10000 = ?, billete_20000 = ? WHERE id = ?`;
-   
+
     dbModulos.query(sql, [billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000, id], (err, result) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ message: 'Registro de billetes actualizado con éxito' });
@@ -869,28 +866,24 @@ const verificarEmpleado = (req, res, next) => {
 };
 app.post('/registrar_costos', (req, res) => {
     const {
-        producto, ingrediente, cantidad_bulto, precio_bulto,
-        cantidad_kg, cantidad_utilizo, rinde,
-        tipo_plastico, precio_plastico
+        producto, ingrediente, precio_unitario,
+        cantidad_kg, cantidad_utilizo, rinde
     } = req.body;
 
-    if (!producto) {
-        return res.status(400).json({ message: 'El campo producto es obligatorio.' });
+    if (!producto || !ingrediente || !precio_unitario) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
-
-    const tipo = ingrediente ? 'ingrediente' : 'plastico';
 
     const sql = `
         INSERT INTO costos (
-            producto, ingrediente, cantidad_bulto, precio_bulto,
-            cantidad_kg, cantidad_utilizo, rinde, 
-            tipo_plastico, precio_plastico, tipo
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            producto, ingrediente, precio_unitario,
+            cantidad_kg, cantidad_utilizo, rinde, tipo
+        ) VALUES (?, ?, ?, ?, ?, ?, 'ingrediente')
     `;
+
     dbModulos.query(sql, [
-        producto, ingrediente || null, cantidad_bulto || null, precio_bulto || null,
-        cantidad_kg || null, cantidad_utilizo || null, rinde || null,
-        tipo_plastico || null, precio_plastico || null, tipo
+        producto, ingrediente, precio_unitario,
+        cantidad_kg, cantidad_utilizo, rinde
     ], (err, result) => {
         if (err) {
             console.error('Error al registrar costos:', err.message);
@@ -903,15 +896,10 @@ app.get('/obtener_costos_producto/:producto', (req, res) => {
     const { producto } = req.params;
 
     const sqlIngredientes = `
-        SELECT id, producto, ingrediente, cantidad_bulto, precio_bulto, cantidad_kg, 
+        SELECT id, producto, ingrediente, precio_unitario, cantidad_kg, 
                cantidad_utilizo, rinde, fecha 
         FROM costos 
         WHERE tipo = 'ingrediente' AND producto = ?
-    `;
-    const sqlPlasticos = `
-        SELECT id, producto, tipo_plastico, precio_plastico, fecha 
-        FROM costos 
-        WHERE tipo = 'plastico' AND producto = ?
     `;
 
     dbModulos.query(sqlIngredientes, [producto], (err, ingredientes) => {
@@ -919,24 +907,14 @@ app.get('/obtener_costos_producto/:producto', (req, res) => {
             console.error('Error al obtener costos de ingredientes:', err.message);
             return res.status(500).json({ error: 'Error al obtener costos de ingredientes' });
         }
-
-        dbModulos.query(sqlPlasticos, [producto], (err, plasticos) => {
-            if (err) {
-                console.error('Error al obtener costos de plásticos:', err.message);
-                return res.status(500).json({ error: 'Error al obtener costos de plásticos' });
-            }
-
-            res.json({ ingredientes, plasticos });
-        });
+        res.json({ ingredientes });
     });
 });
 app.get('/total_por_paquete/:producto', (req, res) => {
     const { producto } = req.params;
 
     const sql = `
-        SELECT
-            SUM(COALESCE(precio_plastico, 0)) AS total_plasticos,
-            SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
+        SELECT SUM(precio_unitario * cantidad_utilizo / rinde) AS total_por_paquete
         FROM costos
         WHERE producto = ?
     `;
@@ -949,6 +927,24 @@ app.get('/total_por_paquete/:producto', (req, res) => {
 
         const total = results.length > 0 ? results[0].total_por_paquete || 0 : 0;
         res.json({ total_por_paquete: total });
+    });
+});
+app.put('/actualizar_costo', (req, res) => {
+    const { id, precio_unitario } = req.body;
+
+    if (!id || !precio_unitario) {
+        return res.status(400).json({ error: 'ID y precio unitario son obligatorios.' });
+    }
+
+    const query = `UPDATE costos SET precio_unitario = ? WHERE id = ?`;
+
+    dbModulos.query(query, [precio_unitario, id], (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error al actualizar el costo' });
+        } else {
+            res.json({ message: 'Costo actualizado correctamente' });
+        }
     });
 });
 app.get('/obtener_todos_costos', (req, res) => {
@@ -989,29 +985,6 @@ app.delete('/eliminar_costo/:id', (req, res) => {
         }
 
         res.json({ message: 'Costo eliminado con éxito.' });
-    });
-});
-app.put('/actualizar_costo', (req, res) => {
-    const { id, tipo, nuevoPrecio } = req.body;
-
-    // Validar tipo
-    if (!['ingredientes', 'plasticos'].includes(tipo)) {
-        return res.status(400).json({ error: 'Tipo de tabla inválido.' });
-    }
-
-    // Determinar el campo a actualizar
-    const campo = tipo === 'ingredientes' ? 'precio_bulto' : 'precio_plastico';
-
-    // Consulta SQL ajustada
-    const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
-
-    dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Error al actualizar el costo' });
-        } else {
-            res.json({ message: 'Costo actualizado correctamente' });
-        }
     });
 });
 app.post('/movimientos_materia_prima', (req, res) => {
