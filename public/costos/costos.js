@@ -222,17 +222,14 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
     tableBody.innerHTML = "";
     plasticosTableBody.innerHTML = "";
     ingredientes.forEach(row => {
-        const precioUnitario = row.cantidad_bulto > 0 ? row.precio_bulto / row.cantidad_bulto : 0;
-        const precioTotal = row.cantidad_utilizo * precioUnitario;
+        const precioTotal = row.cantidad_utilizo * row.precio_unitario;
         const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
 
         const newRow = `
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
                 <td>${row.producto}</td>
                 <td>${row.ingrediente}</td>
-                <td>${row.cantidad_bulto}</td>
-                <td class="precio">${row.precio_bulto}</td>
-                <td>${precioUnitario.toFixed(2)}</td>
+                <td>${row.precio_unitario.toFixed(2)}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
                 <td>${precioTotal.toFixed(2)}</td>
