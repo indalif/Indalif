@@ -214,7 +214,6 @@ function calculateCash() {
         cashResult.innerHTML = `<span class="text-danger">El efectivo en caja ($${totalCash.toFixed(2)}) no coincide con el total neto del día ($${netTotal.toFixed(2)}).</span>`;
     }
 }
-setInterval(calculateCash, 15000);
 function viewHistoryByDate() {
     const historyDate = document.getElementById('historyDate').value;
     if (!historyDate) {
@@ -369,4 +368,4 @@ function saveBilletes() {
     .then(data => console.log(data.message))
     .catch(error => console.error('Error al guardar billetes:', error));
 }
-setInterval(loadBilletes, 500);
+setInterval(loadBilletes, 2000);
