@@ -369,5 +369,5 @@ function calculateCash() {
         cashResult.innerHTML = `<span class="text-danger">El efectivo en caja ($${totalCash.toFixed(2)}) no coincide con el total neto del día ($${netTotal.toFixed(2)}).</span>`;
     }
 }
-setInterval(loadBilletes,0);
+setInterval(loadBilletes, 100);
 setInterval(calculateCash, 15000);
