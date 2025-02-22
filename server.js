@@ -986,6 +986,7 @@ app.get('/obtener_todos_costos', (req, res) => {
             res.json({ ingredientes, plasticos });
         });
     });
+    console.log("Ingredientes obtenidos:", ingredientes);
 });
 app.delete('/eliminar_costo/:id', (req, res) => {
     const { id } = req.params;
