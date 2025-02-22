@@ -311,10 +311,6 @@ function closeMonth() {
             alert('Hubo un error al realizar el cierre mensual.');
         });
 }
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Script cargado y DOM listo");
-    loadBilletes();
-});
 function loadBilletes() {
     fetch('/billetes')
         .then(response => response.json())
