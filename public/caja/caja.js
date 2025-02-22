@@ -312,7 +312,6 @@ function closeMonth() {
         });
 }
 let isEditing = false;
-
 function loadBilletes() {
     fetch('/billetes')
         .then(response => response.json())
@@ -330,7 +329,6 @@ function loadBilletes() {
         })
         .catch(error => console.error('Error al cargar los billetes:', error));
 }
-
 function updateTotal() {
     const bill100 = parseInt(document.getElementById('bill100').value) || 0;
     const bill200 = parseInt(document.getElementById('bill200').value) || 0;
@@ -344,7 +342,6 @@ function updateTotal() {
                   (bill1000 * 1000) + (bill2000 * 2000) + (bill10000 * 10000) + (bill20000 * 20000);
     document.getElementById('cashResult').innerText = `Total en billetes: $${total.toFixed(2)}`;
 }
-
 document.querySelectorAll('input[type=number]').forEach(input => {
     input.addEventListener('focus', () => isEditing = true);
     input.addEventListener('blur', () => {
@@ -352,7 +349,6 @@ document.querySelectorAll('input[type=number]').forEach(input => {
         saveBilletes();
     });
 });
-
 function saveBilletes() {
     const billetes = {
         billete_100: parseInt(document.getElementById('bill100').value) || 0,
@@ -373,4 +369,4 @@ function saveBilletes() {
     .then(data => console.log(data.message))
     .catch(error => console.error('Error al guardar billetes:', error));
 }
-setInterval(loadBilletes, 2000);
+setInterval(loadBilletes, 500);
