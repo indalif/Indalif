@@ -311,12 +311,11 @@ function closeMonth() {
             alert('Hubo un error al realizar el cierre mensual.');
         });
 }
-let isEditing = false;
 function loadBilletes() {
     fetch('/billetes')
         .then(response => response.json())
         .then(data => {
-            if (data && !isEditing) {
+            if (data) {
                 document.getElementById('bill100').value = data.billete_100;
                 document.getElementById('bill200').value = data.billete_200;
                 document.getElementById('bill500').value = data.billete_500;
@@ -343,9 +342,8 @@ function updateTotal() {
     document.getElementById('cashResult').innerText = `Total en billetes: $${total.toFixed(2)}`;
 }
 document.querySelectorAll('input[type=number]').forEach(input => {
-    input.addEventListener('focus', () => isEditing = true);
-    input.addEventListener('blur', () => {
-        isEditing = false;
+    input.addEventListener('input', () => {
+        updateTotal();
         saveBilletes();
     });
 });
@@ -369,3 +367,4 @@ function saveBilletes() {
     .then(data => console.log(data.message))
     .catch(error => console.error('Error al guardar billetes:', error));
 }
+setInterval(loadBilletes, 2000);
