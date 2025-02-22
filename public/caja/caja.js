@@ -4,11 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTransactionHistory();
     updateSummary(); // Se mantiene la actualización automática
     loadTransactions();
+    loadBilletes();
 });
-
 let totalIncome = 0;  
 let totalExpenses = 0;
-
 function resetDailySummary() {
     const today = new Date().toISOString().slice(0, 10); // Fecha actual en formato YYYY-MM-DD
     fetch(`/transactions/date/${today}`)
@@ -28,7 +27,6 @@ function resetDailySummary() {
             console.error('Error al reiniciar el resumen diario:', error);
         });
 }
-
 function updateSummary() {
     fetch('/summary')
         .then(response => response.json())
@@ -51,7 +49,6 @@ function updateSummary() {
         })
         .catch(error => console.error('Error al obtener el resumen:', error));
 }
-
 function addIncome() {
     const description = document.getElementById('incomeDescription').value;
     const amount = parseFloat(document.getElementById('incomeAmount').value);
@@ -114,7 +111,6 @@ function saveTransaction(transaction) {
         console.error('Error al guardar la transacción:', error);
     });
 }
-
 function updateTransactionHistory() {
     fetch('/transactions')
         .then(response => {
@@ -192,33 +188,31 @@ function closeDay() {
             alert('Hubo un error al cerrar el día.');
         });
 }
-
 function resetDailyTotals() {
     const netTotalEl = document.getElementById('netTotal');
     if (netTotalEl) netTotalEl.innerText = 'Total Neto del Día: $0.00';
     console.log('Totales diarios restablecidos a 0.');
 }
+// function calculateCash() {
+//     const bill100 = parseInt(document.getElementById('bill100').value) || 0;
+//     const bill200 = parseInt(document.getElementById('bill200').value) || 0;
+//     const bill500 = parseInt(document.getElementById('bill500').value) || 0;
+//     const bill1000 = parseInt(document.getElementById('bill1000').value) || 0;
+//     const bill2000 = parseInt(document.getElementById('bill2000').value) || 0;
+//     const bill10000 = parseInt(document.getElementById('bill10000').value) || 0;
+//     const bill20000 = parseInt(document.getElementById('bill20000').value) || 0; // Nuevo billete de 20,000
 
-function calculateCash() {
-    const bill100 = parseInt(document.getElementById('bill100').value) || 0;
-    const bill200 = parseInt(document.getElementById('bill200').value) || 0;
-    const bill500 = parseInt(document.getElementById('bill500').value) || 0;
-    const bill1000 = parseInt(document.getElementById('bill1000').value) || 0;
-    const bill2000 = parseInt(document.getElementById('bill2000').value) || 0;
-    const bill10000 = parseInt(document.getElementById('bill10000').value) || 0;
-    const bill20000 = parseInt(document.getElementById('bill20000').value) || 0; // Nuevo billete de 20,000
+//     const totalCash = (bill100 * 100) + (bill200 * 200) + (bill500 * 500) + 
+//                       (bill1000 * 1000) + (bill2000 * 2000) + (bill10000 * 10000) + (bill20000 * 20000);
 
-    const totalCash = (bill100 * 100) + (bill200 * 200) + (bill500 * 500) + 
-                      (bill1000 * 1000) + (bill2000 * 2000) + (bill10000 * 10000) + (bill20000 * 20000);
-
-    const netTotal = totalIncome - totalExpenses; 
-    const cashResult = document.getElementById('cashResult');
-    if (totalCash === netTotal) {
-        cashResult.innerHTML = `<span class="text-success">El efectivo en caja coincide con el total neto del día: $${totalCash.toFixed(2)}</span>`;
-    } else {
-        cashResult.innerHTML = `<span class="text-danger">El efectivo en caja ($${totalCash.toFixed(2)}) no coincide con el total neto del día ($${netTotal.toFixed(2)}).</span>`;
-    }
-}
+//     const netTotal = totalIncome - totalExpenses; 
+//     const cashResult = document.getElementById('cashResult');
+//     if (totalCash === netTotal) {
+//         cashResult.innerHTML = `<span class="text-success">El efectivo en caja coincide con el total neto del día: $${totalCash.toFixed(2)}</span>`;
+//     } else {
+//         cashResult.innerHTML = `<span class="text-danger">El efectivo en caja ($${totalCash.toFixed(2)}) no coincide con el total neto del día ($${netTotal.toFixed(2)}).</span>`;
+//     }
+// }
 function viewHistoryByDate() {
     const historyDate = document.getElementById('historyDate').value;
     if (!historyDate) {
@@ -316,4 +310,63 @@ function closeMonth() {
             console.error('Error al obtener las transacciones para el cierre mensual:', error);
             alert('Hubo un error al realizar el cierre mensual.');
         });
+}
+function loadBilletes() {
+    fetch('/billetes')
+        .then(response => response.json())
+        .then(data => {
+            if (data) {
+                document.getElementById('bill100').value = data.billete_100;
+                document.getElementById('bill200').value = data.billete_200;
+                document.getElementById('bill500').value = data.billete_500;
+                document.getElementById('bill1000').value = data.billete_1000;
+                document.getElementById('bill2000').value = data.billete_2000;
+                document.getElementById('bill10000').value = data.billete_10000;
+                document.getElementById('bill20000').value = data.billete_20000;
+                updateTotal();
+            }
+        })
+        .catch(error => console.error('Error al cargar los billetes:', error));
+}
+function updateTotal() {
+    const bill100 = parseInt(document.getElementById('bill100').value) || 0;
+    const bill200 = parseInt(document.getElementById('bill200').value) || 0;
+    const bill500 = parseInt(document.getElementById('bill500').value) || 0;
+    const bill1000 = parseInt(document.getElementById('bill1000').value) || 0;
+    const bill2000 = parseInt(document.getElementById('bill2000').value) || 0;
+    const bill10000 = parseInt(document.getElementById('bill10000').value) || 0;
+    const bill20000 = parseInt(document.getElementById('bill20000').value) || 0;
+
+    const total = (bill100 * 100) + (bill200 * 200) + (bill500 * 500) +
+                  (bill1000 * 1000) + (bill2000 * 2000) + (bill10000 * 10000) + (bill20000 * 20000);
+    document.getElementById('cashResult').innerText = `Total en billetes: $${total.toFixed(2)}`;
+}
+
+document.querySelectorAll('input[type=number]').forEach(input => {
+    input.addEventListener('input', () => {
+        updateTotal();
+        saveBilletes();
+    });
+});
+function saveBilletes() {
+    const billetes = {
+        billete_100: parseInt(document.getElementById('bill100').value) || 0,
+        billete_200: parseInt(document.getElementById('bill200').value) || 0,
+        billete_500: parseInt(document.getElementById('bill500').value) || 0,
+        billete_1000: parseInt(document.getElementById('bill1000').value) || 0,
+        billete_2000: parseInt(document.getElementById('bill2000').value) || 0,
+        billete_10000: parseInt(document.getElementById('bill10000').value) || 0,
+        billete_20000: parseInt(document.getElementById('bill20000').value) || 0
+    };
+
+    fetch('/billetes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(billetes)
+    })
+    .then(response => response.json())
+    .then(data => console.log(data.message))
+    .catch(error => console.error('Error al guardar billetes:', error));
 }

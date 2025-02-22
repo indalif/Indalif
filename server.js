@@ -246,6 +246,64 @@ dbModulos.query(`
     if (err) throw err;
     console.log('Tabla de mercaderiaClientes verificada/creada.');
 });
+dbModulos.query(`
+    CREATE TABLE IF NOT EXISTS billetes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        billete_100 INT DEFAULT 0,
+        billete_200 INT DEFAULT 0,
+        billete_500 INT DEFAULT 0,
+        billete_1000 INT DEFAULT 0,
+        billete_2000 INT DEFAULT 0,
+        billete_10000 INT DEFAULT 0,
+        billete_20000 INT DEFAULT 0,
+        total DECIMAL(10, 2) GENERATED ALWAYS AS (
+            billete_100 * 100 +
+            billete_200 * 200 +
+            billete_500 * 500 +
+            billete_1000 * 1000 +
+            billete_2000 * 2000 +
+            billete_10000 * 10000 +
+            billete_20000 * 20000
+        ) STORED
+    )
+`, (err) => {
+    if (err) throw err;
+    console.log('Tabla de billetes verificada/creada.');
+});
+// Endpoint para actualizar la cantidad de billetes
+app.post('/billetes', (req, res) => {
+    const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
+   
+    const sql = `INSERT INTO billetes (billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
+   
+    dbModulos.query(sql, [billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id: result.insertId, message: 'Registro de billetes agregado con éxito' });
+    });
+});
+
+// Endpoint para obtener el total de billetes registrados
+app.get('/billetes', (req, res) => {
+    const sql = 'SELECT * FROM billetes ORDER BY id DESC LIMIT 1';
+    dbModulos.query(sql, (err, rows) => {
+        if (err) return res.status(400).json({ error: err.message });
+        res.json(rows[0]);
+    });
+});
+
+// Endpoint para actualizar las cantidades de billetes existentes
+app.put('/billetes/:id', (req, res) => {
+    const { id } = req.params;
+    const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
+   
+    const sql = `UPDATE billetes SET billete_100 = ?, billete_200 = ?, billete_500 = ?, billete_1000 = ?, billete_2000 = ?, billete_10000 = ?, billete_20000 = ? WHERE id = ?`;
+   
+    dbModulos.query(sql, [billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000, id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'Registro de billetes actualizado con éxito' });
+    });
+});
 app.post('/mercaderiaCliente', (req, res) => {
     const { idCliente, descripcion, cantidad, precio, fecha } = req.body;
 
