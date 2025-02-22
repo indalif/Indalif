@@ -953,7 +953,7 @@ app.get('/obtener_todos_costos', (req, res) => {
             id,
             producto,
             ingrediente,
-            precio_unitario,
+            CAST(precio_unitario AS DECIMAL(10,2)) AS precio_unitario,
             cantidad_kg,
             cantidad_utilizo,
             rinde
@@ -972,7 +972,7 @@ app.get('/obtener_todos_costos', (req, res) => {
                 id,
                 producto,
                 tipo_plastico,
-                precio_plastico
+                CAST(precio_plastico AS DECIMAL(10,2)) AS precio_plastico
             FROM costos
             WHERE tipo = 'plastico'
         `;

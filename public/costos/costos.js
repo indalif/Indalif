@@ -221,44 +221,42 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
     const plasticosTableBody = document.getElementById("plasticos-table-body");
     tableBody.innerHTML = "";
     plasticosTableBody.innerHTML = "";
+
+    if (!Array.isArray(ingredientes) || !Array.isArray(plasticos)) {
+        console.error("Los datos no tienen la estructura esperada:", { ingredientes, plasticos });
+        return;
+    }
+
     ingredientes.forEach(row => {
-        const precioTotal = row.cantidad_utilizo * row.precio_unitario;
+        const precioUnitario = parseFloat(row.precio_unitario) || 0; // Asegurar número
+        const precioTotal = row.cantidad_utilizo * precioUnitario;
         const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
 
         const newRow = `
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
                 <td>${row.producto}</td>
                 <td>${row.ingrediente}</td>
-                <td>${row.precio_unitario.toFixed(2)}</td>
+                <td>${precioUnitario.toFixed(2)}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
                 <td>${precioTotal.toFixed(2)}</td>
                 <td>${row.rinde}</td>
                 <td>${totalIngredientes}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
             </tr>
         `;
         tableBody.insertAdjacentHTML("beforeend", newRow);
     });
+
     plasticos.forEach(row => {
         const newRow = `
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="plasticos">
                 <td>${row.producto}</td>
                 <td>${row.tipo_plastico}</td>
                 <td class="precio">${parseFloat(row.precio_plastico).toFixed(2)}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
             </tr>
         `;
         plasticosTableBody.insertAdjacentHTML("beforeend", newRow);
     });
-    agregarEventosAcciones();
-    actualizarTotalPorPaquete(producto);
 }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
