@@ -946,20 +946,15 @@ app.get('/total_por_paquete/:producto', (req, res) => {
     });
 });
 app.put('/actualizar_costo', (req, res) => {
-    const { id, tipo, nuevoPrecio } = req.body;
+    const { id, precio_unitario } = req.body;
 
-    // Validar tipo
-    if (!['ingredientes', 'plasticos'].includes(tipo)) {
-        return res.status(400).json({ error: 'Tipo de tabla inválido.' });
+    if (!id || !precio_unitario) {
+        return res.status(400).json({ error: 'ID y precio unitario son obligatorios.' });
     }
 
-    // Determinar el campo a actualizar
-    const campo = tipo === 'ingredientes' ? 'precio_unitario' : 'precio_plastico';
+    const query = `UPDATE costos SET precio_unitario = ? WHERE id = ?`;
 
-    // Consulta SQL ajustada
-    const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
-
-    dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
+    dbModulos.query(query, [precio_unitario, id], (err, result) => {
         if (err) {
             console.error(err);
             res.status(500).json({ error: 'Error al actualizar el costo' });
