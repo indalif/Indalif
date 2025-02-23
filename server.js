@@ -7,7 +7,6 @@ const bcrypt = require('bcrypt');
 const PORT = process.env.PORT || 3000;
 const path = require('path');
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,10 +24,7 @@ app.use((err, req, res, next) => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login', 'login.html'));
 });
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Error interno del servidor' });
-});
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -36,20 +32,49 @@ const transporter = nodemailer.createTransport({
         pass: 'tfww odff zsxy zyzp',
     },
 });
-const dbModulos = mysql.createConnection({
+
+const dbModulos = mysql.createPool({
     host: 'monorail.proxy.rlwy.net',
     user: 'root',
     password: 'laciwNIOYaUINFlnIDakqawFAeQpeNYn',
     database: 'railway',
-    port: 45617
+    port: 45617,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
-dbModulos.connect(err => {
+dbModulos.getConnection((err, connection) => {
     if (err) {
-        console.error('Error connecting to MySQL:', err);
+        console.error('Error al conectar a MySQL:', err);
         process.exit(1);
     }
     console.log('Conectado a la base de datos MySQL (aranda_db)');
+    connection.release(); // Liberar conexión al pool
 });
+function handleDisconnect() {
+    dbModulos.getConnection((err, connection) => {
+        if (err) {
+            console.error('Error al intentar reconectar a MySQL:', err);
+            setTimeout(handleDisconnect, 2000); // Reintentar conexión tras 2 segundos
+        } else {
+            console.log('Reconectado a la base de datos MySQL');
+            connection.release();
+        }
+    });
+}
+dbModulos.on('error', err => {
+    console.error('Error en la base de datos:', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+        handleDisconnect(); // Reconexión
+    } else {
+        throw err;
+    }
+});
+setInterval(() => {
+    dbModulos.query('SELECT 1', (err) => {
+        if (err) console.error('Error en consulta de keep-alive:', err);
+    });
+}, 5000); // Consulta cada 5 segundos
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS usuarios (
         id INT AUTO_INCREMENT PRIMARY KEY,
