@@ -112,22 +112,21 @@ function cargarDatosProducto(producto) {
         .catch(error => console.error("Error al cargar datos del producto:", error));
 }
 function recalcularTotalesProducto(producto) {
-    // Recalcular totales a partir de las filas en las tablas
     let totalIngredientes = 0;
     let totalPlasticos = 0;
-
+    
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        totalIngredientes += parseFloat(row.children[9]?.textContent.trim()) || 0;
+        const total = parseFloat(row.children[7]?.textContent.trim()) || 0;
+        totalIngredientes += total;
     });
 
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        totalPlasticos += parseFloat(row.children[2]?.textContent.trim()) || 0;
+        const total = parseFloat(row.children[2]?.textContent.trim()) || 0;
+        totalPlasticos += total;
     });
-
-    totalesIngredientes[producto] = totalIngredientes;
-    totalesPlasticos[producto] = totalPlasticos;
-
-    actualizarTotalPorPaquete(producto); // Reflejar el total recalculado
+    
+    const totalPaquete = totalIngredientes + totalPlasticos;
+    document.getElementById("total-por-paquete").textContent = `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
 }
 document.getElementById("producto").addEventListener("change", () => {
     const productoSeleccionado = document.getElementById("producto").value;

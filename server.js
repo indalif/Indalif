@@ -891,40 +891,29 @@ const verificarEmpleado = (req, res, next) => {
     }
     next();
 };
-app.post('/registrar_costos', (req, res) => {
-    console.log("Datos recibidos en el backend:", req.body); // Debug
-
-    const {
-        producto, ingrediente, precio_unitario, cantidad_kg,
-        cantidad_utilizo, rinde, tipo, tipo_plastico, precio_plastico
-    } = req.body;
-
-    let sql, params;
-
-    if (tipo === 'ingrediente') {
-        sql = `
-            INSERT INTO costos (producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, tipo)
-            VALUES (?, ?, ?, ?, ?, ?, 'ingrediente')
-        `;
-        params = [producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde];
-    } else if (tipo === 'plastico') {
-        sql = `
-            INSERT INTO costos (producto, tipo_plastico, precio_plastico, tipo)
-            VALUES (?, ?, ?, 'plastico')
-        `;
-        params = [producto, tipo_plastico, precio_plastico];
-    } else {
-        return res.status(400).json({ message: 'Tipo inválido' });
-    }
-
-    dbModulos.query(sql, params, (err, result) => {
-        if (err) {
-            console.error('Error al registrar costos:', err.message);
-            return res.status(500).json({ error: 'Error al registrar costos' });
+app.post('/registrar_costos', async (req, res) => {
+    try {
+        const { producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, tipo, tipo_plastico, precio_plastico } = req.body;
+        let sql, params;
+        
+        if (tipo === 'ingrediente') {
+            sql = `INSERT INTO costos (producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, tipo)
+                   VALUES (?, ?, ?, ?, ?, ?, 'ingrediente')`;
+            params = [producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde];
+        } else if (tipo === 'plastico') {
+            sql = `INSERT INTO costos (producto, tipo_plastico, precio_plastico, tipo)
+                   VALUES (?, ?, ?, 'plastico')`;
+            params = [producto, tipo_plastico, precio_plastico];
+        } else {
+            return res.status(400).json({ message: 'Tipo inválido' });
         }
-        console.log("Costo registrado en la base de datos:", result.insertId);
+        
+        const [result] = await dbModulos.query(sql, params);
         res.json({ id: result.insertId, message: 'Costo registrado con éxito' });
-    });
+    } catch (err) {
+        console.error('Error al registrar costos:', err.message);
+        res.status(500).json({ error: 'Error al registrar costos' });
+    }
 });
 app.get('/obtener_costos_producto/:producto', (req, res) => {
     const { producto } = req.params;
@@ -982,23 +971,25 @@ app.get('/total_por_paquete/:producto', (req, res) => {
         res.json({ total_por_paquete: total });
     });
 });
-app.put('/actualizar_costo', (req, res) => {
-    const { id, precio_unitario } = req.body;
-
-    if (!id || !precio_unitario) {
-        return res.status(400).json({ error: 'ID y precio unitario son obligatorios.' });
-    }
-
-    const query = `UPDATE costos SET precio_unitario = ? WHERE id = ?`;
-
-    dbModulos.query(query, [precio_unitario, id], (err, result) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Error al actualizar el costo' });
+app.put('/actualizar_costo', async (req, res) => {
+    try {
+        const { id, tipo, nuevoPrecio } = req.body;
+        let sql;
+        if (tipo === 'ingrediente') {
+            sql = `UPDATE costos SET precio_unitario = ? WHERE id = ?`;
+        } else if (tipo === 'plastico') {
+            sql = `UPDATE costos SET precio_plastico = ? WHERE id = ?`;
         } else {
-            res.json({ message: 'Costo actualizado correctamente' });
+            return res.status(400).json({ error: 'Tipo inválido.' });
         }
-    });
+        
+        const [result] = await dbModulos.query(sql, [nuevoPrecio, id]);
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Registro no encontrado.' });
+        res.json({ message: 'Costo actualizado correctamente' });
+    } catch (err) {
+        console.error('Error al actualizar el costo:', err.message);
+        res.status(500).json({ error: 'Error al actualizar el costo' });
+    }
 });
 app.get('/obtener_todos_costos', (req, res) => {
     const sql = `
