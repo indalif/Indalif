@@ -181,7 +181,6 @@ CREATE TABLE IF NOT EXISTS costos (
     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     tipo_plastico VARCHAR(50) DEFAULT NULL,
     precio_plastico DECIMAL(10,2) DEFAULT NULL
-
     )
 `, (err) => {
     if (err) throw err;
@@ -893,6 +892,8 @@ const verificarEmpleado = (req, res, next) => {
     next();
 };
 app.post('/registrar_costos', (req, res) => {
+    console.log("Datos recibidos en el backend:", req.body); // Debug
+
     const {
         producto, ingrediente, precio_unitario, cantidad_kg,
         cantidad_utilizo, rinde, tipo, tipo_plastico, precio_plastico
@@ -921,6 +922,7 @@ app.post('/registrar_costos', (req, res) => {
             console.error('Error al registrar costos:', err.message);
             return res.status(500).json({ error: 'Error al registrar costos' });
         }
+        console.log("Costo registrado en la base de datos:", result.insertId);
         res.json({ id: result.insertId, message: 'Costo registrado con éxito' });
     });
 });

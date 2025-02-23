@@ -138,6 +138,7 @@ document.getElementById("producto").addEventListener("change", () => {
     }
 });
 function enviarDatosAlServidor(datos) {
+    console.log("Enviando datos al servidor:", datos); // Debug
     fetch("/registrar_costos", {
         method: "POST",
         headers: {
@@ -145,19 +146,20 @@ function enviarDatosAlServidor(datos) {
         },
         body: JSON.stringify(datos),
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error("Error al registrar costos:", data.error);
-                alert("Hubo un error al registrar los costos.");
-            } else {
-                console.log("Costo registrado con éxito:", data);
-            }
-        })
-        .catch(error => {
-            console.error("Error al conectarse con el servidor:", error);
-            alert("No se pudo conectar con el servidor.");
-        });
+    .then(response => response.json())
+    .then(data => {
+        console.log("Respuesta del servidor:", data); // Debug
+        if (data.error) {
+            console.error("Error al registrar costos:", data.error);
+            alert("Hubo un error al registrar los costos.");
+        } else {
+            console.log("Costo registrado con éxito:", data);
+        }
+    })
+    .catch(error => {
+        console.error("Error al conectarse con el servidor:", error);
+        alert("No se pudo conectar con el servidor.");
+    });
 }
 function agregarEventosAcciones() {
     document.querySelectorAll(".edit-btn").forEach(btn => {
