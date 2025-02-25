@@ -175,16 +175,39 @@ document.getElementById('nombreCliente').addEventListener('input', function (eve
 cargarClientes();
 
 function abrirPlazosPago(idCliente) {
-    clienteActivoId = idCliente; 
+    clienteActivoId = idCliente;
     const modal = new bootstrap.Modal(document.getElementById('plazosPagoModal'));
-    document.getElementById('plazosPagoForm').reset(); 
-    document.getElementById('plazosPagoTabla').innerHTML = ''; 
-    cargarPlazosPago(idCliente); 
+    document.getElementById('plazosPagoForm').reset();
+    document.getElementById('plazosPagoTabla').innerHTML = '';
+    cargarPlazosPago(idCliente);
     modal.show();
     document.getElementById('plazosPagoForm').onsubmit = function (e) {
         e.preventDefault();
         guardarPlazosPago(idCliente);
     };
+}
+function guardarPlazosPago(idCliente) {
+    const formaPago = document.getElementById('formaPago').value;
+    const totalPagar = document.getElementById('totalPagar').value;
+    const fechaPago = document.getElementById('fechaPago').value;
+    const fechaEmision = document.getElementById('fechaEmision').value;
+    const pago = document.getElementById('pago').value || null;
+    const numeroComprobante = document.getElementById('numeroComprobante').value || null;
+
+    fetch(`/plazos-pago`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idCliente, formaPago, totalPagar, fecha: fechaPago, pago, numeroComprobante, fechaEmision })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Error al guardar plazo de pago');
+        return response.json();
+    })
+    .then(() => {
+        document.getElementById('plazosPagoForm').reset();
+        cargarPlazosPago(idCliente);
+    })
+    .catch(error => console.error('Error al guardar plazos de pago:', error));
 }
 function cargarPlazosPago(idCliente) {
     fetch(`/plazos-pago/${idCliente}`)
@@ -198,7 +221,7 @@ function cargarPlazosPago(idCliente) {
             let totalDeuda = 0;
 
             if (data.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="8">No se encontraron registros</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="9">No se encontraron registros</td></tr>';
                 document.getElementById('totalDeuda').textContent = '0.00';
                 return;
             }
@@ -214,6 +237,7 @@ function cargarPlazosPago(idCliente) {
                     <tr>
                         <td>${plazo.formaPago}</td>
                         <td>${total.toFixed(2)}</td>
+                        <td>${new Date(plazo.fechaEmision).toLocaleDateString('es-ES')}</td>
                         <td>${new Date(plazo.fecha).toLocaleDateString('es-ES')}</td>
                         <td>${pago.toFixed(2)}</td>
                         <td>${plazo.numeroComprobante || '-'}</td>
@@ -232,28 +256,6 @@ function cargarPlazosPago(idCliente) {
             document.getElementById('totalDeuda').textContent = totalDeuda.toFixed(2);
         })
         .catch(error => console.error('Error al cargar plazos de pago:', error));
-}
-function guardarPlazosPago(idCliente) {
-    const formaPago = document.getElementById('formaPago').value;
-    const totalPagar = document.getElementById('totalPagar').value;
-    const fechaPago = document.getElementById('fechaPago').value;
-    const pago = document.getElementById('pago').value || null;
-    const numeroComprobante = document.getElementById('numeroComprobante').value || null;
-
-    fetch(`/plazos-pago`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idCliente, formaPago, totalPagar, fecha: fechaPago, pago, numeroComprobante })
-    })
-        .then(response => {
-            if (!response.ok) throw new Error('Error al guardar plazo de pago');
-            return response.json();
-        })
-        .then(() => {
-            document.getElementById('plazosPagoForm').reset();
-            cargarPlazosPago(idCliente);
-        })
-        .catch(error => console.error('Error al guardar plazos de pago:', error));
 }
 function registrarPago(idPlazo, montoPago) {
     console.log('Datos recibidos para registrar el pago:', { idPlazo, montoPago });

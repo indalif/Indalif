@@ -244,7 +244,8 @@ dbModulos.query(`
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS plazos_pago (
         idPlazo INT AUTO_INCREMENT PRIMARY KEY,
-        idCliente INT NOT NULL,
+        idCliente INT NOT NULL, 
+        fechaEmision DATE,
         formaPago VARCHAR(255) NOT NULL,
         totalPagar DECIMAL(10, 2) NOT NULL,
         fecha DATE NOT NULL,
@@ -445,17 +446,17 @@ app.delete('/mercaderiaCliente/:id', (req, res) => {
     });
 });
 app.post('/plazos-pago', (req, res) => {
-    const { idCliente, formaPago, totalPagar, fecha, pago, numeroComprobante } = req.body;
+    const { idCliente, formaPago, totalPagar, fecha, pago, numeroComprobante, fechaEmision } = req.body;
 
-    if (!idCliente || !formaPago || !totalPagar || !fecha) {
-        return res.status(400).json({ message: 'Los campos idCliente, formaPago, totalPagar, fecha son obligatorios.' });
+    if (!idCliente || !formaPago || !totalPagar || !fecha || !fechaEmision) {
+        return res.status(400).json({ message: 'Todos los campos obligatorios deben ser completados.' });
     }
 
     const sql = `
-        INSERT INTO plazos_pago (idCliente, formaPago, totalPagar, fecha, pago, numeroComprobante)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO plazos_pago (idCliente, fechaEmision, formaPago, totalPagar, fecha, pago, numeroComprobante)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    dbModulos.query(sql, [idCliente, formaPago, totalPagar, fecha, pago, numeroComprobante], (err, result) => {
+    dbModulos.query(sql, [idCliente, fechaEmision, formaPago, totalPagar, fecha, pago, numeroComprobante], (err, result) => {
         if (err) {
             console.error('Error al guardar plazo de pago:', err);
             return res.status(500).json({ message: 'Error al guardar plazo de pago.' });
@@ -467,7 +468,7 @@ app.get('/plazos-pago/:idCliente', (req, res) => {
     const { idCliente } = req.params;
 
     const sql = `
-        SELECT idPlazo, formaPago, totalPagar, fecha, pago, numeroComprobante
+        SELECT idPlazo, fechaEmision, formaPago, totalPagar, fecha, pago, numeroComprobante
         FROM plazos_pago
         WHERE idCliente = ?
     `;
