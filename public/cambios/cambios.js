@@ -2,9 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("cambios-form");
     const tablaCambios = document.getElementById("tabla-cambios");
     const clienteSelect = document.getElementById("cliente");
-
     let editId = null;
-
     async function cargarClientes() {
         try {
             const response = await fetch('/clientes');
@@ -21,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al cargar los clientes:", error);
         }
     }
-
     async function fetchCambios() {
         try {
             const response = await fetch('/traer_cambios');
@@ -29,11 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tablaCambios.innerHTML = '';
             cambios.forEach(cambio => {
-                const fechaFormatted = new Date(cambio.fecha).toLocaleDateString('es-ES');
+                const fechaFormatted = new Date(cambio.fecha).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' });
                 const fechaVencimientoFormatted = cambio.fecha_vencimiento
-                    ? new Date(cambio.fecha_vencimiento).toLocaleDateString('es-ES')
+                    ? new Date(cambio.fecha_vencimiento).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
                     : '';
-
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
                     <td>${cambio.producto}</td>
@@ -62,29 +58,34 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al obtener los cambios:", error);
         }
     }
-
     function handleEdit(event) {
         const id = event.target.dataset.id;
         const fila = event.target.closest("tr");
-
-        const [producto, cantidad, precio, fecha, lote, fechaVencimiento, descripcion, cliente] =
-            Array.from(fila.children).map(td => td.textContent);
-
+    
+        const celdas = Array.from(fila.children);
+    
+        const producto = celdas[0].textContent;
+        const cantidad = celdas[1].textContent;
+        const precio = celdas[2].textContent;
+        const fecha = celdas[4].textContent;
+        const lote = celdas[5].textContent;
+        const fechaVencimiento = celdas[6].textContent;
+        const descripcion = celdas[7].textContent;
+        const cliente = celdas[8].textContent;
+    
         document.getElementById("producto").value = producto;
         document.getElementById("cantidad").value = cantidad;
-        document.getElementById("precio").value = precio; // Llenar precio en el formulario
+        document.getElementById("precio").value = precio;
         document.getElementById("fecha").value = fecha.split('/').reverse().join('-');
         document.getElementById("lote").value = lote;
         document.getElementById("fechaVencimiento").value = fechaVencimiento ? fechaVencimiento.split('/').reverse().join('-') : '';
         document.getElementById("descripcion").value = descripcion;
         document.getElementById("cliente").value = cliente;
-
+    
         editId = id;
-    }
-
+    }    
     async function handleDelete(event) {
         const id = event.target.dataset.id;
-
         if (confirm("¿Está seguro de que desea eliminar este cambio?")) {
             try {
                 const response = await fetch(`/cambios/${id}`, { method: 'DELETE' });
@@ -100,10 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
-
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
-
         const producto = document.getElementById("producto").value;
         const cantidad = parseInt(document.getElementById("cantidad").value, 10);
         const precio = parseFloat(document.getElementById("precio").value);
@@ -112,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const fechaVencimiento = document.getElementById("fechaVencimiento").value;
         const descripcion = document.getElementById("descripcion").value;
         const cliente = document.getElementById("cliente").value;
-
         const cambioData = {
             producto,
             cantidad,
@@ -152,7 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al guardar el cambio:", error);
         }
     });
-
     cargarClientes();
     fetchCambios();
 });
