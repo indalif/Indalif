@@ -33,15 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const cambios = await response.json();
 
             tablaCambios.innerHTML = '';
+            console.log("Fecha original:", cambio.fecha);
+            console.log("Fecha vencimiento original:", cambio.fecha_vencimiento);
             cambios.forEach(cambio => {
-                const fechaFormatted = parseFecha(cambio.fecha)
-                    ? parseFecha(cambio.fecha).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
+                const fechaFormatted = cambio.fecha
+                    ? new Date(cambio.fecha).toISOString().split('T')[0].split('-').reverse().join('/')
                     : '';
-
-                const fechaVencimientoFormatted = parseFecha(cambio.fecha_vencimiento)
-                    ? parseFecha(cambio.fecha_vencimiento).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
+                const fechaVencimientoFormatted = cambio.fecha_vencimiento
+                    ? new Date(cambio.fecha_vencimiento).toISOString().split('T')[0].split('-').reverse().join('/')
                     : '';
-
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
                     <td>${cambio.producto}</td>
