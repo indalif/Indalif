@@ -39,8 +39,9 @@ document.getElementById('agregarProducto').addEventListener('click', function ()
     li.textContent = `${producto} - Cantidad: ${cantidad} - Presentación: ${presentacion}`;
     listaProductos.appendChild(li);
 });
-document.getElementById('notaPedidoForm').addEventListener('submit', function (event) {
+document.getElementById('notaPedidoForm').addEventListener('submit', async function (event) {
     event.preventDefault();
+
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
     const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
@@ -52,39 +53,45 @@ document.getElementById('notaPedidoForm').addEventListener('submit', function (e
         return;
     }
 
-    fetch('/notas-pedido', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
-    })
-        .then(response => response.json())
-        .then(data => {
-            alert('Nota de pedido guardada con éxito!');
-            cargarNotas();
-        
-            // Limpiar los campos de resumen
-            document.getElementById('resCliente').textContent = '';
-            document.getElementById('resFecha').textContent = '';
-            document.getElementById('resFechaEntrega').textContent = '';
-            document.getElementById('resNumeroNota').textContent = '';
-            document.getElementById('resListaProductos').innerHTML = '';
-        
-            document.getElementById('notaVisual').style.display = 'none'; // Ocultar la vista previa
-        
-            // ✅ Limpiar formulario manualmente
-            document.getElementById('numero_nota').value = '';
-            document.getElementById('cliente').value = '';
-            document.getElementById('fecha').value = '';
-            document.getElementById('fecha_entrega').value = '';
-            document.getElementById('producto').value = '';
-            document.getElementById('cantidad').value = '';
-            document.getElementById('presentacion').value = '';
-        
-            // ✅ Limpiar la lista de productos
-            productosLista = [];
-            document.getElementById('listaProductos').innerHTML = '';            
-        })        
-        .catch(error => console.error('Error:', error));
+    try {
+        const response = await fetch('/notas-pedido', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
+        });
+
+        if (!response.ok) throw new Error('Error al guardar la nota de pedido.');
+
+        const data = await response.json();
+        alert('Nota de pedido guardada con éxito!');
+        cargarNotas();
+
+        // LIMPIAR FORMULARIO 🔥
+        console.log('Limpiando formulario...');
+        document.getElementById('notaPedidoForm').reset(); // Intenta primero con reset()
+
+        // Si reset() no funciona, limpiar manualmente
+        document.getElementById('numero_nota').value = '';
+        document.getElementById('cliente').value = '';
+        document.getElementById('fecha').value = '';
+        document.getElementById('fecha_entrega').value = '';
+        document.getElementById('producto').value = '';
+        document.getElementById('cantidad').value = '';
+        document.getElementById('presentacion').value = '';
+
+        // Limpiar la lista de productos
+        productosLista = [];
+        document.getElementById('listaProductos').innerHTML = '';
+
+        // Ocultar la nota visual
+        document.getElementById('notaVisual').style.display = 'none';
+
+        console.log('Formulario limpio.');
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Hubo un error al guardar la nota.');
+    }
 });
 function imprimirNota(button) {
     let notaDiv = button.parentElement;
