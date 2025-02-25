@@ -62,27 +62,27 @@ document.getElementById('notaPedidoForm').addEventListener('submit', function (e
             alert('Nota de pedido guardada con éxito!');
             cargarNotas();
         
-            document.getElementById('resCliente').textContent = clienteNombre;
-            document.getElementById('resFecha').textContent = fecha;
-            document.getElementById('resFechaEntrega').textContent = fechaEntrega;
-            document.getElementById('resNumeroNota').textContent = numero_nota;
+            // Limpiar los campos de resumen
+            document.getElementById('resCliente').textContent = '';
+            document.getElementById('resFecha').textContent = '';
+            document.getElementById('resFechaEntrega').textContent = '';
+            document.getElementById('resNumeroNota').textContent = '';
+            document.getElementById('resListaProductos').innerHTML = '';
         
-            const listaProductos = document.getElementById('resListaProductos');
-            listaProductos.innerHTML = '';
-            productosLista.forEach(p => {
-                let li = document.createElement('li');
-                li.classList.add('list-group-item');
-                li.textContent = `${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion}`;
-                listaProductos.appendChild(li);
-            });
+            document.getElementById('notaVisual').style.display = 'none'; // Ocultar la vista previa
         
-            document.getElementById('notaVisual').style.display = 'block';
+            // ✅ Limpiar formulario manualmente
+            document.getElementById('numero_nota').value = '';
+            document.getElementById('cliente').value = '';
+            document.getElementById('fecha').value = '';
+            document.getElementById('fecha_entrega').value = '';
+            document.getElementById('producto').value = '';
+            document.getElementById('cantidad').value = '';
+            document.getElementById('presentacion').value = '';
         
-            // ✅ Limpiar el formulario
-            document.getElementById('notaPedidoForm').reset();
+            // ✅ Limpiar la lista de productos
             productosLista = [];
-            document.getElementById('listaProductos').innerHTML = '';
-        
+            document.getElementById('listaProductos').innerHTML = '';            
         })        
         .catch(error => console.error('Error:', error));
 });
