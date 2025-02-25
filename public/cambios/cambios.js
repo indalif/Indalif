@@ -26,10 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tablaCambios.innerHTML = '';
             cambios.forEach(cambio => {
-                const fechaFormatted = new Date(cambio.fecha).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' });
+                const fechaFormatted = new Date(cambio.fecha + 'T00:00:00').toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' });
                 const fechaVencimientoFormatted = cambio.fecha_vencimiento
-                    ? new Date(cambio.fecha_vencimiento).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
+                    ? new Date(cambio.fecha_vencimiento + 'T00:00:00').toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
                     : '';
+
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
                     <td>${cambio.producto}</td>
@@ -61,9 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleEdit(event) {
         const id = event.target.dataset.id;
         const fila = event.target.closest("tr");
-    
+
         const celdas = Array.from(fila.children);
-    
+
         const producto = celdas[0].textContent;
         const cantidad = celdas[1].textContent;
         const precio = celdas[2].textContent;
@@ -72,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const fechaVencimiento = celdas[6].textContent;
         const descripcion = celdas[7].textContent;
         const cliente = celdas[8].textContent;
-    
+
         document.getElementById("producto").value = producto;
         document.getElementById("cantidad").value = cantidad;
         document.getElementById("precio").value = precio;
@@ -81,9 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("fechaVencimiento").value = fechaVencimiento ? fechaVencimiento.split('/').reverse().join('-') : '';
         document.getElementById("descripcion").value = descripcion;
         document.getElementById("cliente").value = cliente;
-    
+
         editId = id;
-    }    
+    }
     async function handleDelete(event) {
         const id = event.target.dataset.id;
         if (confirm("¿Está seguro de que desea eliminar este cambio?")) {
