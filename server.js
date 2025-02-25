@@ -294,6 +294,71 @@ dbModulos.query(`
     if (err) throw err;
     console.log('Tabla de billetes verificada/creada.');
 });
+dbModulos.query(`
+    CREATE TABLE IF NOT EXISTS notas_pedido (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero_nota VARCHAR(50) NOT NULL,
+    cliente_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    fecha_entrega DATE NOT NULL,
+    productos JSON NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);
+`, (err) => {
+    if (err) throw err;
+    console.log('Tabla de notas_pedido verificada/creada.');
+});
+app.post('/notas-pedido', (req, res) => {
+    const { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
+
+    if (!Array.isArray(productos)) {
+        return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
+    }
+
+    const productosJSON = JSON.stringify(productos);
+
+    const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
+                 VALUES (?, ?, ?, ?, ?)`;
+
+    dbModulos.query(sql, [numero_nota, cliente_id, fecha, fecha_entrega, productosJSON], (err, results) => {
+        if (err) {
+            console.error("Error guardando nota de pedido:", err);
+            return res.status(500).json({ error: "Error al guardar la nota de pedido" });
+        }
+        res.status(201).json({ mensaje: "Nota de pedido guardada con éxito" });
+    });
+});
+app.get('/notas-pedido', (req, res) => {
+    const sql = `
+        SELECT notas_pedido.*, clientes.nombre AS nombre_cliente
+        FROM notas_pedido
+        JOIN clientes ON notas_pedido.cliente_id = clientes.id
+    `;
+
+    dbModulos.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error obteniendo notas de pedido:", err);
+            return res.status(500).json({ error: "Error al obtener las notas de pedido" });
+        }
+        res.json({ notas: results });
+    });
+});
+app.delete('/notas-pedido/:id', async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const [result] = await dbModulos.promise().query('DELETE FROM notas_pedido WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Nota de pedido no encontrada" });
+        }
+
+        res.status(200).json({ message: "Nota de pedido eliminada correctamente" });
+    } catch (error) {
+        console.error("Error al eliminar la nota de pedido:", error);
+        res.status(500).json({ error: "Error interno al eliminar la nota de pedido" });
+    }
+});
 app.post('/billetes', (req, res) => {
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
 
