@@ -1,4 +1,4 @@
-let clienteActivoId = null; 
+let clienteActivoId = null;
 document.getElementById('clienteForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const idCliente = document.getElementById('idCliente').value;
@@ -18,14 +18,14 @@ document.getElementById('clienteForm').addEventListener('submit', function (e) {
                 'direccion': direccion
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Cliente editado:', data);
-            document.getElementById('clienteForm').reset();
-            document.getElementById('idCliente').value = '';
-            cargarClientes();
-        })
-        .catch(error => console.error('Error:', error));
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cliente editado:', data);
+                document.getElementById('clienteForm').reset();
+                document.getElementById('idCliente').value = '';
+                cargarClientes();
+            })
+            .catch(error => console.error('Error:', error));
     } else {
         fetch('/clientes', {
             method: 'POST',
@@ -38,12 +38,12 @@ document.getElementById('clienteForm').addEventListener('submit', function (e) {
                 'direccion': direccion
             })
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Cliente agregado:', data);
-            cargarClientes();
-        })
-        .catch(error => console.error('Error:', error));
+            .then(response => response.json())
+            .then(data => {
+                console.log('Cliente agregado:', data);
+                cargarClientes();
+            })
+            .catch(error => console.error('Error:', error));
     }
 });
 document.getElementById('nombreCliente').addEventListener('input', function (event) {
@@ -63,10 +63,13 @@ function cargarClientes(filtroNombre = '') {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
                     li.innerHTML = `
-                        <span><strong>Nombre:</strong> ${cliente.nombre} <br><strong>CUIT:</strong> ${cliente.cuit} <br><strong>Dirección:</strong> ${cliente.direccion}</span>
+                          <span><strong>Nombre:</strong> ${cliente.nombre} <br><strong>CUIT:</strong> ${cliente.cuit} <br><strong>Legajo:</strong> ${cliente.legajo_impositivo}</span>
                         <div>
-                            <button class="btn" title="Editar" onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.cuit}', '${cliente.direccion}')"><i class="bi bi-pencil icon-btn"></i></button>
+                            <button class="btn" title="Editar" onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.cuit}', '${cliente.legajo_impositivo}')"><i class="bi bi-pencil icon-btn"></i></button>
                             <button class="btn" title="Eliminar" onclick="eliminarCliente(${cliente.id})"><i class="bi bi-trash icon-btn"></i></button>
+                            <button class="btn btn-primary btn-sm" title="Ver Cambios" onclick="verCambios(${cliente.id}, '${cliente.nombre}')">Cambios</button>
+                            <button class="btn btn-primary btn-sm" onclick="abrirPlazosPago(${cliente.id})">Plazos de Pago</button>
+                            <button class="btn btn-primary btn-sm" onclick="abrirMercaderia(${cliente.id})">Mercadería</button>
                         </div>
                     `;
                     lista.appendChild(li);
@@ -180,15 +183,15 @@ function guardarPlazosPago(idCliente) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idCliente, formaPago, totalPagar, fecha: fechaPago, pago, numeroComprobante, fechaEmision })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Error al guardar plazo de pago');
-        return response.json();
-    })
-    .then(() => {
-        document.getElementById('plazosPagoForm').reset();
-        cargarPlazosPago(idCliente);
-    })
-    .catch(error => console.error('Error al guardar plazos de pago:', error));
+        .then(response => {
+            if (!response.ok) throw new Error('Error al guardar plazo de pago');
+            return response.json();
+        })
+        .then(() => {
+            document.getElementById('plazosPagoForm').reset();
+            cargarPlazosPago(idCliente);
+        })
+        .catch(error => console.error('Error al guardar plazos de pago:', error));
 }
 function cargarPlazosPago(idCliente) {
     fetch(`/plazos-pago/${idCliente}`)
@@ -225,8 +228,8 @@ function cargarPlazosPago(idCliente) {
                         <td>${debe === 0 ? '<span class="text-success">Saldada</span>' : debe.toFixed(2)}</td>
                         <td>
                             ${debe > 0
-                                ? `<button class="btn btn-success btn-sm" onclick="abrirRegistrarPago(${plazo.idPlazo}, ${debe})">Registrar Pago</button>`
-                                : '<span class="text-muted">Pago completo</span>'}
+                        ? `<button class="btn btn-success btn-sm" onclick="abrirRegistrarPago(${plazo.idPlazo}, ${debe})">Registrar Pago</button>`
+                        : '<span class="text-muted">Pago completo</span>'}
                         </td>
                     </tr>
                 `;
@@ -301,9 +304,9 @@ function cargarMercaderia(idCliente) {
                 tabla.innerHTML = '<tr><td colspan="6" class="text-center">No hay mercadería registrada.</td></tr>';
                 return;
             }
-            tabla.innerHTML = ''; 
+            tabla.innerHTML = '';
             data.forEach(item => {
-                const precio = parseFloat(item.precio) || 0; 
+                const precio = parseFloat(item.precio) || 0;
                 const cantidad = parseInt(item.cantidad, 10) || 0;
                 const fila = `
                     <tr data-id="${item.idMercaderia}">
@@ -321,16 +324,16 @@ function cargarMercaderia(idCliente) {
                 `;
                 tabla.insertAdjacentHTML('beforeend', fila);
             });
-        })        
+        })
         .catch(error => {
             tabla.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar la mercadería.</td></tr>';
             console.error('Error al cargar la mercadería:', error);
         });
 }
 function abrirMercaderia(idCliente) {
-    clienteActivoId = idCliente; 
-    document.getElementById('mercaderiaForm').reset(); 
-    cargarMercaderia(clienteActivoId); 
+    clienteActivoId = idCliente;
+    document.getElementById('mercaderiaForm').reset();
+    cargarMercaderia(clienteActivoId);
     const modal = new bootstrap.Modal(document.getElementById('mercaderiaModal'));
     modal.show();
 }
