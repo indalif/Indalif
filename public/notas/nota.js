@@ -49,7 +49,6 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const fechaEntrega = document.getElementById('fecha_entrega').value;
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
-        alert('Debe completar todos los campos antes de guardar la nota de pedido.');
         return;
     }
 
@@ -65,12 +64,8 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
         const data = await response.json();
         alert('Nota de pedido guardada con éxito!');
         cargarNotas();
-
-        // LIMPIAR FORMULARIO 🔥
         console.log('Limpiando formulario...');
         document.getElementById('notaPedidoForm').reset(); // Intenta primero con reset()
-
-        // Si reset() no funciona, limpiar manualmente
         document.getElementById('numero_nota').value = '';
         document.getElementById('cliente').value = '';
         document.getElementById('fecha').value = '';
@@ -78,19 +73,14 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
         document.getElementById('producto').value = '';
         document.getElementById('cantidad').value = '';
         document.getElementById('presentacion').value = '';
-
-        // Limpiar la lista de productos
         productosLista = [];
         document.getElementById('listaProductos').innerHTML = '';
-
-        // Ocultar la nota visual
         document.getElementById('notaVisual').style.display = 'none';
 
         console.log('Formulario limpio.');
 
     } catch (error) {
         console.error('Error:', error);
-        alert('Hubo un error al guardar la nota.');
     }
 });
 function imprimirNota(button) {
@@ -99,8 +89,7 @@ function imprimirNota(button) {
     let cliente = notaDiv.querySelector("p:nth-of-type(1)").innerText.replace("Cliente:", "").trim();
     let fecha = notaDiv.querySelector("p:nth-of-type(2)").innerText.replace("Fecha:", "").trim();
     let fechaEntrega = notaDiv.querySelector("p:nth-of-type(3)").innerText.replace("Fecha de Entrega:", "").trim();
-    
-    // Obtener productos correctamente
+
     let productos = Array.from(notaDiv.querySelectorAll("ul li")).map(li => {
         let partes = li.innerText.match(/^(.*?) - Cantidad: (\d+), Presentación: (.+)$/);
         return partes ? { producto: partes[1], cantidad: partes[2], presentacion: partes[3] } : null;
