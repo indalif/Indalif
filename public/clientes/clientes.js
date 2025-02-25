@@ -287,6 +287,7 @@ function abrirRegistrarPago(idPlazo, saldoPendiente) {
     }
     registrarPago(idPlazo, montoPago);
 }
+let mercaderiaData = []; // Guarda los datos para filtrar
 function cargarMercaderia(idCliente) {
     const tabla = document.getElementById('mercaderiaTabla');
     tabla.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
@@ -299,36 +300,46 @@ function cargarMercaderia(idCliente) {
             return response.json();
         })
         .then(data => {
-            const tabla = document.getElementById('mercaderiaTabla');
-            if (data.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="6" class="text-center">No hay mercadería registrada.</td></tr>';
-                return;
-            }
-            tabla.innerHTML = '';
-            data.forEach(item => {
-                const precio = parseFloat(item.precio) || 0;
-                const cantidad = parseInt(item.cantidad, 10) || 0;
-                const fila = `
-                    <tr data-id="${item.idMercaderia}">
-                        <td>${item.descripcion}</td>
-                        <td>${precio.toFixed(2)}</td>
-                        <td>${cantidad}</td>
-                        <td>${(precio * cantidad).toFixed(2)}</td>
-                        <td>${new Date(item.fecha).toLocaleDateString()}</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm" onclick="eliminarMercaderia(${item.idMercaderia})">
-                                Eliminar
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tabla.insertAdjacentHTML('beforeend', fila);
-            });
+            mercaderiaData = data; // Guarda los datos para aplicar filtros
+            renderizarTabla(data); // Renderiza la tabla
         })
         .catch(error => {
             tabla.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar la mercadería.</td></tr>';
             console.error('Error al cargar la mercadería:', error);
         });
+}
+function renderizarTabla(data) {
+    const tabla = document.getElementById('mercaderiaTabla');
+    if (data.length === 0) {
+        tabla.innerHTML = '<tr><td colspan="6" class="text-center">No hay mercadería registrada.</td></tr>';
+        return;
+    }
+
+    tabla.innerHTML = '';
+    data.forEach(item => {
+        const precio = parseFloat(item.precio) || 0;
+        const cantidad = parseInt(item.cantidad, 10) || 0;
+        const fila = `
+            <tr data-id="${item.idMercaderia}">
+                <td>${item.descripcion}</td>
+                <td>${precio.toFixed(2)}</td>
+                <td>${cantidad}</td>
+                <td>${(precio * cantidad).toFixed(2)}</td>
+                <td>${new Date(item.fecha).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarMercaderia(${item.idMercaderia})">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
+        tabla.insertAdjacentHTML('beforeend', fila);
+    });
+}
+function filtrarProducto() {
+    const filtro = document.getElementById('filtroProducto').value;
+    const datosFiltrados = filtro ? mercaderiaData.filter(item => item.descripcion === filtro) : mercaderiaData;
+    renderizarTabla(datosFiltrados);
 }
 function abrirMercaderia(idCliente) {
     clienteActivoId = idCliente;
