@@ -63,9 +63,9 @@ function cargarClientes(filtroNombre = '') {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
                     li.innerHTML = `
-                          <span><strong>Nombre:</strong> ${cliente.nombre} <br><strong>CUIT:</strong> ${cliente.cuit} <br><strong>Legajo:</strong> ${cliente.legajo_impositivo}</span>
+                          <span><strong>Nombre:</strong> ${cliente.nombre} <br><strong>CUIT:</strong> ${cliente.cuit} <br><strong>Dirección:</strong> ${cliente.direccion}</span>
                         <div>
-                            <button class="btn" title="Editar" onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.cuit}', '${cliente.legajo_impositivo}')"><i class="bi bi-pencil icon-btn"></i></button>
+                            <button class="btn" title="Editar" onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.cuit}', '${cliente.direccion}')"><i class="bi bi-pencil icon-btn"></i></button>
                             <button class="btn" title="Eliminar" onclick="eliminarCliente(${cliente.id})"><i class="bi bi-trash icon-btn"></i></button>
                             <button class="btn btn-primary btn-sm" title="Ver Cambios" onclick="verCambios(${cliente.id}, '${cliente.nombre}')">Cambios</button>
                             <button class="btn btn-primary btn-sm" onclick="abrirPlazosPago(${cliente.id})">Plazos de Pago</button>
