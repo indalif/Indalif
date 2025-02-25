@@ -3,6 +3,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const tablaCambios = document.getElementById("tabla-cambios");
     const clienteSelect = document.getElementById("cliente");
     let editId = null;
+    function parseFecha(fechaStr) {
+        if (!fechaStr) return null;
+        const partes = fechaStr.split('-'); // Intentamos dividir por "-"
+        if (partes.length === 3) {
+            return new Date(`${partes[0]}-${partes[1]}-${partes[2]}T00:00:00`);
+        }
+        return null;
+    }
     async function cargarClientes() {
         try {
             const response = await fetch('/clientes');
@@ -26,21 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tablaCambios.innerHTML = '';
             cambios.forEach(cambio => {
-                function parseFecha(fechaStr) {
-                    if (!fechaStr) return null; // Si la fecha es null o undefined, devolver null
-                    const partes = fechaStr.split('-'); // Intentamos dividir por "-"
-                    if (partes.length === 3) {
-                        return new Date(`${partes[0]}-${partes[1]}-${partes[2]}T00:00:00`);
-                    }
-                    return null;
-                }
-                const fechaFormatted = cambio.fecha
+                const fechaFormatted = parseFecha(cambio.fecha)
                     ? parseFecha(cambio.fecha).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
                     : '';
-                
-                const fechaVencimientoFormatted = cambio.fecha_vencimiento
+
+                const fechaVencimientoFormatted = parseFecha(cambio.fecha_vencimiento)
                     ? parseFecha(cambio.fecha_vencimiento).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
-                    : '';                
+                    : '';
+
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
                     <td>${cambio.producto}</td>
@@ -59,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
                 tablaCambios.appendChild(fila);
             });
+
             document.querySelectorAll(".edit-btn").forEach(button =>
                 button.addEventListener("click", handleEdit)
             );
@@ -72,26 +74,22 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleEdit(event) {
         const id = event.target.dataset.id;
         const fila = event.target.closest("tr");
-
         const celdas = Array.from(fila.children);
 
-        const producto = celdas[0].textContent;
-        const cantidad = celdas[1].textContent;
-        const precio = celdas[2].textContent;
-        const fecha = celdas[4].textContent;
-        const lote = celdas[5].textContent;
-        const fechaVencimiento = celdas[6].textContent;
-        const descripcion = celdas[7].textContent;
-        const cliente = celdas[8].textContent;
+        document.getElementById("producto").value = celdas[0].textContent;
+        document.getElementById("cantidad").value = celdas[1].textContent;
+        document.getElementById("precio").value = celdas[2].textContent;
 
-        document.getElementById("producto").value = producto;
-        document.getElementById("cantidad").value = cantidad;
-        document.getElementById("precio").value = precio;
-        document.getElementById("fecha").value = fecha.split('/').reverse().join('-');
-        document.getElementById("lote").value = lote;
+        const fecha = celdas[4].textContent;
+        document.getElementById("fecha").value = fecha ? fecha.split('/').reverse().join('-') : '';
+
+        document.getElementById("lote").value = celdas[5].textContent;
+
+        const fechaVencimiento = celdas[6].textContent;
         document.getElementById("fechaVencimiento").value = fechaVencimiento ? fechaVencimiento.split('/').reverse().join('-') : '';
-        document.getElementById("descripcion").value = descripcion;
-        document.getElementById("cliente").value = cliente;
+
+        document.getElementById("descripcion").value = celdas[7].textContent;
+        document.getElementById("cliente").value = celdas[8].textContent;
 
         editId = id;
     }
