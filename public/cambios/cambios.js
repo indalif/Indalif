@@ -26,11 +26,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tablaCambios.innerHTML = '';
             cambios.forEach(cambio => {
-                const fechaFormatted = new Date(cambio.fecha + 'T00:00:00').toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' });
-                const fechaVencimientoFormatted = cambio.fecha_vencimiento
-                    ? new Date(cambio.fecha_vencimiento + 'T00:00:00').toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
+                function parseFecha(fechaStr) {
+                    if (!fechaStr) return null; // Si la fecha es null o undefined, devolver null
+                    const partes = fechaStr.split('-'); // Intentamos dividir por "-"
+                    if (partes.length === 3) {
+                        return new Date(`${partes[0]}-${partes[1]}-${partes[2]}T00:00:00`);
+                    }
+                    return null;
+                }
+                const fechaFormatted = cambio.fecha
+                    ? parseFecha(cambio.fecha).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
                     : '';
-
+                
+                const fechaVencimientoFormatted = cambio.fecha_vencimiento
+                    ? parseFecha(cambio.fecha_vencimiento).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
+                    : '';                
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
                     <td>${cambio.producto}</td>
