@@ -1,11 +1,11 @@
 let clienteActivoId = null; 
-
 document.getElementById('clienteForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const idCliente = document.getElementById('idCliente').value;
     const nombre = document.getElementById('nombre').value;
     const cuit = document.getElementById('cuit').value;
-    const legajo_impositivo = document.getElementById('legajo_impositivo').value;
+    const direccion = document.getElementById('direccion').value;
+
     if (idCliente) {
         fetch(`/clientes/${idCliente}`, {
             method: 'PUT',
@@ -15,24 +15,17 @@ document.getElementById('clienteForm').addEventListener('submit', function (e) {
             body: new URLSearchParams({
                 'nombre': nombre,
                 'cuit': cuit,
-                'legajo_impositivo': legajo_impositivo
+                'direccion': direccion
             })
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al editar el cliente');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Cliente editado:', data);
-                document.getElementById('clienteForm').reset();
-                document.getElementById('idCliente').value = '';
-                cargarClientes();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Cliente editado:', data);
+            document.getElementById('clienteForm').reset();
+            document.getElementById('idCliente').value = '';
+            cargarClientes();
+        })
+        .catch(error => console.error('Error:', error));
     } else {
         fetch('/clientes', {
             method: 'POST',
@@ -42,22 +35,15 @@ document.getElementById('clienteForm').addEventListener('submit', function (e) {
             body: new URLSearchParams({
                 'nombre': nombre,
                 'cuit': cuit,
-                'legajo_impositivo': legajo_impositivo
+                'direccion': direccion
             })
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al agregar el cliente');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Cliente agregado:', data);
-                cargarClientes();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Cliente agregado:', data);
+            cargarClientes();
+        })
+        .catch(error => console.error('Error:', error));
     }
 });
 document.getElementById('nombreCliente').addEventListener('input', function (event) {
@@ -77,22 +63,17 @@ function cargarClientes(filtroNombre = '') {
                     const li = document.createElement('li');
                     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
                     li.innerHTML = `
-                        <span><strong>Nombre:</strong> ${cliente.nombre} <br><strong>CUIT:</strong> ${cliente.cuit} <br><strong>Legajo:</strong> ${cliente.legajo_impositivo}</span>
+                        <span><strong>Nombre:</strong> ${cliente.nombre} <br><strong>CUIT:</strong> ${cliente.cuit} <br><strong>Dirección:</strong> ${cliente.direccion}</span>
                         <div>
-                            <button class="btn" title="Editar" onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.cuit}', '${cliente.legajo_impositivo}')"><i class="bi bi-pencil icon-btn"></i></button>
+                            <button class="btn" title="Editar" onclick="editarCliente(${cliente.id}, '${cliente.nombre}', '${cliente.cuit}', '${cliente.direccion}')"><i class="bi bi-pencil icon-btn"></i></button>
                             <button class="btn" title="Eliminar" onclick="eliminarCliente(${cliente.id})"><i class="bi bi-trash icon-btn"></i></button>
-                            <button class="btn btn-primary btn-sm" title="Ver Cambios" onclick="verCambios(${cliente.id}, '${cliente.nombre}')">Cambios</button>
-                            <button class="btn btn-primary btn-sm" onclick="abrirPlazosPago(${cliente.id})">Plazos de Pago</button>
-                            <button class="btn btn-primary btn-sm" onclick="abrirMercaderia(${cliente.id})">Mercadería</button>
                         </div>
                     `;
                     lista.appendChild(li);
                 });
             }
         })
-        .catch(error => {
-            console.error('Error cargando clientes:', error);
-        });
+        .catch(error => console.error('Error cargando clientes:', error));
 }
 function verCambios(idCliente, nombreCliente) {
     const modal = new bootstrap.Modal(document.getElementById('cambiosModal'))
@@ -145,11 +126,11 @@ function verCambios(idCliente, nombreCliente) {
 
     modal.show();
 }
-function editarCliente(id, nombre, cuit, legajo_impositivo) {
+function editarCliente(id, nombre, cuit, direccion) {
     document.getElementById('idCliente').value = id;
     document.getElementById('nombre').value = nombre;
     document.getElementById('cuit').value = cuit;
-    document.getElementById('legajo_impositivo').value = legajo_impositivo;
+    document.getElementById('direccion').value = direccion;
     document.getElementById('submitBtn').textContent = 'Editar Cliente';
 }
 function eliminarCliente(id) {

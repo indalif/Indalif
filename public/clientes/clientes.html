@@ -158,47 +158,45 @@
                 </a>
             </div>
             <h1>Clientes Mayoristas/Distribuidores</h1>
+    </div>
+    <form id="clienteForm" class="mb-4">
+        <input type="hidden" id="idCliente">
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre" required>
         </div>
-        <form id="clienteForm" class="mb-4">
-            <input type="hidden" id="idCliente">
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre:</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese el nombre"
-                    required>
-            </div>
-            <div class="mb-3">
-                <label for="cuit" class="form-label">CUIT:</label>
-                <input type="text" class="form-control" id="cuit" name="cuit" placeholder="Ingrese el CUIT" required>
-            </div>
-            <div class="mb-3">
-                <label for="legajo_impositivo" class="form-label">Legajo Impositivo:</label>
-                <input type="text" class="form-control" id="legajo_impositivo" name="legajo_impositivo"
-                    placeholder="Ingrese el Legajo Impositivo" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100" id="submitBtn">Agregar Cliente</button>
-        </form>
-        <form id="buscadorForm" class="mb-4">
-            <div class="mb-3">
-                <label for="nombreCliente" class="form-label">Buscar Cliente por Nombre:</label>
-                <input type="text" class="form-control" id="nombreCliente" name="nombreCliente"
-                    placeholder="Ingrese el nombre">
-            </div>
-            <div class="modal fade" id="cambiosModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="modalTitle"></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body" id="modalBody"></div>
+        <div class="mb-3">
+            <label for="cuit" class="form-label">CUIT:</label>
+            <input type="text" class="form-control" id="cuit" name="cuit" placeholder="Ingrese el CUIT" required>
+        </div>
+        <div class="mb-3">
+            <label for="direccion" class="form-label">Dirección:</label>
+            <input type="text" class="form-control" id="direccion" name="direccion" placeholder="Ingrese la Dirección"
+                required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100" id="submitBtn">Agregar Cliente</button>
+    </form>
+    <form id="buscadorForm" class="mb-4">
+        <div class="mb-3">
+            <label for="nombreCliente" class="form-label">Buscar Cliente por Nombre:</label>
+            <input type="text" class="form-control" id="nombreCliente" name="nombreCliente"
+                placeholder="Ingrese el nombre">
+        </div>
+        <div class="modal fade" id="cambiosModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                    <div class="modal-body" id="modalBody"></div>
                 </div>
             </div>
-
-        </form>
-        <h2 class="text-center">Lista de Clientes</h2>
-        <ul id="listaClientes" class="list-group mt-3">
-        </ul>
+        </div>
+    </form>
+    <h2 class="text-center">Lista de Clientes</h2>
+    <ul id="listaClientes" class="list-group mt-3">
+    </ul>
     </div>
     <!-- Modal para Plazos de Pago -->
     <div class="modal fade" id="plazosPagoModal" tabindex="-1" aria-labelledby="plazosPagoLabel" aria-hidden="true">

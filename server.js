@@ -92,7 +92,7 @@ dbModulos.query(`
         id INT AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR(255) NOT NULL,
         cuit VARCHAR(50) NOT NULL,
-        legajo_impositivo VARCHAR(100) NOT NULL
+        direccion VARCHAR(255) NOT NULL
     )
 `, (err) => {
     if (err) throw err;
@@ -1491,14 +1491,14 @@ app.get('/summary', (req, res) => {
     });
 })
 app.post('/clientes', (req, res) => {
-    const { nombre, cuit, legajo_impositivo } = req.body;
+    const { nombre, cuit, direccion } = req.body;
 
-    if (!nombre || !cuit || !legajo_impositivo) {
+    if (!nombre || !cuit || !direccion) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
 
-    const sql = 'INSERT INTO clientes (nombre, cuit, legajo_impositivo) VALUES (?, ?, ?)';
-    dbModulos.query(sql, [nombre, cuit, legajo_impositivo], (err, result) => {
+    const sql = 'INSERT INTO clientes (nombre, cuit, direccion) VALUES (?, ?, ?)';
+    dbModulos.query(sql, [nombre, cuit, direccion], (err, result) => {
         if (err) {
             console.error('Error al agregar cliente:', err);
             return res.status(500).json({ message: 'Error al agregar cliente.' });
@@ -1520,10 +1520,10 @@ app.get('/clientes', (req, res) => {
 });
 app.put('/clientes/:id', (req, res) => {
     const { id } = req.params;
-    const { nombre, cuit, legajo_impositivo } = req.body;
+    const { nombre, cuit, direccion } = req.body;
 
-    const sql = 'UPDATE clientes SET nombre = ?, cuit = ?, legajo_impositivo = ? WHERE id = ?';
-    dbModulos.query(sql, [nombre, cuit, legajo_impositivo, id], (err, result) => {
+    const sql = 'UPDATE clientes SET nombre = ?, cuit = ?, direccion = ? WHERE id = ?';
+    dbModulos.query(sql, [nombre, cuit, direccion, id], (err, result) => {
         if (err) {
             console.error('Error al editar cliente:', err);
             return res.status(500).json({ message: 'Error al editar cliente.' });
