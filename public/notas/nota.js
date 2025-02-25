@@ -28,7 +28,6 @@ document.getElementById('agregarProducto').addEventListener('click', function ()
     const presentacion = document.getElementById('presentacion').value;
     
     if (!producto || !cantidad || !presentacion) {
-        alert('Debe completar todos los campos del producto');
         return;
     }
     
@@ -62,12 +61,12 @@ document.getElementById('notaPedidoForm').addEventListener('submit', function (e
         .then(data => {
             alert('Nota de pedido guardada con éxito!');
             cargarNotas();
-
+        
             document.getElementById('resCliente').textContent = clienteNombre;
             document.getElementById('resFecha').textContent = fecha;
             document.getElementById('resFechaEntrega').textContent = fechaEntrega;
             document.getElementById('resNumeroNota').textContent = numero_nota;
-
+        
             const listaProductos = document.getElementById('resListaProductos');
             listaProductos.innerHTML = '';
             productosLista.forEach(p => {
@@ -76,11 +75,15 @@ document.getElementById('notaPedidoForm').addEventListener('submit', function (e
                 li.textContent = `${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion}`;
                 listaProductos.appendChild(li);
             });
-
+        
             document.getElementById('notaVisual').style.display = 'block';
+        
+            // ✅ Limpiar el formulario
+            document.getElementById('notaPedidoForm').reset();
             productosLista = [];
             document.getElementById('listaProductos').innerHTML = '';
-        })
+        
+        })        
         .catch(error => console.error('Error:', error));
 });
 function imprimirNota(button) {
