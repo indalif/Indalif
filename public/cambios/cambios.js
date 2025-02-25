@@ -3,14 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const tablaCambios = document.getElementById("tabla-cambios");
     const clienteSelect = document.getElementById("cliente");
     let editId = null;
-    function parseFecha(fechaStr) {
-        if (!fechaStr) return null;
-        const partes = fechaStr.split('-'); // Intentamos dividir por "-"
-        if (partes.length === 3) {
-            return new Date(`${partes[0]}-${partes[1]}-${partes[2]}T00:00:00`);
-        }
-        return null;
-    }
     async function cargarClientes() {
         try {
             const response = await fetch('/clientes');
@@ -34,14 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tablaCambios.innerHTML = '';
             cambios.forEach(cambio => {
-                const fechaFormatted = parseFecha(cambio.fecha)
-                    ? parseFecha(cambio.fecha).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
+                const fechaFormatted = cambio.fecha
+                    ? cambio.fecha.split('T')[0].split('-').reverse().join('/')
                     : '';
-
-                const fechaVencimientoFormatted = parseFecha(cambio.fecha_vencimiento)
-                    ? parseFecha(cambio.fecha_vencimiento).toLocaleDateString('es-ES', { timeZone: 'America/Argentina/Buenos_Aires' })
+                const fechaVencimientoFormatted = cambio.fecha_vencimiento
+                    ? cambio.fecha_vencimiento.split('T')[0].split('-').reverse().join('/')
                     : '';
-
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
                     <td>${cambio.producto}</td>
