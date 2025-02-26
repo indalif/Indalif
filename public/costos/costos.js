@@ -102,9 +102,9 @@ function recalcularTotalesProducto(producto) {
     let totalPlasticos = 0;
 
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0; // Índice corregido
+        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0; // Índice correcto
         totalIngredientes += costoIngrediente;
-    });
+    });    
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
         totalPlasticos += parseFloat(row.children[2]?.textContent.trim()) || 0;
     });
@@ -217,20 +217,20 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
         const totalIngredientes = (precioTotal / (parseFloat(row.rinde) || 1)).toFixed(2);
 
         const newRow = `
-            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
-                <td>${row.producto}</td>
-                <td>${row.ingrediente}</td>
-                <td>${row.cantidad_kg}</td>
-                <td>${row.cantidad_utilizo}</td>
-                <td>${precioUnitario.toFixed(2)}</td>
-                <td>${precioTotal.toFixed(2)}</td>
-                <td>${row.rinde}</td>
-                <td>${totalIngredientes}</td>
-                <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-                </td>
-            </tr>
+        <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingrediente">
+            <td>${row.producto}</td>
+            <td>${row.ingrediente}</td>
+            <td>${row.cantidad_kg}</td>
+            <td>${row.cantidad_utilizo}</td>
+            <td class="precio">${precioUnitario.toFixed(2)}</td>
+            <td>${precioTotal.toFixed(2)}</td>
+            <td>${row.rinde}</td>
+            <td>${totalIngredientes}</td>
+            <td>
+                <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+            </td>
+        </tr>    
         `;
         tableBody.insertAdjacentHTML("beforeend", newRow);
     });
@@ -254,9 +254,10 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
 
     agregarEventosAcciones();
 
-    if (ingredientes.length > 0) {
-        actualizarTotalPorPaquete(ingredientes[0].producto);
-    }
+    if (tipo !== "ingrediente" && tipo !== "plastico") {
+        console.error("Tipo de tabla inválido.");
+        return;
+    }    
 }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
@@ -333,6 +334,10 @@ document.addEventListener("click", (e) => {
         const id = fila.getAttribute("data-id");
         const tipo = fila.getAttribute("data-tabla");
         const precioCelda = fila.querySelector(".precio");
+        if (!precioCelda) {
+            console.error("No se encontró la celda de precio en la fila:", fila);
+            return;
+        }
         const precioActual = parseFloat(precioCelda.textContent);
         console.log("ID:", id, "Tipo de tabla:", tipo, "Precio actual:", precioActual);
         if (tipo !== "ingredientes" && tipo !== "plasticos") {
@@ -381,7 +386,7 @@ document.getElementById("form-actualizar-precio").addEventListener("submit", (e)
             tipo: tipo === "ingredientes" ? "ingrediente" : "plastico", // Ajustar al formato esperado
             nuevoPrecio,
         }),
-    })    
+    })
         .then((response) => {
             if (!response.ok) {
                 console.error("Error en la solicitud:", response.statusText);
