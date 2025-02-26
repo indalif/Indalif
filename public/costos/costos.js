@@ -79,21 +79,22 @@ document.getElementById("agregar-plastico-btn").addEventListener("click", () => 
     });
     document.getElementById("plasticos-form").reset();
 });
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#table-body tr, #plasticos-table-body tr").forEach(row => {
+        row.style.display = "none";
+    });
+});
 function filtrarTablaPorProducto(producto) {
     console.log("Filtrando tabla para producto:", producto);
 
-    const ingredientesRows = document.querySelectorAll("#table-body tr");
-    const plasticosRows = document.querySelectorAll("#plasticos-table-body tr");
-
-    ingredientesRows.forEach(row => {
-        const productoFila = row.getAttribute("data-producto");
-        console.log(`Fila producto: ${productoFila}, mostrando: ${productoFila === producto || producto === ""}`);
-        row.style.display = (productoFila === producto || producto === "") ? "" : "none";
+    // Ocultar todas las filas al inicio
+    document.querySelectorAll("#table-body tr, #plasticos-table-body tr").forEach(row => {
+        row.style.display = "none";
     });
 
-    plasticosRows.forEach(row => {
-        const productoFila = row.getAttribute("data-producto");
-        row.style.display = (productoFila === producto || producto === "") ? "" : "none";
+    // Mostrar solo las filas del producto seleccionado
+    document.querySelectorAll(`#table-body tr[data-producto="${producto}"], #plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
+        row.style.display = "";
     });
 
     recalcularTotalesProducto(producto);
@@ -113,9 +114,6 @@ function cargarDatosProducto(producto) {
 function recalcularTotalesProducto(producto) {
     let totalIngredientes = 0;
     let totalPlasticos = 0;
-    document.querySelectorAll("#table-body tr").forEach(row => console.log(row.getAttribute("data-producto")));
-    document.querySelectorAll("#plasticos-table-body tr").forEach(row => console.log(row.getAttribute("data-producto")));
-    
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
         const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0;
         totalIngredientes += costoIngrediente;
