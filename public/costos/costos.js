@@ -390,10 +390,10 @@ document.getElementById("form-actualizar-precio").addEventListener("submit", (e)
         },
         body: JSON.stringify({
             id,
-            tipo: tipo === "plasticos" ? "plastico" : "ingrediente", // Corrige la asignación del tipo
+            tipo, // Se envía "ingrediente" o "plastico"
             nuevoPrecio,
         }),
-    })
+    })    
         .then((response) => {
             if (!response.ok) {
                 console.error("Error en la solicitud:", response.statusText);

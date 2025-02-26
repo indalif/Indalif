@@ -1091,11 +1091,20 @@ app.delete('/eliminar_costo/:id', (req, res) => {
 app.put('/actualizar_costo', (req, res) => {
     const { id, tipo, nuevoPrecio } = req.body;
 
+    // Verificar que el tipo sea válido
     if (!['ingrediente', 'plastico'].includes(tipo)) {
         return res.status(400).json({ error: 'Tipo de tabla inválido.' });
     }
 
-    const campo = tipo === 'ingrediente' ? 'precio_unitario' : 'precio_plastico'; // Asegura que se actualice el campo correcto
+    // Seleccionar la columna correcta según el tipo
+    let campo;
+    if (tipo === "ingrediente") {
+        campo = "precio_unitario";
+    } else if (tipo === "plastico") {
+        campo = "precio_plastico";
+    }
+
+    // Ejecutar la consulta para actualizar el precio en la tabla correcta
     const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
 
     dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
