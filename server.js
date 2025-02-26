@@ -958,43 +958,50 @@ const verificarEmpleado = (req, res, next) => {
     }
     next();
 };
-app.post('/registrar_costos', async (req, res) => {
-    try {
-        const { producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, tipo, tipo_plastico, precio_plastico } = req.body;
-        let sql, params;
-        
-        if (tipo === 'ingrediente') {
-            sql = `INSERT INTO costos (producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, tipo)
-                   VALUES (?, ?, ?, ?, ?, ?, 'ingrediente')`;
-            params = [producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde];
-        } else if (tipo === 'plastico') {
-            sql = `INSERT INTO costos (producto, tipo_plastico, precio_plastico, tipo)
-                   VALUES (?, ?, ?, 'plastico')`;
-            params = [producto, tipo_plastico, precio_plastico];
-        } else {
-            return res.status(400).json({ message: 'Tipo inválido' });
-        }
-        
-        const [result] = await dbModulos.query(sql, params);
-        res.json({ id: result.insertId, message: 'Costo registrado con éxito' });
-    } catch (err) {
-        console.error('Error al registrar costos:', err.message);
-        res.status(500).json({ error: 'Error al registrar costos' });
+app.post('/registrar_costos', (req, res) => {
+    const {
+        producto, ingrediente, cantidad_bulto, precio_bulto,
+        cantidad_kg, cantidad_utilizo, rinde,
+        tipo_plastico, precio_plastico
+    } = req.body;
+
+    if (!producto) {
+        return res.status(400).json({ message: 'El campo producto es obligatorio.' });
     }
+
+    const tipo = ingrediente ? 'ingrediente' : 'plastico';
+
+    const sql = `
+        INSERT INTO costos (
+            producto, ingrediente, cantidad_bulto, precio_bulto,
+            cantidad_kg, cantidad_utilizo, rinde, 
+            tipo_plastico, precio_plastico, tipo
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    dbModulos.query(sql, [
+        producto, ingrediente || null, cantidad_bulto || null, precio_bulto || null,
+        cantidad_kg || null, cantidad_utilizo || null, rinde || null,
+        tipo_plastico || null, precio_plastico || null, tipo
+    ], (err, result) => {
+        if (err) {
+            console.error('Error al registrar costos:', err.message);
+            return res.status(500).json({ error: 'Error al registrar costos' });
+        }
+        res.json({ id: result.insertId, message: 'Costo registrado con éxito' });
+    });
 });
 app.get('/obtener_costos_producto/:producto', (req, res) => {
     const { producto } = req.params;
 
     const sqlIngredientes = `
-        SELECT id, producto, ingrediente, precio_unitario, cantidad_kg, 
+        SELECT id, producto, ingrediente, cantidad_bulto, precio_bulto, cantidad_kg, 
                cantidad_utilizo, rinde, fecha 
         FROM costos 
         WHERE tipo = 'ingrediente' AND producto = ?
     `;
-
     const sqlPlasticos = `
-        SELECT id, producto, tipo_plastico, precio_plastico, fecha
-        FROM costos
+        SELECT id, producto, tipo_plastico, precio_plastico, fecha 
+        FROM costos 
         WHERE tipo = 'plastico' AND producto = ?
     `;
 
@@ -1018,9 +1025,9 @@ app.get('/total_por_paquete/:producto', (req, res) => {
     const { producto } = req.params;
 
     const sql = `
-        SELECT 
-            SUM(CASE WHEN tipo = 'ingrediente' THEN (precio_unitario * cantidad_utilizo / rinde) ELSE 0 END) AS total_ingredientes,
-            SUM(CASE WHEN tipo = 'plastico' THEN precio_plastico ELSE 0 END) AS total_plasticos
+        SELECT
+            SUM(COALESCE(precio_plastico, 0)) AS total_plasticos,
+            SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
         FROM costos
         WHERE producto = ?
     `;
@@ -1031,73 +1038,27 @@ app.get('/total_por_paquete/:producto', (req, res) => {
             return res.status(500).json({ error: 'Error al calcular total por paquete' });
         }
 
-        const totalIngredientes = results[0].total_ingredientes || 0;
-        const totalPlasticos = results[0].total_plasticos || 0;
-        const total = totalIngredientes + totalPlasticos;
-
+        const total = results.length > 0 ? results[0].total_por_paquete || 0 : 0;
         res.json({ total_por_paquete: total });
     });
-});
-app.put('/actualizar_costo', async (req, res) => {
-    try {
-        const { id, tipo, nuevoPrecio } = req.body;
-        let sql;
-        if (tipo === 'ingrediente') {
-            sql = `UPDATE costos SET precio_unitario = ? WHERE id = ?`;
-        } else if (tipo === 'plastico') {
-            sql = `UPDATE costos SET precio_plastico = ? WHERE id = ?`;
-        } else {
-            return res.status(400).json({ error: 'Tipo inválido.' });
-        }
-        
-        const [result] = await dbModulos.query(sql, [nuevoPrecio, id]);
-        if (result.affectedRows === 0) return res.status(404).json({ message: 'Registro no encontrado.' });
-        res.json({ message: 'Costo actualizado correctamente' });
-    } catch (err) {
-        console.error('Error al actualizar el costo:', err.message);
-        res.status(500).json({ error: 'Error al actualizar el costo' });
-    }
 });
 app.get('/obtener_todos_costos', (req, res) => {
     const sql = `
         SELECT 
-            id,
             producto,
-            ingrediente,
-            CAST(precio_unitario AS DECIMAL(10,2)) AS precio_unitario,
-            cantidad_kg,
-            cantidad_utilizo,
-            rinde
+            SUM(COALESCE(precio_plastico, 0)) AS total_plasticos,
+            SUM(COALESCE(precio_plastico, 0)) AS total_por_paquete
         FROM costos
-        WHERE tipo = 'ingrediente'
+        GROUP BY producto
     `;
 
-    dbModulos.query(sql, (err, ingredientes) => {
+    dbModulos.query(sql, (err, results) => {
         if (err) {
-            console.error('Error al obtener los costos de ingredientes:', err.message);
-            return res.status(500).json({ error: 'Error al obtener los costos de ingredientes' });
+            console.error('Error al obtener todos los costos:', err.message);
+            return res.status(500).json({ error: 'Error al obtener los costos' });
         }
-
-        const sqlPlasticos = `
-            SELECT 
-                id,
-                producto,
-                tipo_plastico,
-                CAST(precio_plastico AS DECIMAL(10,2)) AS precio_plastico
-            FROM costos
-            WHERE tipo = 'plastico'
-        `;
-
-        dbModulos.query(sqlPlasticos, (err, plasticos) => {
-            if (err) {
-                console.error('Error al obtener los costos de plásticos:', err.message);
-                return res.status(500).json({ error: 'Error al obtener los costos de plásticos' });
-            }
-
-            res.json({ ingredientes, plasticos });
-        });
+        res.json(results || []);
     });
-    console.log("Ingredientes obtenidos:", ingredientes);
 });
 app.delete('/eliminar_costo/:id', (req, res) => {
     const { id } = req.params;
@@ -1119,6 +1080,29 @@ app.delete('/eliminar_costo/:id', (req, res) => {
         }
 
         res.json({ message: 'Costo eliminado con éxito.' });
+    });
+});
+app.put('/actualizar_costo', (req, res) => {
+    const { id, tipo, nuevoPrecio } = req.body;
+
+    // Validar tipo
+    if (!['ingredientes', 'plasticos'].includes(tipo)) {
+        return res.status(400).json({ error: 'Tipo de tabla inválido.' });
+    }
+
+    // Determinar el campo a actualizar
+    const campo = tipo === 'ingredientes' ? 'precio_bulto' : 'precio_plastico';
+
+    // Consulta SQL ajustada
+    const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
+
+    dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Error al actualizar el costo' });
+        } else {
+            res.json({ message: 'Costo actualizado correctamente' });
+        }
     });
 });
 app.post('/movimientos_materia_prima', (req, res) => {
