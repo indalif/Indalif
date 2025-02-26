@@ -208,15 +208,21 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
     const plasticosTableBody = document.getElementById("plasticos-table-body");
     tableBody.innerHTML = "";
     plasticosTableBody.innerHTML = "";
+
     ingredientes.forEach(row => {
-        const precioTotal = row.cantidad_utilizo * row.precio_unitario;
-        const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
+        console.log("Datos de fila:", row); // Verificar los valores recibidos
+
+        const precioUnitario = parseFloat(row.precio_unitario) || 0;
+        const precioTotal = (parseFloat(row.cantidad_utilizo) || 0) * precioUnitario;
+        const totalIngredientes = (precioTotal / (parseFloat(row.rinde) || 1)).toFixed(2);
 
         const newRow = `
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
                 <td>${row.producto}</td>
                 <td>${row.ingrediente}</td>
-                <td>${row.precio_unitario.toFixed(2)}</td>
+                <td>${row.cantidad_bulto}</td>
+                <td class="precio">${parseFloat(row.precio_bulto).toFixed(2)}</td>
+                <td>${precioUnitario.toFixed(2)}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
                 <td>${precioTotal.toFixed(2)}</td>
@@ -230,12 +236,15 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
         `;
         tableBody.insertAdjacentHTML("beforeend", newRow);
     });
+
     plasticos.forEach(row => {
+        const precioPlastico = parseFloat(row.precio_plastico) || 0;
+
         const newRow = `
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="plasticos">
                 <td>${row.producto}</td>
                 <td>${row.tipo_plastico}</td>
-                <td class="precio">${parseFloat(row.precio_plastico).toFixed(2)}</td>
+                <td class="precio">${precioPlastico.toFixed(2)}</td>
                 <td>
                     <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
                     <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
@@ -244,8 +253,12 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
         `;
         plasticosTableBody.insertAdjacentHTML("beforeend", newRow);
     });
+
     agregarEventosAcciones();
-    actualizarTotalPorPaquete(producto);
+
+    if (ingredientes.length > 0) {
+        actualizarTotalPorPaquete(ingredientes[0].producto);
+    }
 }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
