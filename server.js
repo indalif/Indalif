@@ -169,18 +169,19 @@ dbModulos.query(`
     console.log('Tabla productos actualizada/verificada.');
 });
 dbModulos.query(`
-CREATE TABLE IF NOT EXISTS costos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    producto VARCHAR(50) NOT NULL,
-    ingrediente VARCHAR(50) DEFAULT NULL,
-    precio_unitario DECIMAL(10, 2) NOT NULL,
-    cantidad_kg DECIMAL(10, 2) DEFAULT NULL,
-    cantidad_utilizo DECIMAL(10, 2) DEFAULT NULL,
-    rinde DECIMAL(10, 2) DEFAULT NULL,
-    tipo ENUM('ingrediente', 'plastico') NOT NULL,
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    tipo_plastico VARCHAR(50) DEFAULT NULL,
-    precio_plastico DECIMAL(10,2) DEFAULT NULL
+    CREATE TABLE IF NOT EXISTS costos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        producto VARCHAR(50) NOT NULL,
+        ingrediente VARCHAR(50) DEFAULT NULL,
+        cantidad_bulto DECIMAL(10, 2) DEFAULT NULL,
+        precio_bulto DECIMAL(10, 2) DEFAULT NULL,
+        cantidad_kg DECIMAL(10, 2) DEFAULT NULL,
+        cantidad_utilizo DECIMAL(10, 2) DEFAULT NULL,
+        rinde DECIMAL(10, 2) DEFAULT NULL,
+        tipo_plastico VARCHAR(50) DEFAULT NULL,
+        precio_plastico DECIMAL(10, 2) DEFAULT NULL,
+        tipo ENUM('ingrediente', 'plastico') NOT NULL,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
 `, (err) => {
     if (err) throw err;
@@ -959,14 +960,7 @@ const verificarEmpleado = (req, res, next) => {
 };
 app.post('/registrar_costos', async (req, res) => {
     try {
-        console.log("Datos recibidos en el servidor:", req.body);  // Log para depuración
-        
         const { producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, tipo, tipo_plastico, precio_plastico } = req.body;
-        
-        if (!producto) {
-            return res.status(400).json({ message: "El producto es obligatorio" });
-        }
-        
         let sql, params;
         
         if (tipo === 'ingrediente') {
@@ -981,12 +975,7 @@ app.post('/registrar_costos', async (req, res) => {
             return res.status(400).json({ message: 'Tipo inválido' });
         }
         
-        console.log("Ejecutando consulta:", sql, params);
-        
         const [result] = await dbModulos.query(sql, params);
-        
-        console.log("Resultado de la consulta:", result);
-        
         res.json({ id: result.insertId, message: 'Costo registrado con éxito' });
     } catch (err) {
         console.error('Error al registrar costos:', err.message);

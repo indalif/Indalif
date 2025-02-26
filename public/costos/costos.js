@@ -1,5 +1,6 @@
 let totalesIngredientes = {};
 let totalesPlasticos = {};
+
 document.getElementById("agregar-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto").value;
     const ingrediente = document.getElementById("ingrediente").value;
@@ -8,8 +9,8 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
     const cantidadUtilizo = parseFloat(document.getElementById("cantidad-utilizo").value) || 0;
     const rinde = parseFloat(document.getElementById("rinde").value) || 1;
 
-    if (!producto || !ingrediente || precioUnitario <= 0) {
-        alert("Por favor, completa todos los campos correctamente.");
+    if (!producto || !ingrediente) {
+        alert("Por favor, selecciona un producto y un ingrediente.");
         return;
     }
 
@@ -36,7 +37,6 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
     }
     totalesIngredientes[producto] += parseFloat(totalIngredientes);
     actualizarTotalPorPaquete(producto);
-
     enviarDatosAlServidor({
         producto,
         ingrediente,
@@ -46,10 +46,60 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
         rinde,
         total_ingredientes: parseFloat(totalIngredientes),
     });
-
     filtrarTablaPorProducto(producto);
     document.getElementById("ingredientes-form").reset();
 });
+
+// Actualizar funciones relacionadas
+function actualizarTotalPorPaquete(producto) {
+    let totalIngredientes = 0;
+    let totalPlasticos = 0;
+
+    document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
+        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0;
+        totalIngredientes += costoIngrediente;
+    });
+
+    document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
+        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0;
+        totalPlasticos += costoPlastico;
+    });
+
+    const totalPaquete = totalIngredientes + totalPlasticos;
+    document.getElementById("total-por-paquete").textContent =
+        `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
+}
+
+// Modificar la estructura HTML de las filas de ingredientes
+function mostrarDatosEnTablas(ingredientes, plasticos) {
+    const tableBody = document.getElementById("table-body");
+    tableBody.innerHTML = "";
+    ingredientes.forEach(row => {
+        const precioTotal = row.cantidad_utilizo * row.precio_unitario;
+        const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
+
+        const newRow = `
+            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
+                <td>${row.producto}</td>
+                <td>${row.ingrediente}</td>
+                <td>${row.precio_unitario.toFixed(2)}</td>
+                <td>${row.cantidad_kg}</td>
+                <td>${row.cantidad_utilizo}</td>
+                <td>${precioTotal.toFixed(2)}</td>
+                <td>${row.rinde}</td>
+                <td>${totalIngredientes}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML("beforeend", newRow);
+    });
+    agregarEventosAcciones();
+    actualizarTotalPorPaquete(producto);
+}
+
 document.getElementById("agregar-plastico-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto-plastico").value;
     const tipoPlastico = document.getElementById("tipo-plastico").value;
@@ -100,44 +150,47 @@ function filtrarTablaPorProducto(producto) {
 document.addEventListener("DOMContentLoaded", () => {
     cargarTodosLosDatos(); // Carga los datos al inicio
 });
+
 function cargarDatosProducto(producto) {
     fetch(`/obtener_costos_producto/${producto}`)
         .then(response => response.json())
         .then(data => {
-            console.log("Datos recibidos:", data); // Para depuración
             mostrarDatosEnTablas(data.ingredientes, data.plasticos);
-            filtrarTablaPorProducto(producto);
-            recalcularTotalesProducto(producto);
+            recalcularTotalesProducto(producto); // Recalcular totales
         })
         .catch(error => console.error("Error al cargar datos del producto:", error));
 }
+
 function recalcularTotalesProducto(producto) {
+    // Recalcular totales a partir de las filas en las tablas
     let totalIngredientes = 0;
     let totalPlasticos = 0;
-    
+
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const total = parseFloat(row.children[7]?.textContent.trim()) || 0;
-        totalIngredientes += total;
+        totalIngredientes += parseFloat(row.children[9]?.textContent.trim()) || 0;
     });
 
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const total = parseFloat(row.children[2]?.textContent.trim()) || 0;
-        totalPlasticos += total;
+        totalPlasticos += parseFloat(row.children[2]?.textContent.trim()) || 0;
     });
-    
-    const totalPaquete = totalIngredientes + totalPlasticos;
-    document.getElementById("total-por-paquete").textContent = `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
+
+    totalesIngredientes[producto] = totalIngredientes;
+    totalesPlasticos[producto] = totalPlasticos;
+
+    actualizarTotalPorPaquete(producto); // Reflejar el total recalculado
 }
+
 document.getElementById("producto").addEventListener("change", () => {
     const productoSeleccionado = document.getElementById("producto").value;
     if (productoSeleccionado) {
-        cargarDatosProducto(productoSeleccionado);
+        cargarDatosProducto(productoSeleccionado); // Recarga datos del producto
     } else {
         cargarTodosLosDatos();
+        document.getElementById("total-por-paquete").textContent = "Selecciona un producto para ver el total.";
     }
 });
+
 function enviarDatosAlServidor(datos) {
-    console.log("Enviando datos al servidor:", datos); // Debug
     fetch("/registrar_costos", {
         method: "POST",
         headers: {
@@ -145,20 +198,19 @@ function enviarDatosAlServidor(datos) {
         },
         body: JSON.stringify(datos),
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Respuesta del servidor:", data); // Debug
-        if (data.error) {
-            console.error("Error al registrar costos:", data.error);
-            alert("Hubo un error al registrar los costos.");
-        } else {
-            console.log("Costo registrado con éxito:", data);
-        }
-    })
-    .catch(error => {
-        console.error("Error al conectarse con el servidor:", error);
-        alert("No se pudo conectar con el servidor.");
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Error al registrar costos:", data.error);
+                alert("Hubo un error al registrar los costos.");
+            } else {
+                console.log("Costo registrado con éxito:", data);
+            }
+        })
+        .catch(error => {
+            console.error("Error al conectarse con el servidor:", error);
+            alert("No se pudo conectar con el servidor.");
+        });
 }
 function agregarEventosAcciones() {
     document.querySelectorAll(".edit-btn").forEach(btn => {
@@ -202,31 +254,30 @@ function agregarEventosAcciones() {
         });
     });
 }
+
 function cargarTodosLosDatos() {
     fetch("/obtener_todos_costos")
         .then(response => response.json())
         .then(data => {
-            if (data.ingredientes && data.plasticos) {
-                mostrarDatosEnTablas(data.ingredientes, data.plasticos); 
+            if (Array.isArray(data)) {
+                mostrarDatosEnTablas(data); 
             } else {
-                console.error("Los datos no tienen la estructura esperada:", data);
-                mostrarDatosEnTablas([], []);
+                console.error("Los datos no son un arreglo:", data);
+                mostrarDatosEnTablas([]); 
             }
         })
         .catch(error => {
             console.error("Error al cargar todos los datos:", error);
-            mostrarDatosEnTablas([], []);
+            mostrarDatosEnTablas([]); 
         });
 }
 function mostrarDatosEnTablas(ingredientes, plasticos) {
     const tableBody = document.getElementById("table-body");
     const plasticosTableBody = document.getElementById("plasticos-table-body");
-
     tableBody.innerHTML = "";
     plasticosTableBody.innerHTML = "";
-
     ingredientes.forEach(row => {
-        const precioUnitario = parseFloat(row.precio_unitario) || 0;
+        const precioUnitario = row.cantidad_bulto > 0 ? row.precio_bulto / row.cantidad_bulto : 0;
         const precioTotal = row.cantidad_utilizo * precioUnitario;
         const totalIngredientes = (precioTotal / row.rinde).toFixed(2);
 
@@ -234,27 +285,38 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
                 <td>${row.producto}</td>
                 <td>${row.ingrediente}</td>
+                <td>${row.cantidad_bulto}</td>
+                <td class="precio">${row.precio_bulto}</td>
                 <td>${precioUnitario.toFixed(2)}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
                 <td>${precioTotal.toFixed(2)}</td>
                 <td>${row.rinde}</td>
                 <td>${totalIngredientes}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
             </tr>
         `;
         tableBody.insertAdjacentHTML("beforeend", newRow);
     });
-
     plasticos.forEach(row => {
         const newRow = `
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="plasticos">
                 <td>${row.producto}</td>
                 <td>${row.tipo_plastico}</td>
-                <td>${parseFloat(row.precio_plastico).toFixed(2)}</td>
+                <td class="precio">${parseFloat(row.precio_plastico).toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
             </tr>
         `;
         plasticosTableBody.insertAdjacentHTML("beforeend", newRow);
     });
+    agregarEventosAcciones();
+    actualizarTotalPorPaquete(producto);
 }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
@@ -348,18 +410,24 @@ function actualizarTotalPorPaquete(producto) {
     let totalIngredientes = 0;
     let totalPlasticos = 0;
 
+    // Sumar total de ingredientes desde la tabla
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        totalIngredientes += parseFloat(row.children[7]?.textContent.trim()) || 0;
+        const costoIngrediente = parseFloat(row.children[9]?.textContent.trim()) || 0; // Índice ajustado según la columna
+        totalIngredientes += costoIngrediente;
     });
 
+    // Sumar total de plásticos desde la tabla
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        totalPlasticos += parseFloat(row.children[2]?.textContent.trim()) || 0;
+        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0; // Índice ajustado según la columna
+        totalPlasticos += costoPlastico;
     });
 
+    // Calcular y mostrar el total por paquete
     const totalPaquete = totalIngredientes + totalPlasticos;
     document.getElementById("total-por-paquete").textContent =
         `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
 }
+
 function abrirModalActualizarPrecio(id, tipo, precioActual) {
     const modal = document.getElementById("modal-actualizar-precio");
     modal.style.display = "flex";    
@@ -367,6 +435,7 @@ function abrirModalActualizarPrecio(id, tipo, precioActual) {
     document.getElementById("tipo-tabla").value = tipo;
     document.getElementById("nuevo-precio").value = precioActual;
 }
+
 document.getElementById("form-actualizar-precio").addEventListener("submit", (e) => {
     e.preventDefault(); 
     const id = document.getElementById("fila-id").value;
@@ -418,6 +487,7 @@ document.getElementById("form-actualizar-precio").addEventListener("submit", (e)
             alert("No se pudo conectar con el servidor.");
         });
 });
+
 function actualizarFilaIngredientes(fila, nuevoPrecio) {
     const cantidadBulto = parseFloat(fila.children[2].textContent) || 0;
     const cantidadUtilizo = parseFloat(fila.children[6].textContent) || 0;
@@ -432,6 +502,7 @@ function actualizarFilaIngredientes(fila, nuevoPrecio) {
     fila.children[7].textContent = precioTotal.toFixed(2);   
     fila.children[9].textContent = totalIngredientes;       
 }
+
 function actualizarFilaPlasticos(fila, nuevoPrecio) {
     fila.querySelector(".precio").textContent = nuevoPrecio.toFixed(2);
 }
