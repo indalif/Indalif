@@ -96,24 +96,24 @@ function manejarCambioProducto() {
         ocultarTodasLasFilas();
     }
 }
+function filtrarTablaPorProducto(producto) {
+    console.log("Filtrando tabla para producto:", producto);
+
+    ocultarTodasLasFilas(); // Oculta todas las filas antes de mostrar las correctas
+
+    document.querySelectorAll("#table-body tr, #plasticos-table-body tr").forEach(row => {
+        const primeraCelda = row.cells[0]; // La celda donde está el nombre del producto
+        if (primeraCelda && primeraCelda.textContent.trim() === producto) {
+            row.style.display = ""; // Mostrar fila si coincide con el producto seleccionado
+        }
+    });
+
+    recalcularTotalesProducto(producto);
+}
 function ocultarTodasLasFilas() {
     document.querySelectorAll("#table-body tr, #plasticos-table-body tr").forEach(row => {
         row.style.display = "none";
     });
-}
-function filtrarTablaPorProducto(producto) {
-    console.log("Filtrando tabla para producto:", producto);
-
-    // Ocultar todas las filas antes de mostrar solo las necesarias
-    ocultarTodasLasFilas();
-
-    // Mostrar solo las filas que coincidan con el producto seleccionado
-    document.querySelectorAll(`#table-body tr[data-producto="${producto}"], #plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        row.style.display = "";
-    });
-
-    // Recalcular totales si es necesario
-    recalcularTotalesProducto(producto);
 }
 document.addEventListener("DOMContentLoaded", () => {
     cargarTodosLosDatos(); // Carga los datos al inicio
