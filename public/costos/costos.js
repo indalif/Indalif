@@ -79,6 +79,35 @@ document.getElementById("agregar-plastico-btn").addEventListener("click", () => 
     });
     document.getElementById("plasticos-form").reset();
 });
+document.addEventListener("DOMContentLoaded", function () {
+    let filasIngredientes = document.querySelectorAll("#tablaIngredientes tbody tr");
+    let filasPlastico = document.querySelectorAll("#tablaPlastico tbody tr");
+
+    filasIngredientes.forEach(fila => fila.style.display = "none");
+    filasPlastico.forEach(fila => fila.style.display = "none");
+});
+document.getElementById("productoSelect").addEventListener("change", function () {
+    let productoSeleccionado = this.value;
+
+    let filasIngredientes = document.querySelectorAll("#tablaIngredientes tbody tr");
+    let filasPlastico = document.querySelectorAll("#tablaPlastico tbody tr");
+
+    filasIngredientes.forEach(fila => {
+        if (fila.getAttribute("data-producto") === productoSeleccionado) {
+            fila.style.display = "";
+        } else {
+            fila.style.display = "none";
+        }
+    });
+
+    filasPlastico.forEach(fila => {
+        if (fila.getAttribute("data-producto") === productoSeleccionado) {
+            fila.style.display = "";
+        } else {
+            fila.style.display = "none";
+        }
+    });
+});
 function filtrarTablaPorProducto(producto) {
     const ingredientesRows = document.querySelectorAll("#table-body tr");
     const plasticosRows = document.querySelectorAll("#plasticos-table-body tr");
