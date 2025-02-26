@@ -202,9 +202,16 @@ async function cargarNotas() {
         const listaNotas = document.getElementById('listaNotas');
         listaNotas.innerHTML = ''; // ✅ BORRA LAS NOTAS ANTERIORES PARA EVITAR DUPLICADOS
         const formatFecha = (fechaISO) => {
-            const partes = fechaISO.split('-'); // Divide el formato YYYY-MM-DD
-            return `${partes[2]}/${partes[1]}/${partes[0]}`; // Devuelve DD/MM/YYYY sin problemas de zona horaria
-        };
+            if (!fechaISO) return ''; // Evita errores si el valor es nulo o indefinido
+        
+            // Aseguramos que la fecha solo contiene la parte de "YYYY-MM-DD"
+            const fecha = new Date(fechaISO);
+            const dia = fecha.getUTCDate().toString().padStart(2, '0'); 
+            const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); 
+            const anio = fecha.getUTCFullYear();
+        
+            return `${dia}/${mes}/${anio}`;
+        };        
         data.notas.forEach(nota => {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
