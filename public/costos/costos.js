@@ -1,38 +1,12 @@
 let totalesIngredientes = {};
 let totalesPlasticos = {};
-document.addEventListener("DOMContentLoaded", function () {
-    const selectProducto = document.getElementById("producto");
-    const selectPlastico = document.getElementById("producto-plastico");
-    const filasIngredientes = document.querySelectorAll("#tabla-ingredientes tbody tr");
-    const filasPlastico = document.querySelectorAll("#tabla-plastico tbody tr");
-
-    // Ocultar todas las filas al cargar la página
-    filasIngredientes.forEach(fila => fila.style.display = "none");
-    filasPlastico.forEach(fila => fila.style.display = "none");
-
-    function filtrarTablaPorProducto(select, filas) {
-        const productoSeleccionado = select.value;
-
-        // Ocultar todas las filas de la tabla correspondiente
-        filas.forEach(fila => fila.style.display = "none");
-
-        if (productoSeleccionado) {
-            // Mostrar solo las filas que coincidan con el producto seleccionado
-            filas.forEach(fila => {
-                if (fila.getAttribute("data-producto") === productoSeleccionado) {
-                    fila.style.display = "table-row";
-                }
-            });
-        }
-    }
-
-    selectProducto.addEventListener("change", () => {
-        filtrarTablaPorProducto(selectProducto, filasIngredientes);
-    });
-
-    selectPlastico.addEventListener("change", () => {
-        filtrarTablaPorProducto(selectPlastico, filasPlastico);
-    });
+document.getElementById("producto").addEventListener("change", () => {
+    const productoSeleccionado = document.getElementById("producto").value;
+    filtrarTablaPorProducto(productoSeleccionado);
+});
+document.getElementById("producto-plastico").addEventListener("change", () => {
+    const productoSeleccionado = document.getElementById("producto-plastico").value;
+    filtrarTablaPorProducto(productoSeleccionado);
 });
 document.getElementById("agregar-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto").value;
