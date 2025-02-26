@@ -217,20 +217,20 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
         const totalIngredientes = (precioTotal / (parseFloat(row.rinde) || 1)).toFixed(2);
 
         const newRow = `
-        <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingrediente">
-            <td>${row.producto}</td>
-            <td>${row.ingrediente}</td>
-            <td>${row.cantidad_kg}</td>
-            <td>${row.cantidad_utilizo}</td>
-            <td class="precio">${precioUnitario.toFixed(2)}</td>
-            <td>${precioTotal.toFixed(2)}</td>
-            <td>${row.rinde}</td>
-            <td>${totalIngredientes}</td>
-            <td>
-                <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
-                <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
-            </td>
-        </tr>    
+            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingrediente">
+                <td>${row.producto}</td>
+                <td>${row.ingrediente}</td>
+                <td>${row.cantidad_kg}</td>
+                <td>${row.cantidad_utilizo}</td>
+                <td class="precio">${precioUnitario.toFixed(2)}</td>
+                <td>${precioTotal.toFixed(2)}</td>
+                <td>${row.rinde}</td>
+                <td>${totalIngredientes}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+                </td>
+            </tr>
         `;
         tableBody.insertAdjacentHTML("beforeend", newRow);
     });
@@ -239,7 +239,7 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
         const precioPlastico = parseFloat(row.precio_plastico) || 0;
 
         const newRow = `
-            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="plasticos">
+            <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="plastico">
                 <td>${row.producto}</td>
                 <td>${row.tipo_plastico}</td>
                 <td class="precio">${precioPlastico.toFixed(2)}</td>
@@ -254,10 +254,9 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
 
     agregarEventosAcciones();
 
-    if (tipo !== "ingrediente" && tipo !== "plastico") {
-        console.error("Tipo de tabla inválido.");
-        return;
-    }    
+    if (ingredientes.length > 0) {
+        actualizarTotalPorPaquete(ingredientes[0].producto);
+    }
 }
 function calcularTotalDesdeServidor(producto) {
     fetch(`/total_por_paquete/${producto}`)
@@ -333,31 +332,37 @@ document.addEventListener("click", (e) => {
         const fila = e.target.closest("tr");
         const id = fila.getAttribute("data-id");
         const tipo = fila.getAttribute("data-tabla");
+
+        if (!id || (tipo !== "ingrediente" && tipo !== "plastico")) {
+            console.error("Tipo de tabla inválido o ID no encontrado.");
+            return;
+        }
+
         const precioCelda = fila.querySelector(".precio");
         if (!precioCelda) {
             console.error("No se encontró la celda de precio en la fila:", fila);
             return;
         }
+
         const precioActual = parseFloat(precioCelda.textContent);
         console.log("ID:", id, "Tipo de tabla:", tipo, "Precio actual:", precioActual);
-        if (tipo !== "ingredientes" && tipo !== "plasticos") {
-            console.error("Tipo de tabla inválido.");
-            return;
-        }
         abrirModalActualizarPrecio(id, tipo, precioActual);
     }
 });
 function actualizarTotalPorPaquete(producto) {
     let totalIngredientes = 0;
     let totalPlasticos = 0;
+
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoIngrediente = parseFloat(row.children[9]?.textContent.trim()) || 0; // Índice ajustado según la columna
+        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0; // Índice corregido
         totalIngredientes += costoIngrediente;
     });
+
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0; // Índice ajustado según la columna
+        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0;
         totalPlasticos += costoPlastico;
     });
+
     const totalPaquete = totalIngredientes + totalPlasticos;
     document.getElementById("total-por-paquete").textContent =
         `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
