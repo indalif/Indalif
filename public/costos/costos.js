@@ -220,9 +220,9 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingrediente">
                 <td>${row.producto}</td>
                 <td>${row.ingrediente}</td>
+                <td class="precio">${precioUnitario.toFixed(2)}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
-                <td class="precio">${precioUnitario.toFixed(2)}</td>
                 <td>${precioTotal.toFixed(2)}</td>
                 <td>${row.rinde}</td>
                 <td>${totalIngredientes}</td>
@@ -423,15 +423,15 @@ document.getElementById("form-actualizar-precio").addEventListener("submit", (e)
         });
 });
 function actualizarFilaIngredientes(fila, nuevoPrecio) {
-    const cantidadUtilizo = parseFloat(fila.children[4].textContent) || 0;
-    const rinde = parseFloat(fila.children[6].textContent) || 1;
+    const cantidadUtilizo = parseFloat(fila.children[3].textContent) || 0; // Índice corregido
+    const rinde = parseFloat(fila.children[5].textContent) || 1; // Índice corregido
 
     const precioTotal = cantidadUtilizo * nuevoPrecio;
     const totalIngredientes = (precioTotal / rinde).toFixed(2);
 
-    fila.querySelector(".precio").textContent = nuevoPrecio.toFixed(2);
-    fila.children[5].textContent = precioTotal.toFixed(2);
-    fila.children[7].textContent = totalIngredientes;
+    fila.children[2].textContent = nuevoPrecio.toFixed(2); // Actualiza solo el precio unitario
+    fila.children[4].textContent = precioTotal.toFixed(2); // Recalcula precio total
+    fila.children[6].textContent = totalIngredientes; // Recalcula total ingredientes
 }
 function actualizarFilaPlasticos(fila, nuevoPrecio) {
     fila.querySelector(".precio").textContent = nuevoPrecio.toFixed(2);
