@@ -959,7 +959,14 @@ const verificarEmpleado = (req, res, next) => {
 };
 app.post('/registrar_costos', async (req, res) => {
     try {
+        console.log("Datos recibidos en el servidor:", req.body);  // Log para depuración
+        
         const { producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, tipo, tipo_plastico, precio_plastico } = req.body;
+        
+        if (!producto) {
+            return res.status(400).json({ message: "El producto es obligatorio" });
+        }
+        
         let sql, params;
         
         if (tipo === 'ingrediente') {
@@ -974,7 +981,12 @@ app.post('/registrar_costos', async (req, res) => {
             return res.status(400).json({ message: 'Tipo inválido' });
         }
         
+        console.log("Ejecutando consulta:", sql, params);
+        
         const [result] = await dbModulos.query(sql, params);
+        
+        console.log("Resultado de la consulta:", result);
+        
         res.json({ id: result.insertId, message: 'Costo registrado con éxito' });
     } catch (err) {
         console.error('Error al registrar costos:', err.message);
