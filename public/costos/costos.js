@@ -1,5 +1,13 @@
 let totalesIngredientes = {};
 let totalesPlasticos = {};
+document.getElementById("producto").addEventListener("change", () => {
+    const productoSeleccionado = document.getElementById("producto").value;
+    filtrarTablaPorProducto(productoSeleccionado);
+});
+document.getElementById("producto-plastico").addEventListener("change", () => {
+    const productoSeleccionado = document.getElementById("producto-plastico").value;
+    filtrarTablaPorProducto(productoSeleccionado);
+});
 document.getElementById("agregar-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto").value;
     const ingrediente = document.getElementById("ingrediente").value;
@@ -83,7 +91,7 @@ function filtrarTablaPorProducto(producto) {
         row.style.display = row.getAttribute("data-producto") === producto ? "" : "none";
     });
 
-    actualizarTotalPorPaquete(producto);
+    recalcularTotalesProducto(producto);
 }
 document.addEventListener("DOMContentLoaded", () => {
     cargarTodosLosDatos(); // Carga los datos al inicio
@@ -102,27 +110,18 @@ function recalcularTotalesProducto(producto) {
     let totalPlasticos = 0;
 
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0; // Índice correcto
+        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0;
         totalIngredientes += costoIngrediente;
     });
+
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
         totalPlasticos += parseFloat(row.children[2]?.textContent.trim()) || 0;
     });
 
     totalesIngredientes[producto] = totalIngredientes;
     totalesPlasticos[producto] = totalPlasticos;
-
-    actualizarTotalPorPaquete(producto); // Reflejar el total recalculado
+    actualizarTotalPorPaquete(producto);
 }
-document.getElementById("producto").addEventListener("change", () => {
-    const productoSeleccionado = document.getElementById("producto").value;
-    if (productoSeleccionado) {
-        cargarDatosProducto(productoSeleccionado); // Recarga datos del producto
-    } else {
-        cargarTodosLosDatos();
-        document.getElementById("total-por-paquete").textContent = "Selecciona un producto para ver el total.";
-    }
-});
 function enviarDatosAlServidor(datos) {
     fetch("/registrar_costos", {
         method: "POST",
@@ -272,15 +271,6 @@ function calcularTotalDesdeServidor(producto) {
                 `No se pudo calcular el total para ${producto}`;
         });
 }
-document.getElementById("producto-plastico").addEventListener("change", () => {
-    const productoSeleccionado = document.getElementById("producto-plastico").value;
-    if (productoSeleccionado) {
-        cargarDatosProducto(productoSeleccionado);
-    } else {
-        cargarTodosLosDatos();
-        document.getElementById("total-por-paquete").textContent = "Total por Paquete: $0.00";
-    }
-});
 function agregarFilaTabla(datos) {
     const tabla = document.getElementById("table-body");
     const fila = document.createElement("tr");
@@ -350,20 +340,7 @@ document.addEventListener("click", (e) => {
     }
 });
 function actualizarTotalPorPaquete(producto) {
-    let totalIngredientes = 0;
-    let totalPlasticos = 0;
-
-    document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0; // Índice corregido
-        totalIngredientes += costoIngrediente;
-    });
-
-    document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-        const costoPlastico = parseFloat(row.children[2]?.textContent.trim()) || 0;
-        totalPlasticos += costoPlastico;
-    });
-
-    const totalPaquete = totalIngredientes + totalPlasticos;
+    const totalPaquete = (totalesIngredientes[producto] || 0) + (totalesPlasticos[producto] || 0);
     document.getElementById("total-por-paquete").textContent =
         `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
 }
