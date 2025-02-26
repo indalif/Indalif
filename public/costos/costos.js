@@ -3,8 +3,7 @@ let totalesPlasticos = {};
 document.getElementById("agregar-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto").value;
     const ingrediente = document.getElementById("ingrediente").value;
-    const cantidadBulto = parseFloat(document.getElementById("cantidad-bulto").value) || 0;
-    const precioBulto = parseFloat(document.getElementById("precio-bulto").value) || 0;
+    const precioUnitario = parseFloat(document.getElementById("precio-unitario").value) || 0;
     const cantidadKg = parseFloat(document.getElementById("cantidad-kg").value) || 0;
     const cantidadUtilizo = parseFloat(document.getElementById("cantidad-utilizo").value) || 0;
     const rinde = parseFloat(document.getElementById("rinde").value) || 1;
@@ -13,7 +12,7 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
         alert("Por favor, selecciona un producto y un ingrediente.");
         return;
     }
-    const precioUnitario = (cantidadBulto > 0 ? precioBulto / cantidadBulto : 0).toFixed(2);
+    
     const precio = (cantidadUtilizo * precioUnitario).toFixed(2);
     const totalIngredientes = (precio / rinde).toFixed(2);
     const ingredientesTableBody = document.getElementById("table-body");
@@ -21,9 +20,7 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
         <tr data-producto="${producto}">
             <td>${producto}</td>
             <td>${ingrediente}</td>
-            <td>${cantidadBulto}</td>
-            <td>${precioBulto}</td>
-            <td>${precioUnitario}</td>
+            <td>${precioUnitario.toFixed(2)}</td>
             <td>${cantidadKg}</td>
             <td>${cantidadUtilizo}</td>
             <td>${precio}</td>
@@ -32,22 +29,16 @@ document.getElementById("agregar-btn").addEventListener("click", () => {
         </tr>
     `;
     ingredientesTableBody.insertAdjacentHTML("beforeend", newRow);
-    if (!totalesIngredientes[producto]) {
-        totalesIngredientes[producto] = 0;
-    }
-    totalesIngredientes[producto] += parseFloat(totalIngredientes);
-    actualizarTotalPorPaquete(producto);
+
     enviarDatosAlServidor({
         producto,
         ingrediente,
-        cantidad_bulto: cantidadBulto,
-        precio_bulto: precioBulto,
+        precio_unitario: precioUnitario,
         cantidad_kg: cantidadKg,
         cantidad_utilizo: cantidadUtilizo,
         rinde,
         total_ingredientes: parseFloat(totalIngredientes),
     });
-    filtrarTablaPorProducto(producto);
     document.getElementById("ingredientes-form").reset();
 });
 document.getElementById("agregar-plastico-btn").addEventListener("click", () => {

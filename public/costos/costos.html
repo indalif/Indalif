@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="stylesheet" href="costos.css">
     <script defer src="costos.js"></script>
 </head>
+
 <body>
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -17,7 +19,7 @@
                 <button class="btn btn-secondary" onclick="window.location.href='/inicio/inicio.html'">
                     <i class="fas fa-home me-2"></i> Volver a Inicio
                 </button>
-            </div>   
+            </div>
         </div>
         <div class="row g-4">
             <div class="col-lg-6">
@@ -43,10 +45,8 @@
                             </select>
                             <input type="text" id="ingrediente" class="form-control mb-3" placeholder="Ingrediente"
                                 required>
-                            <input type="number" id="cantidad-bulto" class="form-control mb-3"
-                                placeholder="Cantidad por Bulto" required>
-                            <input type="number" id="precio-bulto" class="form-control mb-3"
-                                placeholder="Precio del Bulto" required>
+                            <input type="number" id="precio-unitario" class="form-control mb-3"
+                                placeholder="Precio Unitario" required>
                             <input type="number" id="cantidad-kg" class="form-control mb-3"
                                 placeholder="Cantidad por Kg" required>
                             <input type="number" id="cantidad-utilizo" class="form-control mb-3"
@@ -100,8 +100,6 @@
                         <tr>
                             <th>Producto</th>
                             <th>Ingrediente</th>
-                            <th>Cantidad por Bulto</th>
-                            <th>Precio del Bulto</th>
                             <th>Precio Unitario</th>
                             <th>Cantidad por Kg</th>
                             <th>Cantidad que Utilizo</th>
@@ -153,4 +151,5 @@
             </div>
         </div>
 </body>
+
 </html>

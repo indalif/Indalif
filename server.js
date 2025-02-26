@@ -173,8 +173,7 @@ dbModulos.query(`
         id INT AUTO_INCREMENT PRIMARY KEY,
         producto VARCHAR(50) NOT NULL,
         ingrediente VARCHAR(50) DEFAULT NULL,
-        cantidad_bulto DECIMAL(10, 2) DEFAULT NULL,
-        precio_bulto DECIMAL(10, 2) DEFAULT NULL,
+        precio_unitario DECIMAL(10, 2) DEFAULT NULL,
         cantidad_kg DECIMAL(10, 2) DEFAULT NULL,
         cantidad_utilizo DECIMAL(10, 2) DEFAULT NULL,
         rinde DECIMAL(10, 2) DEFAULT NULL,
@@ -185,7 +184,7 @@ dbModulos.query(`
     )
 `, (err) => {
     if (err) throw err;
-    console.log('Tabla costos verificada/creada.');
+    console.log('Tabla costos actualizada/verificada.');
 });
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS pedidos (
@@ -960,7 +959,7 @@ const verificarEmpleado = (req, res, next) => {
 };
 app.post('/registrar_costos', (req, res) => {
     const {
-        producto, ingrediente, cantidad_bulto, precio_bulto,
+        producto, ingrediente, precio_unitario,
         cantidad_kg, cantidad_utilizo, rinde,
         tipo_plastico, precio_plastico
     } = req.body;
@@ -973,13 +972,13 @@ app.post('/registrar_costos', (req, res) => {
 
     const sql = `
         INSERT INTO costos (
-            producto, ingrediente, cantidad_bulto, precio_bulto,
-            cantidad_kg, cantidad_utilizo, rinde, 
+            producto, ingrediente, precio_unitario,
+            cantidad_kg, cantidad_utilizo, rinde,
             tipo_plastico, precio_plastico, tipo
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     dbModulos.query(sql, [
-        producto, ingrediente || null, cantidad_bulto || null, precio_bulto || null,
+        producto, ingrediente || null, precio_unitario || null,
         cantidad_kg || null, cantidad_utilizo || null, rinde || null,
         tipo_plastico || null, precio_plastico || null, tipo
     ], (err, result) => {
@@ -994,7 +993,7 @@ app.get('/obtener_costos_producto/:producto', (req, res) => {
     const { producto } = req.params;
 
     const sqlIngredientes = `
-        SELECT id, producto, ingrediente, cantidad_bulto, precio_bulto, cantidad_kg, 
+        SELECT id, producto, ingrediente, precio_unitario, cantidad_kg, 
                cantidad_utilizo, rinde, fecha 
         FROM costos 
         WHERE tipo = 'ingrediente' AND producto = ?
@@ -1085,15 +1084,11 @@ app.delete('/eliminar_costo/:id', (req, res) => {
 app.put('/actualizar_costo', (req, res) => {
     const { id, tipo, nuevoPrecio } = req.body;
 
-    // Validar tipo
-    if (!['ingredientes', 'plasticos'].includes(tipo)) {
+    if (!['ingrediente', 'plastico'].includes(tipo)) {
         return res.status(400).json({ error: 'Tipo de tabla inválido.' });
     }
 
-    // Determinar el campo a actualizar
-    const campo = tipo === 'ingredientes' ? 'precio_bulto' : 'precio_plastico';
-
-    // Consulta SQL ajustada
+    const campo = tipo === 'ingrediente' ? 'precio_unitario' : 'precio_plastico';
     const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
 
     dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
