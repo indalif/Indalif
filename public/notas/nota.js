@@ -201,12 +201,10 @@ async function cargarNotas() {
 
         const listaNotas = document.getElementById('listaNotas');
         listaNotas.innerHTML = ''; // ✅ BORRA LAS NOTAS ANTERIORES PARA EVITAR DUPLICADOS
-
         const formatFecha = (fechaISO) => {
-            const fecha = new Date(fechaISO);
-            return `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1).toString().padStart(2, '0')}/${fecha.getFullYear()}`;
+            const partes = fechaISO.split('-'); // Divide el formato YYYY-MM-DD
+            return `${partes[2]}/${partes[1]}/${partes[0]}`; // Devuelve DD/MM/YYYY sin problemas de zona horaria
         };
-
         data.notas.forEach(nota => {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
