@@ -1,6 +1,5 @@
 let totalesIngredientes = {};
 let totalesPlasticos = {};
-// Escuchar cambios en los selects de productos
 document.getElementById("producto").addEventListener("change", () => {
     const productoSeleccionado = document.getElementById("producto").value;
     filtrarTablaPorProducto(productoSeleccionado);
@@ -8,11 +7,6 @@ document.getElementById("producto").addEventListener("change", () => {
 document.getElementById("producto-plastico").addEventListener("change", () => {
     const productoSeleccionado = document.getElementById("producto-plastico").value;
     filtrarTablaPorProducto(productoSeleccionado);
-});
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("#table-body tr, #plasticos-table-body tr").forEach(row => {
-        row.style.display = "none";
-    });
 });
 document.getElementById("agregar-btn").addEventListener("click", () => {
     const producto = document.getElementById("producto").value;
@@ -85,23 +79,41 @@ document.getElementById("agregar-plastico-btn").addEventListener("click", () => 
     });
     document.getElementById("plasticos-form").reset();
 });
-function filtrarTablaPorProducto(producto) {
-    console.log("Filtrando tabla para producto:", producto);
+document.addEventListener("DOMContentLoaded", () => {
+    // Ocultar todas las filas al inicio
+    ocultarTodasLasFilas();
+    
+    // Escuchar cambios en los selects de productos
+    document.getElementById("producto").addEventListener("change", manejarCambioProducto);
+    document.getElementById("producto-plastico").addEventListener("change", manejarCambioProducto);
+});
+function manejarCambioProducto() {
+    const productoSeleccionado = document.getElementById("producto").value;
 
-    // Ocultar todas las filas
+    if (productoSeleccionado) {
+        filtrarTablaPorProducto(productoSeleccionado);
+    } else {
+        ocultarTodasLasFilas();
+    }
+}
+function ocultarTodasLasFilas() {
     document.querySelectorAll("#table-body tr, #plasticos-table-body tr").forEach(row => {
         row.style.display = "none";
     });
+}
+function filtrarTablaPorProducto(producto) {
+    console.log("Filtrando tabla para producto:", producto);
 
-    // Si hay un producto seleccionado, mostrar solo sus filas
-    if (producto) {
-        document.querySelectorAll(`#table-body tr[data-producto="${producto}"], #plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
-            row.style.display = "";
-        });
+    // Ocultar todas las filas antes de mostrar solo las necesarias
+    ocultarTodasLasFilas();
 
-        // Recalcular los totales para el producto seleccionado
-        recalcularTotalesProducto(producto);
-    }
+    // Mostrar solo las filas que coincidan con el producto seleccionado
+    document.querySelectorAll(`#table-body tr[data-producto="${producto}"], #plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
+        row.style.display = "";
+    });
+
+    // Recalcular totales si es necesario
+    recalcularTotalesProducto(producto);
 }
 document.addEventListener("DOMContentLoaded", () => {
     cargarTodosLosDatos(); // Carga los datos al inicio
