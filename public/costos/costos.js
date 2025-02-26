@@ -203,18 +203,33 @@ function cargarTodosLosDatos() {
             mostrarDatosEnTablas([]);
         });
 }
-function mostrarDatosEnTablas(ingredientes, plasticos) {
+function mostrarDatosEnTablas(ingredientes = [], plasticos = []) {
     const tableBody = document.getElementById("table-body");
     const plasticosTableBody = document.getElementById("plasticos-table-body");
+
+    // Limpiar las tablas antes de insertar nuevos datos
     tableBody.innerHTML = "";
     plasticosTableBody.innerHTML = "";
 
+    // Verificar si los datos existen
+    if (!Array.isArray(ingredientes) || !Array.isArray(plasticos)) {
+        console.error("Error: Los datos no están en el formato esperado.");
+        return;
+    }
+
+    let totalIngredientesSum = 0; // Acumulador de total de ingredientes
+
     ingredientes.forEach(row => {
-        console.log("Datos de fila:", row); // Verificar los valores recibidos
+        console.log("Datos de fila (ingredientes):", row);
 
         const precioUnitario = parseFloat(row.precio_unitario) || 0;
-        const precioTotal = (parseFloat(row.cantidad_utilizo) || 0) * precioUnitario;
-        const totalIngredientes = (precioTotal / (parseFloat(row.rinde) || 1)).toFixed(2);
+        const cantidadUtilizo = parseFloat(row.cantidad_utilizo) || 0;
+        const rinde = parseFloat(row.rinde) || 1;
+
+        const precioTotal = cantidadUtilizo * precioUnitario;
+        const totalIngredientes = (precioTotal / rinde).toFixed(2);
+
+        totalIngredientesSum += parseFloat(totalIngredientes); // Acumulamos los valores
 
         const newRow = `
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
@@ -222,10 +237,10 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
                 <td>${row.ingrediente}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
-                <td>${precioUnitario.toFixed(2)}</td>
+                <td class="precio">${precioUnitario.toFixed(2)}</td>
                 <td>${precioTotal.toFixed(2)}</td>
                 <td>${row.rinde}</td>
-                <td>${totalIngredientes}</td>
+                <td class="total-ingredientes">${totalIngredientes}</td>
                 <td>
                     <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
                     <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
@@ -236,6 +251,8 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
     });
 
     plasticos.forEach(row => {
+        console.log("Datos de fila (plásticos):", row);
+
         const precioPlastico = parseFloat(row.precio_plastico) || 0;
 
         const newRow = `
@@ -251,6 +268,8 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
         `;
         plasticosTableBody.insertAdjacentHTML("beforeend", newRow);
     });
+
+    console.log("Total Ingredientes Sumado:", totalIngredientesSum);
 
     agregarEventosAcciones();
 
@@ -369,50 +388,59 @@ document.getElementById("form-actualizar-precio").addEventListener("submit", (e)
     const id = document.getElementById("fila-id").value;
     const tipo = document.getElementById("tipo-tabla").value;
     const nuevoPrecio = parseFloat(document.getElementById("nuevo-precio").value);
+
     if (isNaN(nuevoPrecio) || nuevoPrecio <= 0) {
         alert("Por favor, ingresa un precio válido.");
         return;
     }
+
+    const datos = {
+        id,
+        tipo, 
+        nuevoPrecio,
+    };
+
+    console.log("Enviando datos al servidor:", datos);
+
     fetch("/actualizar_costo", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-            id,
-            tipo, 
-            nuevoPrecio,
-        }),
+        body: JSON.stringify(datos),
     })
-        .then((response) => {
-            if (!response.ok) {
-                console.error("Error en la solicitud:", response.statusText);
-                throw new Error("No se pudo actualizar el costo.");
+    .then((response) => {
+        if (!response.ok) {
+            console.error("Error en la solicitud:", response.statusText);
+            throw new Error("No se pudo actualizar el costo.");
+        }
+        return response.json();
+    })
+    .then((data) => {
+        if (data.error) {
+            alert("Error al actualizar el costo.");
+            console.error(data.error);
+        } else {
+            const fila = document.querySelector(`tr[data-id="${id}"]`);
+            const producto = fila?.getAttribute("data-producto");
+
+            if (fila && tipo === "ingredientes") {
+                actualizarFilaIngredientes(fila, nuevoPrecio);
+            } else if (fila && tipo === "plasticos") {
+                actualizarFilaPlasticos(fila, nuevoPrecio);
             }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.error) {
-                alert("Error al actualizar el costo.");
-                console.error(data.error);
-            } else {
-                const fila = document.querySelector(`tr[data-id="${id}"]`);
-                const producto = fila.getAttribute("data-producto");
 
-                if (fila && tipo === "ingredientes") {
-                    actualizarFilaIngredientes(fila, nuevoPrecio);
-                } else if (fila && tipo === "plasticos") {
-                    actualizarFilaPlasticos(fila, nuevoPrecio);
-                }
-
+            if (producto) {
                 actualizarTotalPorPaquete(producto);
-                document.getElementById("modal-actualizar-precio").style.display = "none";
             }
-        })
-        .catch((error) => {
-            console.error("Error al conectarse con el servidor:", error);
-            alert("No se pudo conectar con el servidor.");
-        });
+
+            document.getElementById("modal-actualizar-precio").style.display = "none";
+        }
+    })
+    .catch((error) => {
+        console.error("Error al conectarse con el servidor:", error);
+        alert("No se pudo conectar con el servidor.");
+    });
 });
 function actualizarFilaIngredientes(fila, nuevoPrecio) {
     const cantidadUtilizo = parseFloat(fila.children[4].textContent) || 0;
