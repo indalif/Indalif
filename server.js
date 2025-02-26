@@ -1095,16 +1095,15 @@ app.put('/actualizar_costo', (req, res) => {
         return res.status(400).json({ error: 'Tipo de tabla inválido.' });
     }
 
-    const campo = tipo === 'ingrediente' ? 'precio_unitario' : 'precio_plastico';
+    const campo = tipo === 'ingrediente' ? 'precio_unitario' : 'precio_plastico'; // Asegura que se actualice el campo correcto
     const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
 
     dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
         if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Error al actualizar el costo' });
-        } else {
-            res.json({ message: 'Costo actualizado correctamente' });
+            console.error('Error al actualizar el costo:', err.message);
+            return res.status(500).json({ error: 'Error al actualizar el costo' });
         }
+        res.json({ message: 'Costo actualizado correctamente' });
     });
 });
 app.post('/movimientos_materia_prima', (req, res) => {

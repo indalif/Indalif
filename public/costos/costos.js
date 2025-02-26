@@ -104,7 +104,7 @@ function recalcularTotalesProducto(producto) {
     document.querySelectorAll(`#table-body tr[data-producto="${producto}"]`).forEach(row => {
         const costoIngrediente = parseFloat(row.children[7]?.textContent.trim()) || 0; // Índice correcto
         totalIngredientes += costoIngrediente;
-    });    
+    });
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"]`).forEach(row => {
         totalPlasticos += parseFloat(row.children[2]?.textContent.trim()) || 0;
     });
@@ -385,10 +385,12 @@ document.getElementById("form-actualizar-precio").addEventListener("submit", (e)
     }
     fetch("/actualizar_costo", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+        },
         body: JSON.stringify({
             id,
-            tipo: tipo === "ingredientes" ? "ingrediente" : "plastico", // Ajustar al formato esperado
+            tipo: tipo === "plasticos" ? "plastico" : "ingrediente", // Corrige la asignación del tipo
             nuevoPrecio,
         }),
     })
