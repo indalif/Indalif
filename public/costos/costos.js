@@ -220,11 +220,9 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
             <tr data-id="${row.id}" data-producto="${row.producto}" data-tabla="ingredientes">
                 <td>${row.producto}</td>
                 <td>${row.ingrediente}</td>
-                <td>${row.cantidad_bulto}</td>
-                <td class="precio">${parseFloat(row.precio_bulto).toFixed(2)}</td>
-                <td>${precioUnitario.toFixed(2)}</td>
                 <td>${row.cantidad_kg}</td>
                 <td>${row.cantidad_utilizo}</td>
+                <td>${precioUnitario.toFixed(2)}</td>
                 <td>${precioTotal.toFixed(2)}</td>
                 <td>${row.rinde}</td>
                 <td>${totalIngredientes}</td>
