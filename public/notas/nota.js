@@ -44,16 +44,30 @@ document.getElementById('agregarProducto').addEventListener('click', function ()
     const presentacion = document.getElementById('presentacion').value;
 
     if (!producto || !cantidad || !presentacion) {
+        alert('Por favor, completa todos los campos.');
         return;
     }
 
-    productosLista.push({ producto, cantidad, presentacion });
+    let editIndex = this.getAttribute('data-edit-index');
 
-    const listaProductos = document.getElementById('listaProductos');
-    let li = document.createElement('li');
-    li.classList.add('list-group-item');
-    li.textContent = `${producto} - Cantidad: ${cantidad} - Presentación: ${presentacion}`;
-    listaProductos.appendChild(li);
+    if (editIndex !== null) {
+        // Si hay un índice, significa que estamos editando
+        productosLista[editIndex] = { producto, cantidad, presentacion };
+
+        // Restaurar botón a "Agregar Producto"
+        this.innerHTML = `<i class="fas fa-plus me-2"></i>Agregar Producto`;
+        this.removeAttribute('data-edit-index');
+    } else {
+        // Si no hay índice, estamos agregando un nuevo producto
+        productosLista.push({ producto, cantidad, presentacion });
+    }
+
+    actualizarListaProductos();
+
+    // Limpiar inputs
+    document.getElementById('producto').value = '';
+    document.getElementById('cantidad').value = '';
+    document.getElementById('presentacion').value = '';
 });
 document.getElementById('notaPedidoForm').addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -329,12 +343,45 @@ async function cargarNotaParaEditar(notaId) {
 function actualizarListaProductos() {
     const listaProductos = document.getElementById('listaProductos');
     listaProductos.innerHTML = '';
-    productosLista.forEach(p => {
+
+    productosLista.forEach((p, index) => {
         let li = document.createElement('li');
-        li.classList.add('list-group-item');
-        li.textContent = `${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion}`;
+        li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+        li.innerHTML = `
+            ${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion}
+            <div>
+                <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${index})">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        `;
+
         listaProductos.appendChild(li);
     });
+}
+function editarProducto(index) {
+    const producto = productosLista[index];
+
+    // Cargar los datos del producto en los inputs
+    document.getElementById('producto').value = producto.producto;
+    document.getElementById('cantidad').value = producto.cantidad;
+    document.getElementById('presentacion').value = producto.presentacion;
+
+    // Guardar índice del producto que se está editando
+    document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
+
+    // Cambiar texto del botón a "Actualizar Producto"
+    document.getElementById('agregarProducto').innerHTML = `<i class="fas fa-save me-2"></i>Actualizar Producto`;
+}
+function eliminarProducto(index) {
+    if (confirm('¿Estás seguro de eliminar este producto?')) {
+        productosLista.splice(index, 1);
+        actualizarListaProductos();
+    }
 }
 async function guardarNotaEditada() {
     const notaId = document.getElementById('guardarNotaEditada').getAttribute('data-id');
