@@ -294,3 +294,60 @@ async function marcarComoEntregado(button) {
     }
 }
 document.addEventListener('DOMContentLoaded', cargarNotas, marcarComoEntregado);
+function agregarBotonEditar(notaDiv, nota) {
+    let botonEditar = document.createElement('button');
+    botonEditar.classList.add('btn', 'btn-warning', 'w-100', 'mt-2');
+    botonEditar.innerHTML = '<i class="fas fa-edit me-2"></i> Editar';
+    botonEditar.addEventListener('click', () => cargarNotaParaEditar(nota));
+    notaDiv.appendChild(botonEditar);
+}
+function cargarNotaParaEditar(nota) {
+    document.getElementById('numero_nota').value = nota.numero_nota;
+    document.getElementById('cliente').value = nota.cliente_id;
+    document.getElementById('fecha').value = nota.fecha;
+    document.getElementById('fecha_entrega').value = nota.fecha_entrega;
+    
+    productosLista = JSON.parse(nota.productos);
+    actualizarListaProductos();
+    
+    document.getElementById('guardarNotaEditada').style.display = 'block';
+    document.getElementById('guardarNota').style.display = 'none';
+    
+    document.getElementById('guardarNotaEditada').setAttribute('data-id', nota.id);
+}
+function actualizarListaProductos() {
+    const listaProductos = document.getElementById('listaProductos');
+    listaProductos.innerHTML = '';
+    productosLista.forEach(p => {
+        let li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.textContent = `${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion}`;
+        listaProductos.appendChild(li);
+    });
+}
+async function guardarNotaEditada() {
+    const notaId = document.getElementById('guardarNotaEditada').getAttribute('data-id');
+    const numero_nota = document.getElementById('numero_nota').value;
+    const clienteId = document.getElementById('cliente').value;
+    const fecha = document.getElementById('fecha').value;
+    const fechaEntrega = document.getElementById('fecha_entrega').value;
+    
+    try {
+        const response = await fetch(`/notas-pedido/${notaId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
+        });
+        
+        if (!response.ok) throw new Error('Error al actualizar la nota de pedido');
+        
+        alert('Nota de pedido actualizada con éxito!');
+        document.getElementById('notaPedidoForm').reset();
+        document.getElementById('guardarNotaEditada').style.display = 'none';
+        document.getElementById('guardarNota').style.display = 'block';
+        cargarNotas();
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+document.getElementById('guardarNotaEditada').addEventListener('click', guardarNotaEditada);
