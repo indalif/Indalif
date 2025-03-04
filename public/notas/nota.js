@@ -53,17 +53,11 @@ document.getElementById('agregarProducto').addEventListener('click', function (e
     let editIndex = this.getAttribute('data-edit-index');
 
     if (editIndex !== null) {
-        // Convertir a número
         editIndex = parseInt(editIndex);
-
-        // Si hay un índice, significa que estamos editando
         productosLista[editIndex] = { producto, cantidad, presentacion };
-
-        // Restaurar botón a "Agregar Producto"
-        this.innerHTML = `<i class="fas fa-plus me-2"></i>Agregar Producto`;
+        this.innerHTML = '<i class="fas fa-plus me-2"></i>Agregar Producto';
         this.removeAttribute('data-edit-index');
     } else {
-        // Si no hay índice, estamos agregando un nuevo producto
         productosLista.push({ producto, cantidad, presentacion });
     }
 
@@ -122,16 +116,16 @@ function imprimirNota(button) {
     let notaDiv = button.parentElement;
     let numeroNota = notaDiv.querySelector("h5").innerText.replace("Número de Nota:", "").trim();
     let cliente = notaDiv.querySelector("p:nth-of-type(1)").innerText.replace("Cliente:", "").trim();
-    let fecha = notaDiv.querySelector("p:nth-of-type(2)").innerText.replace("Fecha:", "").trim();
-    let fechaEntrega = notaDiv.querySelector("p:nth-of-type(3)").innerText.replace("Fecha de Entrega:", "").trim();
     let direccion = notaDiv.querySelector("p:nth-of-type(2)").innerText.replace("Dirección:", "").trim();
+    let fecha = notaDiv.querySelector("p:nth-of-type(3)").innerText.replace("Fecha:", "").trim();
+    let fechaEntrega = notaDiv.querySelector("p:nth-of-type(4)").innerText.replace("Fecha de Entrega:", "").trim();
     let productos = Array.from(notaDiv.querySelectorAll("ul li")).map(li => {
         let partes = li.innerText.match(/^(.*?) - Cantidad: (\d+), Presentación: (.+)$/);
         return partes ? { producto: partes[1], cantidad: partes[2], presentacion: partes[3] } : null;
     }).filter(p => p !== null);
 
     let contenidoHTML = `
-        <html>
+    <html>
         <head>
             <title>Nota de Pedido</title>
             <style>
@@ -252,14 +246,13 @@ async function cargarNotas() {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
             div.setAttribute('data-id', nota.id);
-
-            let productosHTML = '';
+            let productosHTML = '';          
             let productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
 
             if (Array.isArray(productos)) {
                 productos.forEach(p => {
                     productosHTML += `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}</li>`;
-                });
+                });  
             } else {
                 productosHTML = '<li>Error al cargar productos</li>';
             }
