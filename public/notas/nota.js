@@ -305,6 +305,9 @@ function agregarBotonEditar(notaDiv, nota) {
     botonEditar.addEventListener('click', () => cargarNotaParaEditar(nota));
     notaDiv.appendChild(botonEditar);
 }
+function formatFechaParaInput(fechaISO) {
+    return fechaISO ? fechaISO.split('T')[0] : ''; // Extrae solo YYYY-MM-DD
+}
 async function cargarNotaParaEditar(notaId) {
     try {
         const response = await fetch(`/notas-pedido/${notaId}`);
@@ -312,12 +315,10 @@ async function cargarNotaParaEditar(notaId) {
 
         document.getElementById('numero_nota').value = nota.numero_nota;
         document.getElementById('cliente').value = nota.cliente_id;
-        document.getElementById('fecha').value = nota.fecha;
-        document.getElementById('fecha_entrega').value = nota.fecha_entrega;
-
-        productosLista = JSON.parse(nota.productos);
+        document.getElementById('fecha').value = formatFechaParaInput(nota.fecha);
+        document.getElementById('fecha_entrega').value = formatFechaParaInput(nota.fecha_entrega);
+        productosLista = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
         actualizarListaProductos();
-
         document.getElementById('guardarNotaEditada').style.display = 'block';
         document.getElementById('guardarNota').style.display = 'none';
         document.getElementById('guardarNotaEditada').setAttribute('data-id', nota.id);
