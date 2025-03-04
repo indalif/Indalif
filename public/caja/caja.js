@@ -53,53 +53,45 @@ function addIncome() {
     const description = document.getElementById('incomeDescription').value;
     const amount = parseFloat(document.getElementById('incomeAmount').value);
     const method = document.getElementById('incomeMethod').value;
-
     if (isNaN(amount) || amount <= 0) {
         alert('Por favor, ingresa un monto válido para el ingreso.');
         return;
     }
-
-    const billetes = getBilletes(amount, 'Ingreso');
-    if (!billetes) return; // Si el usuario cancela, no se guarda la transacción
-
     const transaction = {
         type: 'Ingreso',
         description,
         amount,
         method,
-        date: new Date(),
-        billetes
+        date: new Date()
     };
-
     saveTransaction(transaction);
     totalIncome += amount;
     updateSummary();
+    document.getElementById('incomeDescription').value = '';
+    document.getElementById('incomeAmount').value = '';
+    document.getElementById('incomeMethod').selectedIndex = 0;
 }
 function addExpense() {
     const description = document.getElementById('expenseDescription').value;
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const method = document.getElementById('expenseMethod').value;
-
     if (isNaN(amount) || amount <= 0) {
         alert('Por favor, ingresa un monto válido para el egreso.');
         return;
     }
-
-    const billetes = getBilletes(amount, 'Egreso');
-    if (!billetes) return; // Si el usuario cancela, no se guarda la transacción
-
     const transaction = {
         type: 'Egreso',
         description,
         amount,
         method,
-        date: new Date(),
-        billetes
+        date: new Date()
     };
-
     saveTransaction(transaction);
     totalExpenses += amount;
     updateSummary();
+    document.getElementById('expenseDescription').value = '';
+    document.getElementById('expenseAmount').value = '';
+    document.getElementById('expenseMethod').selectedIndex = 0;
 }
 function saveTransaction(transaction) {
     fetch('/transactions', {
@@ -114,7 +106,6 @@ function saveTransaction(transaction) {
         console.log(data.message);
         updateTransactionHistory();
         updateSummary();
-        updateBilletes(transaction.billetes, transaction.type);
     })
     .catch(error => {
         console.error('Error al guardar la transacción:', error);
@@ -324,19 +315,19 @@ function closeMonth() {
 function loadBilletes() {
     fetch('/billetes')
         .then(response => response.json())
-        .then(billetes => {
-            console.log("Billetero actualizado:", billetes);
-            document.getElementById('bill100').value = billetes["100"] || 0;
-            document.getElementById('bill200').value = billetes["200"] || 0;
-            document.getElementById('bill500').value = billetes["500"] || 0;
-            document.getElementById('bill1000').value = billetes["1000"] || 0;
-            document.getElementById('bill2000').value = billetes["2000"] || 0;
-            document.getElementById('bill10000').value = billetes["10000"] || 0;
-            document.getElementById('bill20000').value = billetes["20000"] || 0;
+        .then(data => {
+            if (data) {
+                document.getElementById('bill100').value = data.billete_100;
+                document.getElementById('bill200').value = data.billete_200;
+                document.getElementById('bill500').value = data.billete_500;
+                document.getElementById('bill1000').value = data.billete_1000;
+                document.getElementById('bill2000').value = data.billete_2000;
+                document.getElementById('bill10000').value = data.billete_10000;
+                document.getElementById('bill20000').value = data.billete_20000;
+                updateTotal();
+            }
         })
-        .catch(error => {
-            console.error('Error al cargar el billetero:', error);
-        });
+        .catch(error => console.error('Error al cargar los billetes:', error));
 }
 function updateTotal() {
     const bill100 = parseInt(document.getElementById('bill100').value) || 0;
@@ -378,40 +369,3 @@ function saveBilletes() {
     .catch(error => console.error('Error al guardar billetes:', error));
 }
 setInterval(loadBilletes, 5000);
-function getBilletes(amount, type) {
-    let billetes = {};
-    let total = 0;
-
-    const denominations = [20000, 10000, 2000, 1000, 500, 200, 100];
-    for (let denom of denominations) {
-        let count = parseInt(prompt(`¿Cuántos billetes de ${denom} usaste para este ${type.toLowerCase()}?`, "0")) || 0;
-        if (count > 0) {
-            billetes[denom] = count;
-            total += count * denom;
-        }
-    }
-
-    if (total !== amount) {
-        alert(`El total ingresado en billetes ($${total}) no coincide con el monto de la transacción ($${amount}). Inténtalo de nuevo.`);
-        return null;
-    }
-
-    return billetes;
-}
-function updateBilletes(billetes, type) {
-    fetch('/update-billetes', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ billetes, type })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data.message);
-        loadBilletes();
-    })
-    .catch(error => {
-        console.error('Error al actualizar el billetero:', error);
-    });
-}
