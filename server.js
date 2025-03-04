@@ -384,6 +384,20 @@ app.put('/notas-pedido/:id', (req, res) => {
         res.status(200).json({ mensaje: "Nota de pedido actualizada con éxito" });
     });
 });
+app.get('/notas-pedido/:id', (req, res) => {
+    const { id } = req.params;
+
+    dbModulos.query('SELECT * FROM notas_pedido WHERE id = ?', [id], (err, results) => {
+        if (err) {
+            console.error("Error obteniendo nota de pedido:", err);
+            return res.status(500).json({ error: "Error al obtener la nota de pedido" });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Nota de pedido no encontrada" });
+        }
+        res.json(results[0]);
+    });
+});
 app.post('/billetes', (req, res) => {
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
 
