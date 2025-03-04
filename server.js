@@ -429,67 +429,6 @@ app.put('/billetes/:id', (req, res) => {
         res.json({ message: 'Registro de billetes actualizado con éxito' });
     });
 });
-app.post('/update-billetes', (req, res) => {
-    const { billetes, type } = req.body;  // 'billetes' es un objeto con claves que representan denominaciones, por ejemplo: { "100": 2, "2000": 1 }
-    
-    // Seleccionamos el registro actual del billetero (id = 1)
-    const sqlSelect = 'SELECT * FROM billetes WHERE id = 1 LIMIT 1';
-    dbModulos.query(sqlSelect, (err, rows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        // Si no existe el registro, se inicializa con ceros
-        let current = rows[0] || {
-            billete_100: 0,
-            billete_200: 0,
-            billete_500: 0,
-            billete_1000: 0,
-            billete_2000: 0,
-            billete_10000: 0,
-            billete_20000: 0
-        };
-
-        // Mapeo de denominaciones a los nombres de campos en la tabla
-        const denominationsMap = {
-            "100": "billete_100",
-            "200": "billete_200",
-            "500": "billete_500",
-            "1000": "billete_1000",
-            "2000": "billete_2000",
-            "10000": "billete_10000",
-            "20000": "billete_20000"
-        };
-
-        // Recorremos cada denominación enviada y actualizamos el valor
-        for (let denom in billetes) {
-            if (denominationsMap[denom]) {
-                const count = parseInt(billetes[denom]) || 0;
-                if (type === 'Ingreso') {
-                    current[denominationsMap[denom]] = (parseInt(current[denominationsMap[denom]]) || 0) + count;
-                } else if (type === 'Egreso') {
-                    current[denominationsMap[denom]] = (parseInt(current[denominationsMap[denom]]) || 0) - count;
-                }
-            }
-        }
-
-        // Actualizamos el registro usando REPLACE INTO
-        const sqlUpdate = `
-            REPLACE INTO billetes (id, billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000)
-            VALUES (1, ?, ?, ?, ?, ?, ?, ?)
-        `;
-        dbModulos.query(sqlUpdate, [
-            current.billete_100,
-            current.billete_200,
-            current.billete_500,
-            current.billete_1000,
-            current.billete_2000,
-            current.billete_10000,
-            current.billete_20000
-        ], (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ message: 'Billetero actualizado correctamente', billetero: current });
-        });
-    });
-});
 app.post('/mercaderiaCliente', (req, res) => {
     const { idCliente, descripcion, cantidad, precio, fecha } = req.body;
 
