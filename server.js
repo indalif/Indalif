@@ -360,6 +360,22 @@ app.delete('/notas-pedido/:id', async (req, res) => {
         res.status(500).json({ error: "Error interno al eliminar la nota de pedido" });
     }
 });
+app.put('/notas-pedido/:id', (req, res) => {
+    const { id } = req.params;
+    const { numero_nota, fecha, fecha_entrega, cliente_id } = req.body;
+    
+    const sql = `UPDATE notas_pedido SET numero_nota = ?, fecha = ?, fecha_entrega = ?, cliente_id = ? WHERE id = ?`;
+    dbModulos.query(sql, [numero_nota, fecha, fecha_entrega, cliente_id, id], (err, result) => {
+        if (err) {
+            console.error("Error actualizando la nota de pedido:", err);
+            return res.status(500).json({ error: "Error al actualizar la nota de pedido" });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Nota de pedido no encontrada" });
+        }
+        res.status(200).json({ mensaje: "Nota de pedido actualizada con éxito" });
+    });
+});
 app.post('/billetes', (req, res) => {
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
 

@@ -41,13 +41,11 @@ document.getElementById('agregarProducto').addEventListener('click', function ()
 });
 document.getElementById('notaPedidoForm').addEventListener('submit', async function (event) {
     event.preventDefault();
-
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
-    const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
     const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
-
+    
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
     }
@@ -61,28 +59,40 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
 
         if (!response.ok) throw new Error('Error al guardar la nota de pedido.');
 
-        const data = await response.json();
         alert('Nota de pedido guardada con éxito!');
         cargarNotas();
-        console.log('Limpiando formulario...');
-        document.getElementById('notaPedidoForm').reset(); // Intenta primero con reset()
-        document.getElementById('numero_nota').value = '';
-        document.getElementById('cliente').value = '';
-        document.getElementById('fecha').value = '';
-        document.getElementById('fecha_entrega').value = '';
-        document.getElementById('producto').value = '';
-        document.getElementById('cantidad').value = '';
-        document.getElementById('presentacion').value = '';
+        document.getElementById('notaPedidoForm').reset();
         productosLista = [];
         document.getElementById('listaProductos').innerHTML = '';
-        document.getElementById('notaVisual').style.display = 'none';
-
-        console.log('Formulario limpio.');
-
     } catch (error) {
         console.error('Error:', error);
     }
 });
+async function editarNota(notaId) {
+    const numero_nota = prompt('Ingrese el nuevo número de nota:');
+    const fecha = prompt('Ingrese la nueva fecha (YYYY-MM-DD):');
+    const fechaEntrega = prompt('Ingrese la nueva fecha de entrega (YYYY-MM-DD):');
+    const clienteId = prompt('Ingrese el nuevo ID del cliente:');
+    
+    if (!numero_nota || !fecha || !fechaEntrega || !clienteId) {
+        alert('Todos los campos son obligatorios.');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/notas-pedido/${notaId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ numero_nota, fecha, fecha_entrega: fechaEntrega, cliente_id: clienteId })
+        });
+
+        if (!response.ok) throw new Error('Error al actualizar la nota de pedido.');
+        alert('Nota de pedido actualizada con éxito!');
+        cargarNotas();
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
 function imprimirNota(button) {
     let notaDiv = button.parentElement;
     let numeroNota = notaDiv.querySelector("h5").innerText.replace("Número de Nota:", "").trim();
