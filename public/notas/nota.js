@@ -38,7 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 let productosLista = [];
-document.getElementById('agregarProducto').addEventListener('click', function () {
+document.getElementById('agregarProducto').addEventListener('click', function (event) {
+    event.preventDefault(); // Evita el envío del formulario
+
     const producto = document.getElementById('producto').value;
     const cantidad = document.getElementById('cantidad').value;
     const presentacion = document.getElementById('presentacion').value;
@@ -51,6 +53,9 @@ document.getElementById('agregarProducto').addEventListener('click', function ()
     let editIndex = this.getAttribute('data-edit-index');
 
     if (editIndex !== null) {
+        // Convertir a número
+        editIndex = parseInt(editIndex);
+
         // Si hay un índice, significa que estamos editando
         productosLista[editIndex] = { producto, cantidad, presentacion };
 
@@ -331,10 +336,20 @@ async function cargarNotaParaEditar(notaId) {
         document.getElementById('cliente').value = nota.cliente_id;
         document.getElementById('fecha').value = formatFechaParaInput(nota.fecha);
         document.getElementById('fecha_entrega').value = formatFechaParaInput(nota.fecha_entrega);
+
         productosLista = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
         actualizarListaProductos();
-        document.getElementById('guardarNotaEditada').style.display = 'block';
-        document.getElementById('guardarNota').style.display = 'none';
+
+        let btnEditar = document.getElementById('guardarNotaEditada');
+        let btnGuardar = document.getElementById('guardarNota');
+
+        if (btnEditar && btnGuardar) {
+            btnEditar.style.display = 'block';
+            btnGuardar.style.display = 'none';
+        } else {
+            console.error('Error: No se encontró el botón de edición o guardado.');
+        }
+
         document.getElementById('guardarNotaEditada').setAttribute('data-id', nota.id);
     } catch (error) {
         console.error('Error al cargar la nota para editar:', error);
@@ -371,11 +386,14 @@ function editarProducto(index) {
     document.getElementById('cantidad').value = producto.cantidad;
     document.getElementById('presentacion').value = producto.presentacion;
 
-    // Guardar índice del producto que se está editando
+    // Guardar el índice del producto que se está editando
     document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
 
     // Cambiar texto del botón a "Actualizar Producto"
     document.getElementById('agregarProducto').innerHTML = `<i class="fas fa-save me-2"></i>Actualizar Producto`;
+
+    // Asegurar que no se guarde la nota accidentalmente
+    event.preventDefault();
 }
 function eliminarProducto(index) {
     if (confirm('¿Estás seguro de eliminar este producto?')) {
