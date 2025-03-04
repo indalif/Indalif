@@ -360,6 +360,20 @@ app.delete('/notas-pedido/:id', async (req, res) => {
         res.status(500).json({ error: "Error interno al eliminar la nota de pedido" });
     }
 });
+app.put("/notas/:id", async (req, res) => {
+    const { id } = req.params;
+    const { cliente, productos, cantidad } = req.body;
+    
+    try {
+        await dbModulos.query("UPDATE notas SET cliente = ?, productos = ?, cantidad = ? WHERE id = ?", 
+            [cliente, productos, cantidad, id]
+        );
+        res.json({ message: "Nota actualizada correctamente" });
+    } catch (error) {
+        console.error("Error al actualizar nota:", error);
+        res.status(500).json({ error: "Error al actualizar nota" });
+    }
+});
 app.post('/billetes', (req, res) => {
     const { billete_100, billete_200, billete_500, billete_1000, billete_2000, billete_10000, billete_20000 } = req.body;
 

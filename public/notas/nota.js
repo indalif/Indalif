@@ -5,13 +5,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         console.log('Clientes recibidos:', data);
 
-        if (!Array.isArray(data.clientes)) {
+        if (!Array.isArray(data)) {
             throw new Error('La respuesta no contiene un array de clientes');
         }
 
         const clienteSelect = document.getElementById('cliente');
         clienteSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
-        data.clientes.forEach(cliente => {
+        data.forEach(cliente => {
             let option = document.createElement('option');
             option.value = cliente.id;
             option.textContent = cliente.nombre;
@@ -44,45 +44,72 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
 
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
-    const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
     const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
+    const idNota = document.getElementById('notaPedidoForm').dataset.idNota || null;
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
     }
 
     try {
-        const response = await fetch('/notas-pedido', {
-            method: 'POST',
+        const method = idNota ? 'PUT' : 'POST';
+        const url = idNota ? `/notas-pedido/${idNota}` : '/notas-pedido';
+
+        const response = await fetch(url, {
+            method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
         });
 
         if (!response.ok) throw new Error('Error al guardar la nota de pedido.');
 
-        const data = await response.json();
-        alert('Nota de pedido guardada con éxito!');
-        cargarNotas();
-        console.log('Limpiando formulario...');
-        document.getElementById('notaPedidoForm').reset(); // Intenta primero con reset()
-        document.getElementById('numero_nota').value = '';
-        document.getElementById('cliente').value = '';
-        document.getElementById('fecha').value = '';
-        document.getElementById('fecha_entrega').value = '';
-        document.getElementById('producto').value = '';
-        document.getElementById('cantidad').value = '';
-        document.getElementById('presentacion').value = '';
+        alert(idNota ? 'Nota de pedido actualizada con éxito!' : 'Nota de pedido guardada con éxito!');
+        document.getElementById('notaPedidoForm').reset();
+        document.getElementById('notaPedidoForm').removeAttribute('data-id-nota');
         productosLista = [];
         document.getElementById('listaProductos').innerHTML = '';
-        document.getElementById('notaVisual').style.display = 'none';
-
-        console.log('Formulario limpio.');
-
+        cargarNotas();
     } catch (error) {
         console.error('Error:', error);
     }
 });
+async function cargarNotas() {
+    try {
+        const response = await fetch('/notas-pedido');
+        const data = await response.json();
+
+        console.log('Notas recibidas:', data);
+
+        if (!Array.isArray(data)) {
+            throw new Error('La respuesta no contiene un array de notas');
+        }
+
+        const listaNotas = document.getElementById('listaNotas');
+        listaNotas.innerHTML = '';
+
+        data.forEach(nota => {
+            let div = document.createElement('div');
+            div.classList.add('border', 'p-3', 'mb-2');
+            div.setAttribute('data-id', nota.id);
+
+            let productosHTML = nota.productos.map(p => `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}</li>`).join('');
+
+            div.innerHTML = `
+                <h5>Número de Nota: ${nota.numero_nota}</h5>
+                <p><strong>Cliente:</strong> ${nota.nombre_cliente}</p>
+                <p><strong>Fecha:</strong> ${nota.fecha}</p>
+                <p><strong>Fecha de Entrega:</strong> ${nota.fecha_entrega}</p>
+                <h6>Productos:</h6>
+                <ul>${productosHTML}</ul>
+                <button onclick="editarNota(${nota.id})" class="btn btn-warning w-100 mt-2">Editar</button>
+            `;
+            listaNotas.appendChild(div);
+        });
+    } catch (error) {
+        console.error('Error obteniendo notas de pedido:', error);
+    }
+}
 function imprimirNota(button) {
     let notaDiv = button.parentElement;
     let numeroNota = notaDiv.querySelector("h5").innerText.replace("Número de Nota:", "").trim();
@@ -188,64 +215,28 @@ function imprimirNota(button) {
     ventanaImpresion.document.write(contenidoHTML);
     ventanaImpresion.document.close();
 }
-async function cargarNotas() {
+async function editarNota(id) {
     try {
-        const response = await fetch('/notas-pedido');
-        const data = await response.json();
+        const response = await fetch(`/notas-pedido/${id}`);
+        const nota = await response.json();
 
-        console.log('Notas recibidas:', data);
+        document.getElementById('numero_nota').value = nota.numero_nota;
+        document.getElementById('cliente').value = nota.cliente_id;
+        document.getElementById('fecha').value = nota.fecha;
+        document.getElementById('fecha_entrega').value = nota.fecha_entrega;
+        productosLista = nota.productos;
 
-        if (!Array.isArray(data.notas)) {
-            throw new Error('La respuesta no contiene un array de notas');
-        }
-
-        const listaNotas = document.getElementById('listaNotas');
-        listaNotas.innerHTML = ''; // ✅ BORRA LAS NOTAS ANTERIORES PARA EVITAR DUPLICADOS
-        const formatFecha = (fechaISO) => {
-            if (!fechaISO) return ''; // Evita errores si el valor es nulo o indefinido
-        
-            // Aseguramos que la fecha solo contiene la parte de "YYYY-MM-DD"
-            const fecha = new Date(fechaISO);
-            const dia = fecha.getUTCDate().toString().padStart(2, '0'); 
-            const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); 
-            const anio = fecha.getUTCFullYear();
-        
-            return `${dia}/${mes}/${anio}`;
-        };        
-        data.notas.forEach(nota => {
-            let div = document.createElement('div');
-            div.classList.add('border', 'p-3', 'mb-2');
-            div.setAttribute('data-id', nota.id); // Guardamos el ID del pedido en el div
-
-            let productosHTML = '';
-            let productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
-
-            if (Array.isArray(productos)) {
-                productos.forEach(p => {
-                    productosHTML += `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}</li>`;
-                });
-            } else {
-                productosHTML = '<li>Error al cargar productos</li>';
-            }
-
-            div.innerHTML = `
-                <h5>Número de Nota: ${nota.numero_nota}</h5>
-                <p><strong>Cliente:</strong> ${nota.nombre_cliente}</p>
-                <p><strong>Fecha:</strong> ${formatFecha(nota.fecha)}</p>
-                <p><strong>Fecha de Entrega:</strong> ${formatFecha(nota.fecha_entrega)}</p>
-                <h6>Productos:</h6>
-                <ul>${productosHTML}</ul>
-                                <button onclick="imprimirNota(this)" class="btn btn-primary w-100 mt-3" style="background-color: #ffda77; border: 1px solid #d8ad09; color: #5b1f0a; font-weight: bold; padding: 5px 10px; border-radius: 8px; transition: background-color 0.3s ease, transform 0.2s ease;">
-                    <i class="fas fa-print me-2"></i> Imprimir
-                </button>
-                <button onclick="marcarComoEntregado(this)" class="btn btn-success w-100 mt-3" style="background-color: #d8ad09; border: 1px solid #b88c08; color: #ffffff; font-weight: bold; padding: 5px 10px; border-radius: 8px; transition: background-color 0.3s ease, transform 0.2s ease;">
-                    <i class="fas fa-check-circle me-2"></i> Marcar como Entregado
-                </button>
-            `;
-            listaNotas.appendChild(div);
+        document.getElementById('listaProductos').innerHTML = '';
+        productosLista.forEach(p => {
+            let li = document.createElement('li');
+            li.classList.add('list-group-item');
+            li.textContent = `${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion}`;
+            document.getElementById('listaProductos').appendChild(li);
         });
+
+        document.getElementById('notaPedidoForm').dataset.idNota = id;
     } catch (error) {
-        console.error('Error obteniendo notas de pedido:', error);
+        console.error('Error al cargar la nota para edición:', error);
     }
 }
 async function marcarComoEntregado(button) {
