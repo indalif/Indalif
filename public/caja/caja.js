@@ -2,8 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Script cargado y DOM listo");
     resetDailySummary();
     updateTransactionHistory();
-    updateSummary(); // Se mantiene la actualización automática
-    loadTransactions();
+    updateSummary(); 
     loadBilletes();
 });
 let totalIncome = 0;  
