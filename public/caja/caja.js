@@ -48,6 +48,28 @@ function updateSummary() {
         })
         .catch(error => console.error('Error al obtener el resumen:', error));
 }
+function updateTotals() {
+    fetch("https://indalif-production.up.railway.app/summary")
+    .then(response => response.json())
+    .then(data => {
+        let totalEfectivo = 0, totalTransferencia = 0, totalTarjeta = 0;
+
+        data.forEach(row => {
+            if (row.method === "efectivo") {
+                totalEfectivo += row.type === "Ingreso" ? row.total : -row.total;
+            } else if (row.method === "transferencia") {
+                totalTransferencia += row.type === "Ingreso" ? row.total : -row.total;
+            } else if (row.method === "tarjeta") {
+                totalTarjeta += row.type === "Ingreso" ? row.total : -row.total;
+            }
+        });
+        document.getElementById("totalEfectivo").textContent = totalEfectivo.toLocaleString();
+        document.getElementById("totalTransferencia").textContent = totalTransferencia.toLocaleString();
+        document.getElementById("totalTarjeta").textContent = totalTarjeta.toLocaleString();
+    })
+    .catch(error => console.error("Error al obtener los totales:", error));
+}
+
 function askBilletes(type) {
     let currentBilletes = {
         billete_100: parseInt(document.getElementById('bill100').value) || 0,

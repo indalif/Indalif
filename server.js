@@ -1547,15 +1547,18 @@ app.get('/transactions/date/:date', (req, res) => {
     });
 });
 app.get('/summary', (req, res) => {
-    const sql =
-        'SELECT type, SUM(amount) AS total FROM caja GROUP BY type';
+    const sql = `
+        SELECT method, type, SUM(amount) AS total 
+        FROM caja 
+        GROUP BY method, type
+    `;
     dbModulos.query(sql, (err, rows) => {
         if (err) {
             return res.status(400).json({ error: err.message });
         }
         res.json(rows);
     });
-})
+});
 app.post('/clientes', (req, res) => {
     const { nombre, cuit, direccion } = req.body;
 
