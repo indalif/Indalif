@@ -204,69 +204,46 @@ function updateTransactionHistory() {
             console.error('Error al obtener las transacciones:', error);
         });
 }
-function editTransaction(transactionId) {
-    fetch(`/transactions/${transactionId}`)
-        .then(response => response.json())
-        .then(transaction => {
-            if (!transaction) {
-                alert('Error: No se encontró la transacción.');
-                return;
-            }
-            document.getElementById('incomeDescription').value = transaction.description;
-            document.getElementById('incomeAmount').value = transaction.amount;
-            document.getElementById('incomeMethod').value = transaction.method;
-            document.getElementById('saveEditButton')?.remove();
-            let saveButton = document.createElement("button");
-            saveButton.id = "saveEditButton";
-            saveButton.className = "btn btn-success";
-            saveButton.innerText = "Guardar Cambios";
-            saveButton.onclick = function () {
-                saveEditedTransaction(transactionId);
-            };
+function editTransaction(id) {
+    const newDescription = prompt("Ingrese la nueva descripción:");
+    const newAmount = prompt("Ingrese el nuevo monto:");
+    const newMethod = prompt("Ingrese el nuevo método (efectivo, tarjeta, etc.):");
+    const newType = prompt("Ingrese el nuevo tipo (Ingreso/Egreso):");
 
-            document.getElementById('transactionForm').appendChild(saveButton);
-        })
-        .catch(error => {
-            console.error('Error al obtener la transacción para editar:', error);
-        });
-}
-function saveEditedTransaction(transactionId) {
-    const description = document.getElementById('incomeDescription').value;
-    const amount = parseFloat(document.getElementById('incomeAmount').value);
-    const method = document.getElementById('incomeMethod').value;
-
-    if (isNaN(amount) || amount <= 0) {
-        alert('Por favor, ingresa un monto válido.');
+    if (!newDescription || !newAmount || !newMethod || !newType) {
+        alert("Todos los campos son obligatorios.");
         return;
     }
 
-    fetch(`/transactions/${transactionId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description, amount, method })
-    })
-        .then(response => response.json())
-        .then(data => {
-            alert('Transacción actualizada con éxito.');
-            updateTransactionHistory();
-            document.getElementById('saveEditButton').remove();
+    fetch(`/transactions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            description: newDescription,
+            amount: parseFloat(newAmount),
+            method: newMethod,
+            type: newType
         })
-        .catch(error => console.error('Error al actualizar la transacción:', error));
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        updateTransactionHistory(); // Refresca la tabla
+    })
+    .catch(error => console.error("Error al editar:", error));
 }
-function deleteTransaction(transactionId) {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
-        return;
-    }
+function deleteTransaction(id) {
+    if (!confirm("¿Seguro que deseas eliminar esta transacción?")) return;
 
-    fetch(`/transactions/${transactionId}`, {
-        method: 'DELETE'
+    fetch(`/transactions/${id}`, {
+        method: "DELETE"
     })
-        .then(response => response.json())
-        .then(data => {
-            alert('Transacción eliminada con éxito.');
-            updateTransactionHistory();
-        })
-        .catch(error => console.error('Error al eliminar la transacción:', error));
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+        updateTransactionHistory(); // Refresca la tabla
+    })
+    .catch(error => console.error("Error al eliminar:", error));
 }
 function closeDay() {
     const today = new Date().toISOString().slice(0, 10);
