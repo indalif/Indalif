@@ -79,10 +79,6 @@
                 <h5 class="card-title">Resumen Diario</h5>
                 <div id="summary" class="font-weight-bold"></div>
                 <p id="netTotal">Total Neto del Día: $0.00</p>
-                <h3>Total Neto por Método de Pago</h3>
-                <p>Efectivo: <strong id="totalEfectivo">0</strong></p>
-                <p>Transferencia: <strong id="totalTransferencia">0</strong></p>
-                <p>Tarjeta: <strong id="totalTarjeta">0</strong></p>
                 <button class="btn btn-info mt-2" data-toggle="modal" data-target="#historyModal">Ver Historial por
                     Fecha</button>
             </div>
@@ -165,12 +161,11 @@
                             <input type="number" class="form-control" id="bill20000" min="0" value="0">
                         </div>
                     </div>
-                    <button type="button" class="btn btn-info mt-3" onclick="calculateCash()">Calcular Total
-                        Efectivo</button>
+                    <button type="button" class="btn btn-info mt-3" onclick="calculateCash()">Calcular Total Efectivo</button>
                 </form>
                 <div id="cashResult" class="mt-3"></div>
             </div>
-        </div>
+        </div>        
         <div class="card mb-4 shadow border-primary">
             <div class="card-body">
                 <h5 class="card-title">Cierre Mensual</h5>
