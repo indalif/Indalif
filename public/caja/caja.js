@@ -174,29 +174,100 @@ function updateTransactionHistory() {
             transactionHistory.innerHTML = '';
 
             if (!transactions || transactions.length === 0) {
-                transactionHistory.innerHTML = '<tr><td colspan="5">No hay transacciones registradas.</td></tr>';
+                transactionHistory.innerHTML = '<tr><td colspan="6">No hay transacciones registradas.</td></tr>';
                 return;
             }
+
             transactions.forEach(transaction => {
                 const amount = parseFloat(transaction.amount);
                 if (isNaN(amount)) {
                     console.error(`Transacción inválida, el valor de 'amount' no es un número:`, transaction);
                     return;
                 }
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${new Date(transaction.date).toLocaleDateString('es-ES')}</td>
                     <td>${transaction.description}</td>
-                    <td>${amount.toFixed(2)}</td> <!-- Formatear el valor numérico -->
+                    <td>${amount.toFixed(2)}</td>
                     <td>${transaction.method}</td>
                     <td>${transaction.type}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editTransaction(${transaction.id})"><i class="bi bi-pencil icon-btn"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTransaction(${transaction.id})"><i class="bi bi-trash icon-btn"></i></button>
+                    </td>
                 `;
+
                 transactionHistory.appendChild(row);
             });
         })
         .catch(error => {
             console.error('Error al obtener las transacciones:', error);
         });
+}
+function editTransaction(transactionId) {
+    fetch(`/transactions/${transactionId}`)
+        .then(response => response.json())
+        .then(transaction => {
+            if (!transaction) {
+                alert('Error: No se encontró la transacción.');
+                return;
+            }
+            document.getElementById('incomeDescription').value = transaction.description;
+            document.getElementById('incomeAmount').value = transaction.amount;
+            document.getElementById('incomeMethod').value = transaction.method;
+            document.getElementById('saveEditButton')?.remove();
+            let saveButton = document.createElement("button");
+            saveButton.id = "saveEditButton";
+            saveButton.className = "btn btn-success";
+            saveButton.innerText = "Guardar Cambios";
+            saveButton.onclick = function () {
+                saveEditedTransaction(transactionId);
+            };
+
+            document.getElementById('transactionForm').appendChild(saveButton);
+        })
+        .catch(error => {
+            console.error('Error al obtener la transacción para editar:', error);
+        });
+}
+function saveEditedTransaction(transactionId) {
+    const description = document.getElementById('incomeDescription').value;
+    const amount = parseFloat(document.getElementById('incomeAmount').value);
+    const method = document.getElementById('incomeMethod').value;
+
+    if (isNaN(amount) || amount <= 0) {
+        alert('Por favor, ingresa un monto válido.');
+        return;
+    }
+
+    fetch(`/transactions/${transactionId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description, amount, method })
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert('Transacción actualizada con éxito.');
+            updateTransactionHistory();
+            document.getElementById('saveEditButton').remove();
+        })
+        .catch(error => console.error('Error al actualizar la transacción:', error));
+}
+function deleteTransaction(transactionId) {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta transacción?')) {
+        return;
+    }
+
+    fetch(`/transactions/${transactionId}`, {
+        method: 'DELETE'
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert('Transacción eliminada con éxito.');
+            updateTransactionHistory();
+        })
+        .catch(error => console.error('Error al eliminar la transacción:', error));
 }
 function closeDay() {
     const today = new Date().toISOString().slice(0, 10);
