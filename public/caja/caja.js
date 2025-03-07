@@ -49,6 +49,31 @@ function updateSummary() {
         })
         .catch(error => console.error('Error al obtener el resumen:', error));
 }
+function askBilletes(callback) {
+    let billetes = {
+        billete_100: parseInt(prompt("Ingrese cantidad de billetes de $100:", "0")) || 0,
+        billete_200: parseInt(prompt("Ingrese cantidad de billetes de $200:", "0")) || 0,
+        billete_500: parseInt(prompt("Ingrese cantidad de billetes de $500:", "0")) || 0,
+        billete_1000: parseInt(prompt("Ingrese cantidad de billetes de $1000:", "0")) || 0,
+        billete_2000: parseInt(prompt("Ingrese cantidad de billetes de $2000:", "0")) || 0,
+        billete_10000: parseInt(prompt("Ingrese cantidad de billetes de $10000:", "0")) || 0,
+        billete_20000: parseInt(prompt("Ingrese cantidad de billetes de $20000:", "0")) || 0
+    };
+
+    // Actualiza los campos en la interfaz
+    document.getElementById('bill100').value = billetes.billete_100;
+    document.getElementById('bill200').value = billetes.billete_200;
+    document.getElementById('bill500').value = billetes.billete_500;
+    document.getElementById('bill1000').value = billetes.billete_1000;
+    document.getElementById('bill2000').value = billetes.billete_2000;
+    document.getElementById('bill10000').value = billetes.billete_10000;
+    document.getElementById('bill20000').value = billetes.billete_20000;
+
+    // Guarda los billetes en la base de datos
+    saveBilletes();
+
+    if (callback) callback();
+}
 function addIncome() {
     const description = document.getElementById('incomeDescription').value;
     const amount = parseFloat(document.getElementById('incomeAmount').value);
@@ -67,6 +92,7 @@ function addIncome() {
     saveTransaction(transaction);
     totalIncome += amount;
     updateSummary();
+    askBilletes();
     document.getElementById('incomeDescription').value = '';
     document.getElementById('incomeAmount').value = '';
     document.getElementById('incomeMethod').selectedIndex = 0;
@@ -89,6 +115,7 @@ function addExpense() {
     saveTransaction(transaction);
     totalExpenses += amount;
     updateSummary();
+    askBilletes();
     document.getElementById('expenseDescription').value = '';
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseMethod').selectedIndex = 0;
