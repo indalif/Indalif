@@ -205,32 +205,40 @@ function updateTransactionHistory() {
         });
 }
 function editTransaction(id) {
-    const newDescription = prompt("Ingrese la nueva descripción:");
-    const newAmount = prompt("Ingrese el nuevo monto:");
-    const newMethod = prompt("Ingrese el nuevo método (efectivo, tarjeta, etc.):");
-    const newType = prompt("Ingrese el nuevo tipo (Ingreso/Egreso):");
-
-    if (!newDescription || !newAmount || !newMethod || !newType) {
-        alert("Todos los campos son obligatorios.");
-        return;
-    }
-
-    fetch(`/transactions/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            description: newDescription,
-            amount: parseFloat(newAmount),
-            method: newMethod,
-            type: newType
-        })
-    })
+    // Primero obtenemos los datos actuales de la transacción
+    fetch(`/transactions/${id}`)
     .then(response => response.json())
-    .then(data => {
-        alert(data.message);
-        updateTransactionHistory(); // Refresca la tabla
+    .then(transaction => {
+        if (!transaction) {
+            alert("Error al obtener la transacción.");
+            return;
+        }
+
+        // Mostramos los valores actuales en los prompts para editar
+        const newDescription = prompt("Editar descripción:", transaction.description) || transaction.description;
+        const newAmount = prompt("Editar monto:", transaction.amount) || transaction.amount;
+        const newMethod = prompt("Editar método:", transaction.method) || transaction.method;
+        const newType = prompt("Editar tipo (Ingreso/Egreso):", transaction.type) || transaction.type;
+
+        // Enviamos la actualización al servidor
+        fetch(`/transactions/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                description: newDescription,
+                amount: parseFloat(newAmount),
+                method: newMethod,
+                type: newType
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            updateTransactionHistory(); // Refresca la tabla
+        })
+        .catch(error => console.error("Error al editar:", error));
     })
-    .catch(error => console.error("Error al editar:", error));
+    .catch(error => console.error("Error al obtener la transacción:", error));
 }
 function deleteTransaction(id) {
     if (!confirm("¿Seguro que deseas eliminar esta transacción?")) return;
