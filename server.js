@@ -1491,13 +1491,32 @@ app.post('/transactions', (req, res) => {
         res.json({ id: result.insertId, message: `${type} agregado con éxito` });
     });
 });
-app.get('/transactions', (req, res) => {
-    const sql = 'SELECT * FROM caja ORDER BY date DESC';
-    dbModulos.query(sql, (err, rows) => {
-        if (err) {
-            return res.status(400).json({ error: err.message });
-        }
-        res.json(rows);
+app.get('/transactions/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = 'SELECT * FROM caja WHERE id = ?';
+    
+    dbModulos.query(sql, [id], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows[0] || {});
+    });
+});
+app.put('/transactions/:id', (req, res) => {
+    const { id } = req.params;
+    const { description, amount, method, type } = req.body;
+
+    const sql = 'UPDATE caja SET description = ?, amount = ?, method = ?, type = ? WHERE id = ?';
+    dbModulos.query(sql, [description, amount, method, type, id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'Transacción actualizada correctamente' });
+    });
+});
+app.delete('/transactions/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = 'DELETE FROM caja WHERE id = ?';
+
+    dbModulos.query(sql, [id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: 'Transacción eliminada correctamente' });
     });
 });
 app.get('/transactions/date/:date', (req, res) => {
