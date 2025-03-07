@@ -49,8 +49,17 @@ function updateSummary() {
         })
         .catch(error => console.error('Error al obtener el resumen:', error));
 }
-function askBilletes(callback) {
-    let billetes = {
+function askBilletes(type) {
+    let currentBilletes = {
+        billete_100: parseInt(document.getElementById('bill100').value) || 0,
+        billete_200: parseInt(document.getElementById('bill200').value) || 0,
+        billete_500: parseInt(document.getElementById('bill500').value) || 0,
+        billete_1000: parseInt(document.getElementById('bill1000').value) || 0,
+        billete_2000: parseInt(document.getElementById('bill2000').value) || 0,
+        billete_10000: parseInt(document.getElementById('bill10000').value) || 0,
+        billete_20000: parseInt(document.getElementById('bill20000').value) || 0
+    };
+    let billetesUsados = {
         billete_100: parseInt(prompt("Ingrese cantidad de billetes de $100:", "0")) || 0,
         billete_200: parseInt(prompt("Ingrese cantidad de billetes de $200:", "0")) || 0,
         billete_500: parseInt(prompt("Ingrese cantidad de billetes de $500:", "0")) || 0,
@@ -60,19 +69,31 @@ function askBilletes(callback) {
         billete_20000: parseInt(prompt("Ingrese cantidad de billetes de $20000:", "0")) || 0
     };
 
-    // Actualiza los campos en la interfaz
-    document.getElementById('bill100').value = billetes.billete_100;
-    document.getElementById('bill200').value = billetes.billete_200;
-    document.getElementById('bill500').value = billetes.billete_500;
-    document.getElementById('bill1000').value = billetes.billete_1000;
-    document.getElementById('bill2000').value = billetes.billete_2000;
-    document.getElementById('bill10000').value = billetes.billete_10000;
-    document.getElementById('bill20000').value = billetes.billete_20000;
+    let factor = type === 'Ingreso' ? 1 : -1;
 
-    // Guarda los billetes en la base de datos
+    let nuevosBilletes = {
+        billete_100: currentBilletes.billete_100 + (billetesUsados.billete_100 * factor),
+        billete_200: currentBilletes.billete_200 + (billetesUsados.billete_200 * factor),
+        billete_500: currentBilletes.billete_500 + (billetesUsados.billete_500 * factor),
+        billete_1000: currentBilletes.billete_1000 + (billetesUsados.billete_1000 * factor),
+        billete_2000: currentBilletes.billete_2000 + (billetesUsados.billete_2000 * factor),
+        billete_10000: currentBilletes.billete_10000 + (billetesUsados.billete_10000 * factor),
+        billete_20000: currentBilletes.billete_20000 + (billetesUsados.billete_20000 * factor)
+    };
+
+    Object.keys(nuevosBilletes).forEach(key => {
+        if (nuevosBilletes[key] < 0) nuevosBilletes[key] = 0;
+    });
+
+    document.getElementById('bill100').value = nuevosBilletes.billete_100;
+    document.getElementById('bill200').value = nuevosBilletes.billete_200;
+    document.getElementById('bill500').value = nuevosBilletes.billete_500;
+    document.getElementById('bill1000').value = nuevosBilletes.billete_1000;
+    document.getElementById('bill2000').value = nuevosBilletes.billete_2000;
+    document.getElementById('bill10000').value = nuevosBilletes.billete_10000;
+    document.getElementById('bill20000').value = nuevosBilletes.billete_20000;
+
     saveBilletes();
-
-    if (callback) callback();
 }
 function addIncome() {
     const description = document.getElementById('incomeDescription').value;
@@ -92,7 +113,7 @@ function addIncome() {
     saveTransaction(transaction);
     totalIncome += amount;
     updateSummary();
-    askBilletes();
+    askBilletes('Ingreso');
     document.getElementById('incomeDescription').value = '';
     document.getElementById('incomeAmount').value = '';
     document.getElementById('incomeMethod').selectedIndex = 0;
@@ -115,7 +136,7 @@ function addExpense() {
     saveTransaction(transaction);
     totalExpenses += amount;
     updateSummary();
-    askBilletes();
+    askBilletes('Egreso');
     document.getElementById('expenseDescription').value = '';
     document.getElementById('expenseAmount').value = '';
     document.getElementById('expenseMethod').selectedIndex = 0;
