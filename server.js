@@ -1491,6 +1491,15 @@ app.post('/transactions', (req, res) => {
         res.json({ id: result.insertId, message: `${type} agregado con éxito` });
     });
 });
+app.get('/transactions', (req, res) => {
+    const sql = 'SELECT * FROM caja ORDER BY date DESC';
+    dbModulos.query(sql, (err, rows) => {
+        if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+});
 app.get('/transactions/:id', (req, res) => {
     const { id } = req.params;
     const sql = 'SELECT * FROM caja WHERE id = ?';
