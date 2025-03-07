@@ -43,7 +43,7 @@ document.getElementById('agregarProducto').addEventListener('click', function (e
 
     const producto = document.getElementById('producto').value;
     const cantidad = document.getElementById('cantidad').value;
-    const presentacion = document.getElementById('presentacion').value;
+    const presentacion = document.getElementById('presentacion').options[document.getElementById('presentacion').selectedIndex].text;
 
     if (!producto || !cantidad || !presentacion) {
         alert('Por favor, completa todos los campos.');
@@ -66,7 +66,7 @@ document.getElementById('agregarProducto').addEventListener('click', function (e
     // Limpiar inputs
     document.getElementById('producto').value = '';
     document.getElementById('cantidad').value = '';
-    document.getElementById('presentacion').value = '';
+    document.getElementById('presentacion').selectedIndex = 0; // Vuelve a la primera opción
 });
 document.getElementById('notaPedidoForm').addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -246,13 +246,13 @@ async function cargarNotas() {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
             div.setAttribute('data-id', nota.id);
-            let productosHTML = '';          
+            let productosHTML = '';
             let productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
 
             if (Array.isArray(productos)) {
                 productos.forEach(p => {
                     productosHTML += `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}</li>`;
-                });  
+                });
             } else {
                 productosHTML = '<li>Error al cargar productos</li>';
             }
@@ -374,18 +374,15 @@ function actualizarListaProductos() {
 function editarProducto(index) {
     const producto = productosLista[index];
 
-    // Cargar los datos del producto en los inputs
     document.getElementById('producto').value = producto.producto;
     document.getElementById('cantidad').value = producto.cantidad;
-    document.getElementById('presentacion').value = producto.presentacion;
+    document.getElementById('presentacion').value = [...document.getElementById('presentacion').options]
+    .find(option => option.text === producto.presentacion)?.value || "";
 
-    // Guardar el índice del producto que se está editando
     document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
 
-    // Cambiar texto del botón a "Actualizar Producto"
     document.getElementById('agregarProducto').innerHTML = `<i class="fas fa-save me-2"></i>Actualizar Producto`;
 
-    // Asegurar que no se guarde la nota accidentalmente
     event.preventDefault();
 }
 function eliminarProducto(index) {
