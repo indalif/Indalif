@@ -368,6 +368,9 @@ function actualizarListaProductos() {
         item.classList.add('list-group-item');
         item.innerHTML = `
             ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion} 
+            <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
+                    <i class="fas fa-edit"></i>
+                </button>
             <button class="btn btn-sm btn-danger ms-2" onclick="eliminarProducto(${index})">
                 <i class="fas fa-trash-alt"></i>
             </button>
