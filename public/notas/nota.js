@@ -334,7 +334,7 @@ async function cargarNotaParaEditar(notaId) {
         document.getElementById('fecha').value = formatFechaParaInput(nota.fecha);
         document.getElementById('fecha_entrega').value = formatFechaParaInput(nota.fecha_entrega);
 
-        productosLista = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
+        productosLista = Array.isArray(nota.productos) ? nota.productos : JSON.parse(nota.productos);
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
