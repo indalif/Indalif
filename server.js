@@ -352,7 +352,7 @@ app.get('/notas-pedido', (req, res) => {
             return res.status(500).json({ error: "Error al obtener las notas de pedido" });
         }
 
-        // Convertimos los productos de string JSON a objeto
+        // Convertir los productos a objetos JSON antes de enviar
         results.forEach(nota => {
             try {
                 nota.productos = JSON.parse(nota.productos);
