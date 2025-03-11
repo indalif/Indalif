@@ -422,6 +422,7 @@ app.get('/notas-pedido/:id', (req, res) => {
 app.put('/notas-pedido/:id', (req, res) => {
     const { id } = req.params;
     const { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
+    console.log("📌 Datos recibidos en PUT:", req.body);
 
     if (!Array.isArray(productos)) {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });

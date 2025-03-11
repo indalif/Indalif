@@ -430,39 +430,63 @@ function eliminarProducto(index) {
         actualizarListaProductos();
     }
 }
-async function guardarNotaEditada() {
+async function guardarNotaEditada(event) {
+    event.preventDefault();
+
     const notaId = document.getElementById('guardarNotaEditada').getAttribute('data-id');
+    if (!notaId) {
+        console.error("❌ No se encontró el ID de la nota para actualizar.");
+        return;
+    }
+
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
     const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
 
-    // Aseguramos que productosLista se convierte correctamente a JSON
-    const productosJSON = JSON.stringify(
-        productosLista.map(p => ({
-            producto: p.producto,
-            cantidad: p.cantidad,
-            presentacion: p.presentacion,
-            descripcion: p.descripcion || "" // Si no hay descripción, guardamos un string vacío
-        }))
-    );
+    if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
+        console.error("❌ Campos incompletos al intentar actualizar la nota.");
+        return;
+    }
+
+    const datosActualizados = {
+        numero_nota,
+        cliente_id: clienteId,
+        fecha,
+        fecha_entrega: fechaEntrega,
+        productos: productosLista
+    };
+
+    console.log("📌 Enviando datos actualizados:", datosActualizados); // 🔍 DEBUG
 
     try {
         const response = await fetch(`/notas-pedido/${notaId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosJSON })
+            body: JSON.stringify(datosActualizados)
         });
 
-        if (!response.ok) throw new Error('Error al actualizar la nota de pedido');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error al actualizar la nota de pedido: ${errorText}`);
+        }
 
-        alert('Nota de pedido actualizada con éxito!');
-        document.getElementById('notaPedidoForm').reset();
-        document.getElementById('guardarNotaEditada').style.display = 'none';
-        document.getElementById('guardarNota').style.display = 'block';
+        alert('✅ Nota de pedido actualizada con éxito.');
         cargarNotas();
+        document.getElementById('notaPedidoForm').reset();
+        productosLista = [];
+        document.getElementById('listaProductos').innerHTML = '';
+
+        let btnEditar = document.getElementById('guardarNotaEditada');
+        let btnGuardar = document.getElementById('guardarNota');
+
+        if (btnEditar && btnGuardar) {
+            btnEditar.style.display = 'none';
+            btnGuardar.style.display = 'block';
+        }
+
     } catch (error) {
-        console.error('Error:', error);
+        console.error("🚨 Error al actualizar la nota:", error);
     }
 }
 document.getElementById('guardarNotaEditada').addEventListener('click', guardarNotaEditada);
