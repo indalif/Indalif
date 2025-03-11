@@ -399,10 +399,10 @@ function actualizarListaProductos() {
         let item = document.createElement('li');
         item.classList.add('list-group-item');
         item.innerHTML = `
-            ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion} 
+            ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion}, Descripción: ${producto.descripcion || "Sin descripción"} 
             <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
-                    <i class="fas fa-edit"></i>
-                </button>
+                <i class="fas fa-edit"></i>
+            </button>
             <button class="btn btn-sm btn-danger ms-2" onclick="eliminarProducto(${index})">
                 <i class="fas fa-trash-alt"></i>
             </button>
@@ -417,9 +417,9 @@ function editarProducto(index) {
     document.getElementById('cantidad').value = producto.cantidad;
     document.getElementById('presentacion').value = [...document.getElementById('presentacion').options]
         .find(option => option.text === producto.presentacion)?.value || "";
+    document.getElementById('descripcion').value = producto.descripcion || ""; // ✅ Se asegura que la descripción no se pierda
 
     document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
-
     document.getElementById('agregarProducto').innerHTML = `<i class="fas fa-save me-2"></i>Actualizar Producto`;
 
     event.preventDefault();
@@ -454,28 +454,23 @@ async function guardarNotaEditada(event) {
         cliente_id: clienteId,
         fecha,
         fecha_entrega: fechaEntrega,
-        productos: productosLista
+        productos: productosLista.map(p => ({
+            producto: p.producto,
+            cantidad: p.cantidad,
+            presentacion: p.presentacion,
+            descripcion: p.descripcion || ""  // ✅ Se asegura de que la descripción siempre esté
+        }))
     };
 
-    console.log("📌 Enviando datos actualizados:", datosActualizados); // 🔍 DEBUG
+    console.log("📌 Enviando datos actualizados:", datosActualizados);
 
     try {
         const response = await fetch(`/notas-pedido/${notaId}`, {
             method: 'PUT',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                numero_nota,
-                cliente_id,
-                fecha,
-                fecha_entrega,
-                productos: productos.map(p => ({
-                    producto: p.producto,
-                    cantidad: p.cantidad,
-                    presentacion: p.presentacion,
-                    descripcion: p.descripcion // 👀 Asegúrate de que esto se incluya
-                }))
-            })
+            body: JSON.stringify(datosActualizados)
         });        
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Error al actualizar la nota de pedido: ${errorText}`);
