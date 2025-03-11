@@ -40,28 +40,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 let productosLista = [];
 document.getElementById('agregarProducto').addEventListener('click', function (event) {
     event.preventDefault();
+    
     const producto = document.getElementById('producto').value;
     const cantidad = document.getElementById('cantidad').value;
     const presentacion = document.getElementById('presentacion').options[document.getElementById('presentacion').selectedIndex].text;
     const descripcion = document.getElementById('descripcion').value.trim(); // Nuevo campo
+
     if (!producto || !cantidad || !presentacion) {
         alert('Por favor, completa todos los campos.');
         return;
     }
+
     let editIndex = this.getAttribute('data-edit-index');
-    if (editIndex !== null) {
+
+    if (editIndex !== null && editIndex !== '') {
         editIndex = parseInt(editIndex);
         productosLista[editIndex] = { producto, cantidad, presentacion, descripcion };
-        this.innerHTML = '<i class="fas fa-plus me-2"></i>Agregar Producto';
+        this.innerHTML = '<i class="fas fa-plus me-2"></i> Agregar Producto';
         this.removeAttribute('data-edit-index');
     } else {
         productosLista.push({ producto, cantidad, presentacion, descripcion });
     }
+
     actualizarListaProductos();
+
+    // Limpiar formulario después de agregar o editar
     document.getElementById('producto').value = '';
     document.getElementById('cantidad').value = '';
     document.getElementById('presentacion').selectedIndex = 0;
-    document.getElementById('descripcion').value = ''; // Limpia el campo de descripción
+    document.getElementById('descripcion').value = ''; 
 });
 document.getElementById('notaPedidoForm').addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -353,29 +360,30 @@ async function cargarNotaParaEditar(notaId) {
     }
 }
 function actualizarListaProductos() {
-    console.log("Lista de productos:", productosLista);
-
     const listaProductos = document.getElementById('listaProductos');
     listaProductos.innerHTML = '';
 
-    if (!Array.isArray(productosLista) || productosLista.length === 0) {
-        listaProductos.innerHTML = '<li class="text-danger">No hay productos registrados</li>';
-        return;
-    }
+    productosLista.forEach((item, index) => {
+        let li = document.createElement('li');
+        li.textContent = `${item.producto} - Cantidad: ${item.cantidad}, Presentación: ${item.presentacion}${item.descripcion ? ' - ' + item.descripcion : ''}`;
+        
+        let editarBtn = document.createElement('button');
+        editarBtn.textContent = 'Editar';
+        editarBtn.classList.add('btn', 'btn-warning', 'ms-2');
+        editarBtn.addEventListener('click', function () {
+            editarProducto(index);
+        });
 
-    productosLista.forEach((producto, index) => {
-        let item = document.createElement('li');
-        item.classList.add('list-group-item');
-        item.innerHTML = `
-            ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion} 
-            <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
-                    <i class="fas fa-edit"></i>
-                </button>
-            <button class="btn btn-sm btn-danger ms-2" onclick="eliminarProducto(${index})">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-        `;
-        listaProductos.appendChild(item);
+        let eliminarBtn = document.createElement('button');
+        eliminarBtn.textContent = 'Eliminar';
+        eliminarBtn.classList.add('btn', 'btn-danger', 'ms-2');
+        eliminarBtn.addEventListener('click', function () {
+            eliminarProducto(index);
+        });
+
+        li.appendChild(editarBtn);
+        li.appendChild(eliminarBtn);
+        listaProductos.appendChild(li);
     });
 }
 function editarProducto(index) {
@@ -383,20 +391,16 @@ function editarProducto(index) {
 
     document.getElementById('producto').value = producto.producto;
     document.getElementById('cantidad').value = producto.cantidad;
-    document.getElementById('presentacion').value = [...document.getElementById('presentacion').options]
-        .find(option => option.text === producto.presentacion)?.value || "";
+    document.getElementById('presentacion').value = producto.presentacion;
+    document.getElementById('descripcion').value = producto.descripcion;
 
-    document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
-
-    document.getElementById('agregarProducto').innerHTML = `<i class="fas fa-save me-2"></i>Actualizar Producto`;
-
-    event.preventDefault();
+    let btnAgregar = document.getElementById('agregarProducto');
+    btnAgregar.innerHTML = '<i class="fas fa-edit me-2"></i> Editar Producto';
+    btnAgregar.setAttribute('data-edit-index', index);
 }
 function eliminarProducto(index) {
-    if (confirm('¿Estás seguro de eliminar este producto?')) {
-        productosLista.splice(index, 1);
-        actualizarListaProductos();
-    }
+    productosLista.splice(index, 1);
+    actualizarListaProductos();
 }
 async function guardarNotaEditada() {
     const notaId = document.getElementById('guardarNotaEditada').getAttribute('data-id');
