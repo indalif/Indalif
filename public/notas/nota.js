@@ -230,6 +230,7 @@ async function cargarNotas() {
 
         const listaNotas = document.getElementById('listaNotas');
         listaNotas.innerHTML = ''; // ✅ BORRA LAS NOTAS ANTERIORES PARA EVITAR DUPLICADOS
+
         const formatFecha = (fechaISO) => {
             if (!fechaISO) return ''; // Evita errores si el valor es nulo o indefinido
 
@@ -241,6 +242,7 @@ async function cargarNotas() {
 
             return `${dia}/${mes}/${anio}`;
         };
+
         data.notas.forEach(nota => {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
@@ -258,7 +260,10 @@ async function cargarNotas() {
 
             let productosHTML = productos.length > 0
                 ? productos.map(p => `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>`).join("")
-                : '<li>No hay productos registrados</li>';
+                : '';
+
+            // ✅ Mostrar mensaje solo si la lista de productos está vacía
+            let listaProductosHTML = productosHTML || '<li class="text-danger">No hay productos registrados</li>';
 
             div.innerHTML = `
                 <h5>Número de Nota: ${nota.numero_nota}</h5>
@@ -267,7 +272,7 @@ async function cargarNotas() {
                 <p><strong>Fecha:</strong> ${formatFecha(nota.fecha)}</p>
                 <p><strong>Fecha de Entrega:</strong> ${formatFecha(nota.fecha_entrega)}</p>
                 <h6>Productos:</h6>
-                <ul>${productosHTML}</ul>
+                <ul>${listaProductosHTML}</ul>
                 <button onclick="imprimirNota(this)" class="btn btn-primary w-100 mt-3">
                     <i class="fas fa-print me-2"></i> Imprimir
                 </button>
@@ -352,25 +357,24 @@ async function cargarNotaParaEditar(notaId) {
     }
 }
 function actualizarListaProductos() {
-    console.log("Lista de productos:", productosLista); // 🔍 Verifica los productos en la consola
+    console.log("Lista de productos:", productosLista);
 
     const listaProductos = document.getElementById('listaProductos');
     listaProductos.innerHTML = '';
 
-    if (productosLista.length === 0) {
-        listaProductos.innerHTML = '<li class="list-group-item">No hay productos registrados</li>';
+    if (!Array.isArray(productosLista) || productosLista.length === 0) {
+        listaProductos.innerHTML = '<li class="text-danger">No hay productos registrados</li>';
         return;
     }
 
     productosLista.forEach((producto, index) => {
         let item = document.createElement('li');
-        item.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+        item.classList.add('list-group-item');
         item.innerHTML = `
-            ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion}
-              <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
-                    <i class="fas fa-edit"></i>
-                </button>
-            <button class="btn btn-danger btn-sm ms-2" onclick="eliminarProducto(${index})"><i class="fas fa-trash-alt"></i></button>
+            ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion} 
+            <button class="btn btn-sm btn-danger ms-2" onclick="eliminarProducto(${index})">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         `;
         listaProductos.appendChild(item);
     });

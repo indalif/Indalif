@@ -295,7 +295,6 @@ dbModulos.query(`
     if (err) throw err;
     console.log('Tabla de billetes verificada/creada.');
 });
-// Crear tabla si no existe
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS notas_pedido (
         id INT AUTO_INCREMENT PRIMARY KEY,
