@@ -405,12 +405,16 @@ app.get('/notas-pedido/:id', (req, res) => {
             return res.status(404).json({ error: "Nota de pedido no encontrada" });
         }
 
-        try {
-            results[0].productos = JSON.parse(results[0].productos);
-        } catch (error) {
-            console.error("Error parseando productos:", error);
+        if (typeof results[0].productos === "string") {
+            try {
+                results[0].productos = JSON.parse(results[0].productos);
+            } catch (error) {
+                console.error("Error parseando productos:", error);
+                results[0].productos = [];
+            }
+        } else if (!Array.isArray(results[0].productos)) {
             results[0].productos = [];
-        }
+        }        
 
         res.json(results[0]);
     });

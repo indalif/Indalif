@@ -354,7 +354,19 @@ async function cargarNotaParaEditar(notaId) {
         document.getElementById('fecha').value = formatFechaParaInput(nota.fecha);
         document.getElementById('fecha_entrega').value = formatFechaParaInput(nota.fecha_entrega);
 
-        productosLista = Array.isArray(nota.productos) ? nota.productos : JSON.parse(nota.productos);
+        if (Array.isArray(nota.productos)) {
+            productosLista = nota.productos;
+        } else if (typeof nota.productos === "string") {
+            try {
+                productosLista = JSON.parse(nota.productos);
+            } catch (error) {
+                console.error("Error parseando productos:", error);
+                productosLista = [];
+            }
+        } else {
+            productosLista = [];
+        }
+        console.log("🔍 Productos cargados para edición:", productosLista);        
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
