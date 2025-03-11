@@ -316,17 +316,28 @@ app.post('/notas-pedido', (req, res) => {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
     }
 
-    console.log("📥 Productos recibidos:", productos); // 🔍 DEBUG: Verifica si ya vienen como array
-    const productosJSON = JSON.stringify(
-        productos.map(p => ({
-            producto: p.producto,
-            cantidad: p.cantidad,
-            presentacion: p.presentacion,
-            descripcion: p.descripcion || ""
-        }))
-    );
+    console.log("📥 Productos recibidos en el POST:", productos); // 🔍 DEBUG
 
-    console.log("📦 Guardando productos como JSON:", productosJSON); // 🔍 DEBUG
+    // 🔥 CORRECCIÓN: Verificar si el contenido ya es JSON
+    if (typeof productos === 'string') {
+        console.warn("⚠️ productos ya es un string, intentaremos parsearlo.");
+        try {
+            productos = JSON.parse(productos);
+        } catch (error) {
+            console.error("❌ Error al intentar parsear productos recibidos:", error);
+            return res.status(400).json({ error: "Formato de productos inválido" });
+        }
+    }
+
+    // 🔥 CORRECCIÓN: Asegurar que es un array de objetos antes de convertir a JSON
+    if (!Array.isArray(productos)) {
+        return res.status(400).json({ error: "El campo 'productos' debe ser un array válido" });
+    }
+
+    // ✅ Convertir productos a JSON STRING ANTES de guardarlos en la BD
+    const productosJSON = JSON.stringify(productos);
+
+    console.log("📦 Guardando productos en BD:", productosJSON); // 🔍 DEBUG
 
     const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
                  VALUES (?, ?, ?, ?, ?)`;
