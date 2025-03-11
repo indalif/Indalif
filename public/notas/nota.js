@@ -355,25 +355,16 @@ function actualizarListaProductos() {
     const listaProductos = document.getElementById('listaProductos');
     listaProductos.innerHTML = '';
 
-    productosLista.forEach((p, index) => {
-        let li = document.createElement('li');
-        li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-
-        let descripcionTexto = p.descripcion ? ` - <em>${p.descripcion}</em>` : ''; // Mostrar solo si tiene descripción
-
-        li.innerHTML = `
-            ${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion} ${descripcionTexto}
-            <div>
-                <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
+    productosLista.forEach((producto, index) => {
+        let item = document.createElement('li');
+        item.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+        item.innerHTML = `
+            ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion} - ${producto.descripcion || 'Sin descripción'}
+            <button class="btn btn-danger btn-sm ms-2" onclick="eliminarProducto(${index})"><i class="fas fa-trash-alt"></i></button> <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${index})">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>
         `;
-
-        listaProductos.appendChild(li);
+        listaProductos.appendChild(item);
     });
 }
 function editarProducto(index) {
