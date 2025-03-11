@@ -232,14 +232,11 @@ async function cargarNotas() {
         listaNotas.innerHTML = ''; // ✅ BORRA LAS NOTAS ANTERIORES PARA EVITAR DUPLICADOS
 
         const formatFecha = (fechaISO) => {
-            if (!fechaISO) return ''; // Evita errores si el valor es nulo o indefinido
-
-            // Aseguramos que la fecha solo contiene la parte de "YYYY-MM-DD"
+            if (!fechaISO) return '';
             const fecha = new Date(fechaISO);
             const dia = fecha.getUTCDate().toString().padStart(2, '0');
             const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
             const anio = fecha.getUTCFullYear();
-
             return `${dia}/${mes}/${anio}`;
         };
 
@@ -251,19 +248,24 @@ async function cargarNotas() {
             let productos = [];
 
             try {
+                // ✅ Asegurar que productos es un array
                 productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
                 if (!Array.isArray(productos)) throw new Error("Productos no es un array");
             } catch (error) {
-                console.error("Error parseando productos:", error);
+                console.error("Error parseando productos para la nota ID", nota.id, ":", error);
                 productos = [];
             }
 
-            let productosHTML = productos.length > 0
-                ? productos.map(p => `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>`).join("")
-                : '';
+            console.log("Productos en nota ID", nota.id, ":", productos); // 🔍 DEBUG
 
-            // ✅ Mostrar mensaje solo si la lista de productos está vacía
-            let listaProductosHTML = productosHTML || '<li class="text-danger">No hay productos registrados</li>';
+            let productosHTML = productos.map(p => `
+                <li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>
+            `).join("");
+
+            // ✅ Si no hay productos, mostrar mensaje de advertencia en amarillo
+            if (productos.length === 0) {
+                productosHTML = '<li class="text-warning">No hay productos registrados</li>';
+            }
 
             div.innerHTML = `
                 <h5>Número de Nota: ${nota.numero_nota}</h5>
@@ -272,7 +274,7 @@ async function cargarNotas() {
                 <p><strong>Fecha:</strong> ${formatFecha(nota.fecha)}</p>
                 <p><strong>Fecha de Entrega:</strong> ${formatFecha(nota.fecha_entrega)}</p>
                 <h6>Productos:</h6>
-                <ul>${listaProductosHTML}</ul>
+                <ul>${productosHTML}</ul>
                 <button onclick="imprimirNota(this)" class="btn btn-primary w-100 mt-3">
                     <i class="fas fa-print me-2"></i> Imprimir
                 </button>
