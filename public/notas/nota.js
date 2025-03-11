@@ -99,7 +99,10 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
         document.getElementById('presentacion').value = '';
         productosLista = [];
         document.getElementById('listaProductos').innerHTML = '';
-        document.getElementById('notaVisual').style.display = 'none';
+        const notaVisual = document.getElementById('notaVisual');
+        if (notaVisual) {
+            notaVisual.style.display = 'none';
+        }
 
         console.log('Formulario limpio.');
 
@@ -117,7 +120,7 @@ function imprimirNota(button) {
     let productos = Array.from(notaDiv.querySelectorAll("ul li")).map(li => {
         let partes = li.innerText.match(/^(.*?) - Cantidad: (\d+), Presentación: (.+?)(?: - (.*))?$/);
         return partes ? { producto: partes[1], cantidad: partes[2], presentacion: partes[3], descripcion: partes[4] || "" } : null;
-    }).filter(p => p !== null);    
+    }).filter(p => p !== null);
     let contenidoHTML = `
     <html>
         <head>
@@ -242,9 +245,9 @@ async function cargarNotas() {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
             div.setAttribute('data-id', nota.id);
-        
+
             let productos = [];
-        
+
             try {
                 productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
                 if (!Array.isArray(productos)) throw new Error("Productos no es un array");
@@ -252,11 +255,11 @@ async function cargarNotas() {
                 console.error("Error parseando productos:", error);
                 productos = [];
             }
-        
+
             let productosHTML = productos.length > 0
                 ? productos.map(p => `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>`).join("")
                 : '<li>No hay productos registrados</li>';
-        
+
             div.innerHTML = `
                 <h5>Número de Nota: ${nota.numero_nota}</h5>
                 <p><strong>Cliente:</strong> ${nota.nombre_cliente}</p>
@@ -275,9 +278,9 @@ async function cargarNotas() {
                     <i class="fas fa-edit me-2"></i> Editar
                 </button>
             `;
-        
+
             listaNotas.appendChild(div);
-        });        
+        });
     } catch (error) {
         console.error('Error obteniendo notas de pedido:', error);
     }
@@ -379,7 +382,7 @@ function editarProducto(index) {
     document.getElementById('producto').value = producto.producto;
     document.getElementById('cantidad').value = producto.cantidad;
     document.getElementById('presentacion').value = [...document.getElementById('presentacion').options]
-    .find(option => option.text === producto.presentacion)?.value || "";
+        .find(option => option.text === producto.presentacion)?.value || "";
 
     document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
 
