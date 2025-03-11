@@ -117,8 +117,7 @@ function imprimirNota(button) {
     let productos = Array.from(notaDiv.querySelectorAll("ul li")).map(li => {
         let partes = li.innerText.match(/^(.*?) - Cantidad: (\d+), Presentación: (.+?)(?: - (.*))?$/);
         return partes ? { producto: partes[1], cantidad: partes[2], presentacion: partes[3], descripcion: partes[4] || "" } : null;
-    }).filter(p => p !== null);
-
+    }).filter(p => p !== null);    
     let contenidoHTML = `
     <html>
         <head>
@@ -243,17 +242,21 @@ async function cargarNotas() {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
             div.setAttribute('data-id', nota.id);
-            let productosHTML = '';
-            let productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
-
-            if (Array.isArray(productos)) {
-                productos.forEach(p => {
-                    productosHTML += `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}</li>`;
-                });
-            } else {
-                productosHTML = '<li>Error al cargar productos</li>';
+        
+            let productos = [];
+        
+            try {
+                productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
+                if (!Array.isArray(productos)) throw new Error("Productos no es un array");
+            } catch (error) {
+                console.error("Error parseando productos:", error);
+                productos = [];
             }
-
+        
+            let productosHTML = productos.length > 0
+                ? productos.map(p => `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>`).join("")
+                : '<li>No hay productos registrados</li>';
+        
             div.innerHTML = `
                 <h5>Número de Nota: ${nota.numero_nota}</h5>
                 <p><strong>Cliente:</strong> ${nota.nombre_cliente}</p>
@@ -272,9 +275,9 @@ async function cargarNotas() {
                     <i class="fas fa-edit me-2"></i> Editar
                 </button>
             `;
-
+        
             listaNotas.appendChild(div);
-        });
+        });        
     } catch (error) {
         console.error('Error obteniendo notas de pedido:', error);
     }
@@ -397,11 +400,21 @@ async function guardarNotaEditada() {
     const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
 
+    // Aseguramos que productosLista se convierte correctamente a JSON
+    const productosJSON = JSON.stringify(
+        productosLista.map(p => ({
+            producto: p.producto,
+            cantidad: p.cantidad,
+            presentacion: p.presentacion,
+            descripcion: p.descripcion || "" // Si no hay descripción, guardamos un string vacío
+        }))
+    );
+
     try {
         const response = await fetch(`/notas-pedido/${notaId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
+            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosJSON })
         });
 
         if (!response.ok) throw new Error('Error al actualizar la nota de pedido');
