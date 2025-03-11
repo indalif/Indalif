@@ -316,6 +316,7 @@ app.post('/notas-pedido', (req, res) => {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
     }
 
+    console.log("📥 Productos recibidos:", productos); // 🔍 DEBUG: Verifica si ya vienen como array
     const productosJSON = JSON.stringify(
         productos.map(p => ({
             producto: p.producto,
@@ -325,12 +326,14 @@ app.post('/notas-pedido', (req, res) => {
         }))
     );
 
+    console.log("📦 Guardando productos como JSON:", productosJSON); // 🔍 DEBUG
+
     const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
                  VALUES (?, ?, ?, ?, ?)`;
 
     dbModulos.query(sql, [numero_nota, cliente_id, fecha, fecha_entrega, productosJSON], (err, results) => {
         if (err) {
-            console.error("Error guardando nota de pedido:", err);
+            console.error("❌ Error guardando nota de pedido:", err);
             return res.status(500).json({ error: "Error al guardar la nota de pedido" });
         }
         res.status(201).json({ mensaje: "Nota de pedido guardada con éxito", id: results.insertId });
