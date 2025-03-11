@@ -297,14 +297,14 @@ dbModulos.query(`
 });
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS notas_pedido (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    numero_nota VARCHAR(50) NOT NULL,
-    cliente_id INT NOT NULL,
-    fecha DATE NOT NULL,
-    fecha_entrega DATE NOT NULL,
-    productos JSON NOT NULL,
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
-);
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        numero_nota VARCHAR(50) NOT NULL,
+        cliente_id INT NOT NULL,
+        fecha DATE NOT NULL,
+        fecha_entrega DATE NOT NULL,
+        productos JSON NOT NULL,
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    );
 `, (err) => {
     if (err) throw err;
     console.log('Tabla de notas_pedido verificada/creada.');
@@ -316,7 +316,15 @@ app.post('/notas-pedido', (req, res) => {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
     }
 
-    const productosJSON = JSON.stringify(productos);
+    // Convertimos los productos a JSON asegurando que tengan descripción
+    const productosJSON = JSON.stringify(
+        productos.map(p => ({
+            producto: p.producto,
+            cantidad: p.cantidad,
+            presentacion: p.presentacion,
+            descripcion: p.descripcion || "" // Si no hay descripción, guardamos un string vacío
+        }))
+    );
 
     const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
                  VALUES (?, ?, ?, ?, ?)`;
@@ -343,6 +351,17 @@ app.get('/notas-pedido', (req, res) => {
             console.error("Error obteniendo notas de pedido:", err);
             return res.status(500).json({ error: "Error al obtener las notas de pedido" });
         }
+
+        // Convertimos los productos de string JSON a objeto
+        results.forEach(nota => {
+            try {
+                nota.productos = JSON.parse(nota.productos);
+            } catch (error) {
+                console.error("Error parseando productos:", error);
+                nota.productos = [];
+            }
+        });
+
         res.json({ notas: results });
     });
 });
@@ -370,8 +389,16 @@ app.put('/notas-pedido/:id', (req, res) => {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
     }
 
-    const productosJSON = JSON.stringify(productos);
-    
+    // Asegurar que los productos incluyan la descripción al guardarse
+    const productosJSON = JSON.stringify(
+        productos.map(p => ({
+            producto: p.producto,
+            cantidad: p.cantidad,
+            presentacion: p.presentacion,
+            descripcion: p.descripcion || ""
+        }))
+    );
+
     const sql = `UPDATE notas_pedido 
                  SET numero_nota = ?, cliente_id = ?, fecha = ?, fecha_entrega = ?, productos = ? 
                  WHERE id = ?`;
@@ -395,6 +422,15 @@ app.get('/notas-pedido/:id', (req, res) => {
         if (results.length === 0) {
             return res.status(404).json({ error: "Nota de pedido no encontrada" });
         }
+
+        // Convertimos los productos de JSON string a objeto
+        try {
+            results[0].productos = JSON.parse(results[0].productos);
+        } catch (error) {
+            console.error("Error parseando productos:", error);
+            results[0].productos = [];
+        }
+
         res.json(results[0]);
     });
 });

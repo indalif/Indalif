@@ -39,34 +39,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 let productosLista = [];
 document.getElementById('agregarProducto').addEventListener('click', function (event) {
-    event.preventDefault(); // Evita el envío del formulario
-
+    event.preventDefault();
     const producto = document.getElementById('producto').value;
     const cantidad = document.getElementById('cantidad').value;
     const presentacion = document.getElementById('presentacion').options[document.getElementById('presentacion').selectedIndex].text;
-
+    const descripcion = document.getElementById('descripcion').value.trim(); // Nuevo campo
     if (!producto || !cantidad || !presentacion) {
         alert('Por favor, completa todos los campos.');
         return;
     }
-
     let editIndex = this.getAttribute('data-edit-index');
-
     if (editIndex !== null) {
         editIndex = parseInt(editIndex);
-        productosLista[editIndex] = { producto, cantidad, presentacion };
+        productosLista[editIndex] = { producto, cantidad, presentacion, descripcion };
         this.innerHTML = '<i class="fas fa-plus me-2"></i>Agregar Producto';
         this.removeAttribute('data-edit-index');
     } else {
-        productosLista.push({ producto, cantidad, presentacion });
+        productosLista.push({ producto, cantidad, presentacion, descripcion });
     }
-
     actualizarListaProductos();
-
-    // Limpiar inputs
     document.getElementById('producto').value = '';
     document.getElementById('cantidad').value = '';
-    document.getElementById('presentacion').selectedIndex = 0; // Vuelve a la primera opción
+    document.getElementById('presentacion').selectedIndex = 0;
+    document.getElementById('descripcion').value = ''; // Limpia el campo de descripción
 });
 document.getElementById('notaPedidoForm').addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -120,8 +115,8 @@ function imprimirNota(button) {
     let fecha = notaDiv.querySelector("p:nth-of-type(3)").innerText.replace("Fecha:", "").trim();
     let fechaEntrega = notaDiv.querySelector("p:nth-of-type(4)").innerText.replace("Fecha de Entrega:", "").trim();
     let productos = Array.from(notaDiv.querySelectorAll("ul li")).map(li => {
-        let partes = li.innerText.match(/^(.*?) - Cantidad: (\d+), Presentación: (.+)$/);
-        return partes ? { producto: partes[1], cantidad: partes[2], presentacion: partes[3] } : null;
+        let partes = li.innerText.match(/^(.*?) - Cantidad: (\d+), Presentación: (.+?)(?: - (.*))?$/);
+        return partes ? { producto: partes[1], cantidad: partes[2], presentacion: partes[3], descripcion: partes[4] || "" } : null;
     }).filter(p => p !== null);
 
     let contenidoHTML = `
@@ -197,12 +192,14 @@ function imprimirNota(button) {
                         <th>Producto</th>
                         <th>Cantidad</th>
                         <th>Presentación</th>
+                        <th>Descripción</th>
                     </tr>
                     ${productos.map(p => `
                         <tr>
                             <td>${p.producto}</td>
                             <td>${p.cantidad}</td>
                             <td>${p.presentacion}</td>
+                            <td>${p.descripcion ? p.descripcion : ""}</td>
                         </tr>
                     `).join("")}
                 </table>
@@ -356,8 +353,10 @@ function actualizarListaProductos() {
         let li = document.createElement('li');
         li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
 
+        let descripcionTexto = p.descripcion ? ` - <em>${p.descripcion}</em>` : ''; // Mostrar solo si tiene descripción
+
         li.innerHTML = `
-            ${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion}
+            ${p.producto} - Cantidad: ${p.cantidad} - Presentación: ${p.presentacion} ${descripcionTexto}
             <div>
                 <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
                     <i class="fas fa-edit"></i>
