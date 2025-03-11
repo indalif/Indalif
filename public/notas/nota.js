@@ -43,11 +43,13 @@ document.getElementById('agregarProducto').addEventListener('click', function (e
     const producto = document.getElementById('producto').value;
     const cantidad = document.getElementById('cantidad').value;
     const presentacion = document.getElementById('presentacion').options[document.getElementById('presentacion').selectedIndex].text;
-    const descripcion = document.getElementById('descripcion').value.trim(); // Nuevo campo
+    const descripcion = document.getElementById('descripcion').value.trim();
+
     if (!producto || !cantidad || !presentacion) {
         alert('Por favor, completa todos los campos.');
         return;
     }
+
     let editIndex = this.getAttribute('data-edit-index');
     if (editIndex !== null) {
         editIndex = parseInt(editIndex);
@@ -57,11 +59,12 @@ document.getElementById('agregarProducto').addEventListener('click', function (e
     } else {
         productosLista.push({ producto, cantidad, presentacion, descripcion });
     }
+
     actualizarListaProductos();
     document.getElementById('producto').value = '';
     document.getElementById('cantidad').value = '';
     document.getElementById('presentacion').selectedIndex = 0;
-    document.getElementById('descripcion').value = ''; // Limpia el campo de descripción
+    document.getElementById('descripcion').value = '';
 });
 document.getElementById('notaPedidoForm').addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -222,22 +225,20 @@ async function cargarNotas() {
         const response = await fetch('/notas-pedido');
         const data = await response.json();
 
-        console.log('Notas recibidas:', data);
+        console.log('📌 Notas recibidas:', data);
 
         if (!Array.isArray(data.notas)) {
-            throw new Error('La respuesta no contiene un array de notas');
+            throw new Error('❌ La respuesta no contiene un array de notas.');
         }
 
         const listaNotas = document.getElementById('listaNotas');
         listaNotas.innerHTML = ''; // ✅ Limpia la lista antes de cargar nuevas notas
 
+        // Función para formatear fechas (mejorada)
         const formatFecha = (fechaISO) => {
-            if (!fechaISO) return '';
+            if (!fechaISO) return 'Fecha no disponible';
             const fecha = new Date(fechaISO);
-            const dia = fecha.getUTCDate().toString().padStart(2, '0');
-            const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
-            const anio = fecha.getUTCFullYear();
-            return `${dia}/${mes}/${anio}`;
+            return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
         };
 
         data.notas.forEach(nota => {
@@ -248,8 +249,14 @@ async function cargarNotas() {
             let productos = [];
 
             try {
-                productos = Array.isArray(nota.productos) ? nota.productos : JSON.parse(nota.productos);
-                if (!Array.isArray(productos)) throw new Error("Productos no es un array");
+                if (Array.isArray(nota.productos)) {
+                    productos = nota.productos;
+                } else if (typeof nota.productos === 'string') {
+                    productos = JSON.parse(nota.productos);
+                    if (!Array.isArray(productos)) throw new Error("Productos no es un array después de parsear.");
+                } else {
+                    throw new Error("Formato desconocido de productos.");
+                }
             } catch (error) {
                 console.error("❌ Error parseando productos en nota ID", nota.id, ":", error);
                 productos = [];
@@ -282,9 +289,22 @@ async function cargarNotas() {
 
             listaNotas.appendChild(div);
         });
+
     } catch (error) {
-        console.error('Error obteniendo notas de pedido:', error);
+        console.error('🚨 Error obteniendo notas de pedido:', error);
+        alert("Hubo un error al cargar las notas de pedido. Inténtalo nuevamente.");
     }
+}
+function editarNota(numeroNota, clienteId, fecha, fechaEntrega, productos) {
+    document.getElementById('numero_nota').value = numeroNota;
+    document.getElementById('cliente').value = clienteId;
+    document.getElementById('fecha').value = fecha;
+    document.getElementById('fecha_entrega').value = fechaEntrega;
+
+    productosLista = productos; // Asignar productos al editar
+    console.log('Productos cargados para edición:', productosLista);
+
+    actualizarListaProductos();
 }
 async function marcarComoEntregado(button) {
     let pedidoDiv = button.parentElement;
