@@ -462,10 +462,20 @@ async function guardarNotaEditada(event) {
     try {
         const response = await fetch(`/notas-pedido/${notaId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosActualizados)
-        });
-
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                numero_nota,
+                cliente_id,
+                fecha,
+                fecha_entrega,
+                productos: productos.map(p => ({
+                    producto: p.producto,
+                    cantidad: p.cantidad,
+                    presentacion: p.presentacion,
+                    descripcion: p.descripcion // 👀 Asegúrate de que esto se incluya
+                }))
+            })
+        });        
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Error al actualizar la nota de pedido: ${errorText}`);

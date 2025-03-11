@@ -420,9 +420,10 @@ app.get('/notas-pedido/:id', (req, res) => {
     });
 });
 app.put('/notas-pedido/:id', (req, res) => {
+    console.log("📌 Datos recibidos en PUT:", req.body);
+
     const { id } = req.params;
     const { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
-    console.log("📌 Datos recibidos en PUT:", req.body);
 
     if (!Array.isArray(productos)) {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
@@ -436,6 +437,8 @@ app.put('/notas-pedido/:id', (req, res) => {
             descripcion: p.descripcion || ""
         }))
     );
+
+    console.log("📌 JSON de productos antes de guardar:", productosJSON);
 
     const sql = `UPDATE notas_pedido 
                  SET numero_nota = ?, cliente_id = ?, fecha = ?, fecha_entrega = ?, productos = ? 
