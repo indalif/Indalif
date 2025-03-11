@@ -295,6 +295,7 @@ dbModulos.query(`
     if (err) throw err;
     console.log('Tabla de billetes verificada/creada.');
 });
+// Crear tabla si no existe
 dbModulos.query(`
     CREATE TABLE IF NOT EXISTS notas_pedido (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -316,13 +317,12 @@ app.post('/notas-pedido', (req, res) => {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
     }
 
-    // Convertimos los productos a JSON asegurando que tengan descripción
     const productosJSON = JSON.stringify(
         productos.map(p => ({
             producto: p.producto,
             cantidad: p.cantidad,
             presentacion: p.presentacion,
-            descripcion: p.descripcion || "" // Si no hay descripción, guardamos un string vacío
+            descripcion: p.descripcion || ""
         }))
     );
 
@@ -334,7 +334,7 @@ app.post('/notas-pedido', (req, res) => {
             console.error("Error guardando nota de pedido:", err);
             return res.status(500).json({ error: "Error al guardar la nota de pedido" });
         }
-        res.status(201).json({ mensaje: "Nota de pedido guardada con éxito" });
+        res.status(201).json({ mensaje: "Nota de pedido guardada con éxito", id: results.insertId });
     });
 });
 app.get('/notas-pedido', (req, res) => {
@@ -352,12 +352,11 @@ app.get('/notas-pedido', (req, res) => {
             return res.status(500).json({ error: "Error al obtener las notas de pedido" });
         }
 
-        // Convertir los productos a objetos JSON antes de enviar
         results.forEach(nota => {
             try {
                 nota.productos = JSON.parse(nota.productos);
             } catch (error) {
-                console.error("Error parseando productos:", error);
+                console.error("Error parseando productos en nota de pedido ID", nota.id, ":", error);
                 nota.productos = [];
             }
         });
@@ -365,21 +364,36 @@ app.get('/notas-pedido', (req, res) => {
         res.json({ notas: results });
     });
 });
-app.delete('/notas-pedido/:id', async (req, res) => {
+app.get('/notas-pedido/:id', (req, res) => {
     const { id } = req.params;
-    
-    try {
-        const [result] = await dbModulos.promise().query('DELETE FROM notas_pedido WHERE id = ?', [id]);
 
-        if (result.affectedRows === 0) {
+    const sql = `
+        SELECT notas_pedido.*, 
+               clientes.nombre AS nombre_cliente, 
+               clientes.direccion AS direccion_cliente
+        FROM notas_pedido
+        JOIN clientes ON notas_pedido.cliente_id = clientes.id
+        WHERE notas_pedido.id = ?
+    `;
+
+    dbModulos.query(sql, [id], (err, results) => {
+        if (err) {
+            console.error("Error obteniendo nota de pedido:", err);
+            return res.status(500).json({ error: "Error al obtener la nota de pedido" });
+        }
+        if (results.length === 0) {
             return res.status(404).json({ error: "Nota de pedido no encontrada" });
         }
 
-        res.status(200).json({ message: "Nota de pedido eliminada correctamente" });
-    } catch (error) {
-        console.error("Error al eliminar la nota de pedido:", error);
-        res.status(500).json({ error: "Error interno al eliminar la nota de pedido" });
-    }
+        try {
+            results[0].productos = JSON.parse(results[0].productos);
+        } catch (error) {
+            console.error("Error parseando productos:", error);
+            results[0].productos = [];
+        }
+
+        res.json(results[0]);
+    });
 });
 app.put('/notas-pedido/:id', (req, res) => {
     const { id } = req.params;
@@ -389,7 +403,6 @@ app.put('/notas-pedido/:id', (req, res) => {
         return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
     }
 
-    // Asegurar que los productos incluyan la descripción al guardarse
     const productosJSON = JSON.stringify(
         productos.map(p => ({
             producto: p.producto,
@@ -408,30 +421,24 @@ app.put('/notas-pedido/:id', (req, res) => {
             console.error("Error actualizando nota de pedido:", err);
             return res.status(500).json({ error: "Error al actualizar la nota de pedido" });
         }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Nota de pedido no encontrada" });
+        }
         res.status(200).json({ mensaje: "Nota de pedido actualizada con éxito" });
     });
 });
-app.get('/notas-pedido/:id', (req, res) => {
+app.delete('/notas-pedido/:id', (req, res) => {
     const { id } = req.params;
 
-    dbModulos.query('SELECT * FROM notas_pedido WHERE id = ?', [id], (err, results) => {
+    dbModulos.query('DELETE FROM notas_pedido WHERE id = ?', [id], (err, results) => {
         if (err) {
-            console.error("Error obteniendo nota de pedido:", err);
-            return res.status(500).json({ error: "Error al obtener la nota de pedido" });
+            console.error("Error al eliminar la nota de pedido:", err);
+            return res.status(500).json({ error: "Error al eliminar la nota de pedido" });
         }
-        if (results.length === 0) {
+        if (results.affectedRows === 0) {
             return res.status(404).json({ error: "Nota de pedido no encontrada" });
         }
-
-        // Convertimos los productos de JSON string a objeto
-        try {
-            results[0].productos = JSON.parse(results[0].productos);
-        } catch (error) {
-            console.error("Error parseando productos:", error);
-            results[0].productos = [];
-        }
-
-        res.json(results[0]);
+        res.status(200).json({ mensaje: "Nota de pedido eliminada correctamente" });
     });
 });
 app.post('/billetes', (req, res) => {

@@ -367,6 +367,9 @@ function actualizarListaProductos() {
         item.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
         item.innerHTML = `
             ${producto.producto} - Cantidad: ${producto.cantidad}, Presentación: ${producto.presentacion}
+              <button class="btn btn-sm btn-warning me-2" onclick="editarProducto(${index})">
+                    <i class="fas fa-edit"></i>
+                </button>
             <button class="btn btn-danger btn-sm ms-2" onclick="eliminarProducto(${index})"><i class="fas fa-trash-alt"></i></button>
         `;
         listaProductos.appendChild(item);
