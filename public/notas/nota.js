@@ -229,7 +229,7 @@ async function cargarNotas() {
         }
 
         const listaNotas = document.getElementById('listaNotas');
-        listaNotas.innerHTML = ''; // ✅ BORRA LAS NOTAS ANTERIORES PARA EVITAR DUPLICADOS
+        listaNotas.innerHTML = ''; // ✅ Limpia la lista antes de cargar nuevas notas
 
         const formatFecha = (fechaISO) => {
             if (!fechaISO) return '';
@@ -248,24 +248,18 @@ async function cargarNotas() {
             let productos = [];
 
             try {
-                // ✅ Asegurar que productos es un array
-                productos = typeof nota.productos === 'string' ? JSON.parse(nota.productos) : nota.productos;
+                productos = Array.isArray(nota.productos) ? nota.productos : JSON.parse(nota.productos);
                 if (!Array.isArray(productos)) throw new Error("Productos no es un array");
             } catch (error) {
-                console.error("Error parseando productos para la nota ID", nota.id, ":", error);
+                console.error("❌ Error parseando productos en nota ID", nota.id, ":", error);
                 productos = [];
             }
 
-            console.log("Productos en nota ID", nota.id, ":", productos); // 🔍 DEBUG
+            console.log("✅ Productos en nota ID", nota.id, ":", productos); // 🔍 DEBUG
 
-            let productosHTML = productos.map(p => `
-                <li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>
-            `).join("");
-
-            // ✅ Si no hay productos, mostrar mensaje de advertencia en amarillo
-            if (productos.length === 0) {
-                productosHTML = '<li class="text-warning">No hay productos registrados</li>';
-            }
+            let productosHTML = productos.length > 0
+                ? productos.map(p => `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>`).join("")
+                : '<li class="text-warning">⚠️ No hay productos registrados</li>';
 
             div.innerHTML = `
                 <h5>Número de Nota: ${nota.numero_nota}</h5>
