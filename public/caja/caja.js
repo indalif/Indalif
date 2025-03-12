@@ -48,7 +48,7 @@ function updateSummary() {
         })
         .catch(error => console.error('Error al obtener el resumen:', error));
 }
-function askBilletes(type, amount) {
+function askBilletes(type, transactionAmount, callback) {
     let billetesUsados = {
         billete_100: parseInt(prompt("Ingrese cantidad de billetes de $100:", "0")) || 0,
         billete_200: parseInt(prompt("Ingrese cantidad de billetes de $200:", "0")) || 0,
@@ -60,74 +60,87 @@ function askBilletes(type, amount) {
     };
 
     let totalBilletes = 
-        (billetesUsados.billete_100 * 100) +
-        (billetesUsados.billete_200 * 200) +
-        (billetesUsados.billete_500 * 500) +
-        (billetesUsados.billete_1000 * 1000) +
-        (billetesUsados.billete_2000 * 2000) +
-        (billetesUsados.billete_10000 * 10000) +
+        (billetesUsados.billete_100 * 100) + 
+        (billetesUsados.billete_200 * 200) + 
+        (billetesUsados.billete_500 * 500) + 
+        (billetesUsados.billete_1000 * 1000) + 
+        (billetesUsados.billete_2000 * 2000) + 
+        (billetesUsados.billete_10000 * 10000) + 
         (billetesUsados.billete_20000 * 20000);
 
-    if (totalBilletes !== amount) {
-        alert(`Error: El total de billetes ingresados ($${totalBilletes}) no coincide con el monto de la transacción ($${amount}). La transacción no será registrada.`);
-        return false;
+    if (totalBilletes !== transactionAmount) {
+        alert(`Error: El total de billetes ingresados ($${totalBilletes}) no coincide con el monto de la transacción ($${transactionAmount}).`);
+        return;
     }
 
-    return true;
+    // Guardar los billetes en la BD
+    fetch('/billetes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(billetesUsados)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Billetes guardados:", data);
+        if (callback) callback(); // Llamar la función de guardar transacción
+    })
+    .catch(error => console.error('Error al guardar los billetes:', error));
 }
 function addIncome() {
     const description = document.getElementById('incomeDescription').value;
     const amount = parseFloat(document.getElementById('incomeAmount').value);
     const method = document.getElementById('incomeMethod').value;
-    
+
     if (isNaN(amount) || amount <= 0) {
         alert('Por favor, ingresa un monto válido para el ingreso.');
         return;
     }
 
-    if (!askBilletes('Ingreso', amount)) return; // Validar billetes antes de guardar
+    askBilletes('Ingreso', amount, () => {
+        const transaction = {
+            type: 'Ingreso',
+            description,
+            amount,
+            method,
+            date: new Date()
+        };
 
-    const transaction = {
-        type: 'Ingreso',
-        description,
-        amount,
-        method,
-        date: new Date()
-    };
+        saveTransaction(transaction);
+        totalIncome += amount;
+        updateSummary();
 
-    saveTransaction(transaction);
-    totalIncome += amount;
-    updateSummary();
-    document.getElementById('incomeDescription').value = '';
-    document.getElementById('incomeAmount').value = '';
-    document.getElementById('incomeMethod').selectedIndex = 0;
+        document.getElementById('incomeDescription').value = '';
+        document.getElementById('incomeAmount').value = '';
+        document.getElementById('incomeMethod').selectedIndex = 0;
+    });
 }
 function addExpense() {
     const description = document.getElementById('expenseDescription').value;
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const method = document.getElementById('expenseMethod').value;
-    
+
     if (isNaN(amount) || amount <= 0) {
         alert('Por favor, ingresa un monto válido para el egreso.');
         return;
     }
 
-    if (!askBilletes('Egreso', amount)) return; // Validar billetes antes de guardar
+    askBilletes('Egreso', amount, () => {
+        const transaction = {
+            type: 'Egreso',
+            description,
+            amount,
+            method,
+            date: new Date()
+        };
 
-    const transaction = {
-        type: 'Egreso',
-        description,
-        amount,
-        method,
-        date: new Date()
-    };
+        saveTransaction(transaction);
+        totalExpenses += amount;
+        updateSummary();
 
-    saveTransaction(transaction);
-    totalExpenses += amount;
-    updateSummary();
-    document.getElementById('expenseDescription').value = '';
-    document.getElementById('expenseAmount').value = '';
-    document.getElementById('expenseMethod').selectedIndex = 0;
+        document.getElementById('expenseDescription').value = '';
+        document.getElementById('expenseAmount').value = '';
+        document.getElementById('expenseMethod').selectedIndex = 0;
+    });
 }
 function saveTransaction(transaction) {
     fetch('/transactions', {
