@@ -41,7 +41,8 @@ const dbModulos = mysql.createPool({
     port: 45617,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    timezone: 'Z'
 });
 dbModulos.getConnection((err, connection) => {
     if (err) {
