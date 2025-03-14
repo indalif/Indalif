@@ -72,10 +72,8 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
     const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
-
-    // Ajustar fechas para evitar desfasajes por la zona horaria
-    const fecha = new Date(document.getElementById('fecha').value + "T00:00:00");
-    const fechaEntrega = new Date(document.getElementById('fecha_entrega').value + "T00:00:00");
+    const fecha = document.getElementById('fecha').value;
+    const fechaEntrega = document.getElementById('fecha_entrega').value;
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
@@ -85,13 +83,7 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
         const response = await fetch('/notas-pedido', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                numero_nota, 
-                cliente_id: clienteId, 
-                fecha: fecha.toISOString().split("T")[0],  // Formato seguro YYYY-MM-DD
-                fecha_entrega: fechaEntrega.toISOString().split("T")[0], 
-                productos: productosLista 
-            })
+            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
         });
 
         if (!response.ok) throw new Error('Error al guardar la nota de pedido.');
@@ -99,9 +91,8 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
         const data = await response.json();
         alert('Nota de pedido guardada con éxito!');
         cargarNotas();
-
         console.log('Limpiando formulario...');
-        document.getElementById('notaPedidoForm').reset(); 
+        document.getElementById('notaPedidoForm').reset(); // Intenta primero con reset()
         document.getElementById('numero_nota').value = '';
         document.getElementById('cliente').value = '';
         document.getElementById('fecha').value = '';
@@ -111,7 +102,6 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
         document.getElementById('presentacion').value = '';
         productosLista = [];
         document.getElementById('listaProductos').innerHTML = '';
-
         const notaVisual = document.getElementById('notaVisual');
         if (notaVisual) {
             notaVisual.style.display = 'none';
@@ -352,10 +342,7 @@ function agregarBotonEditar(notaDiv, nota) {
     notaDiv.appendChild(botonEditar);
 }
 function formatFechaParaInput(fechaISO) {
-    if (!fechaISO) return '';
-    const fecha = new Date(fechaISO);
-    fecha.setMinutes(fecha.getMinutes() + fecha.getTimezoneOffset()); // Ajusta la zona horaria
-    return fecha.toISOString().split('T')[0];
+    return fechaISO ? fechaISO.split('T')[0] : '';
 }
 async function cargarNotaParaEditar(notaId) {
     try {
@@ -379,7 +366,7 @@ async function cargarNotaParaEditar(notaId) {
         } else {
             productosLista = [];
         }
-        console.log("🔍 Productos cargados para edición:", productosLista);
+        console.log("🔍 Productos cargados para edición:", productosLista);        
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
@@ -454,8 +441,8 @@ async function guardarNotaEditada(event) {
 
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
-    const fecha = new Date(document.getElementById('fecha').value + 'T00:00:00').toISOString().split('T')[0];
-    const fechaEntrega = new Date(document.getElementById('fecha_entrega').value + 'T00:00:00').toISOString().split('T')[0];
+    const fecha = document.getElementById('fecha').value;
+    const fechaEntrega = document.getElementById('fecha_entrega').value;
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         console.error("❌ Campos incompletos al intentar actualizar la nota.");
@@ -482,7 +469,7 @@ async function guardarNotaEditada(event) {
             method: 'PUT',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados)
-        });
+        });        
 
         if (!response.ok) {
             const errorText = await response.text();

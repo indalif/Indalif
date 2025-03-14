@@ -41,8 +41,7 @@ const dbModulos = mysql.createPool({
     port: 45617,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0,
-    timezone: 'Z'
+    queueLimit: 0
 });
 dbModulos.getConnection((err, connection) => {
     if (err) {
@@ -311,39 +310,39 @@ dbModulos.query(`
     console.log('Tabla de notas_pedido verificada/creada.');
 });
 app.post('/notas-pedido', (req, res) => {
-    let { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
+    const { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
 
-    if (!numero_nota || !cliente_id || !fecha || !fecha_entrega || !Array.isArray(productos)) {
-        return res.status(400).json({ error: "Datos incompletos o incorrectos" });
+    if (!Array.isArray(productos)) {
+        return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
     }
 
-    console.log("📥 Productos recibidos en el POST:", productos);
+    console.log("📥 Productos recibidos en el POST:", productos); // 🔍 DEBUG
 
-    // Verificar si productos ya es un string y convertirlo a JSON si es necesario
+    // 🔥 CORRECCIÓN: Verificar si el contenido ya es JSON
     if (typeof productos === 'string') {
+        console.warn("⚠️ productos ya es un string, intentaremos parsearlo.");
         try {
             productos = JSON.parse(productos);
         } catch (error) {
-            console.error("❌ Error al parsear productos:", error);
+            console.error("❌ Error al intentar parsear productos recibidos:", error);
             return res.status(400).json({ error: "Formato de productos inválido" });
         }
     }
 
-    // Convertir las fechas al formato YYYY-MM-DD en UTC para evitar desfases de zona horaria
-    const fechaISO = new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0];
-    const fechaEntregaISO = new Date(fecha_entrega + 'T00:00:00Z').toISOString().split('T')[0];
+    // 🔥 CORRECCIÓN: Asegurar que es un array de objetos antes de convertir a JSON
+    if (!Array.isArray(productos)) {
+        return res.status(400).json({ error: "El campo 'productos' debe ser un array válido" });
+    }
 
-    console.log(`📅 Fecha procesada: ${fechaISO}, Fecha de entrega procesada: ${fechaEntregaISO}`);
-
-    // Convertir productos a formato JSON antes de guardarlo en la base de datos
+    // ✅ Convertir productos a JSON STRING ANTES de guardarlos en la BD
     const productosJSON = JSON.stringify(productos);
 
-    console.log("📦 Guardando productos en BD:", productosJSON);
+    console.log("📦 Guardando productos en BD:", productosJSON); // 🔍 DEBUG
 
     const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
                  VALUES (?, ?, ?, ?, ?)`;
 
-    dbModulos.query(sql, [numero_nota, cliente_id, fechaISO, fechaEntregaISO, productosJSON], (err, results) => {
+    dbModulos.query(sql, [numero_nota, cliente_id, fecha, fecha_entrega, productosJSON], (err, results) => {
         if (err) {
             console.error("❌ Error guardando nota de pedido:", err);
             return res.status(500).json({ error: "Error al guardar la nota de pedido" });
@@ -355,9 +354,7 @@ app.get('/notas-pedido', (req, res) => {
     const sql = `
         SELECT notas_pedido.*, 
                clientes.nombre AS nombre_cliente, 
-               clientes.direccion AS direccion_cliente,
-               DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha,
-               DATE_FORMAT(fecha_entrega, '%Y-%m-%d') AS fecha_entrega
+               clientes.direccion AS direccion_cliente
         FROM notas_pedido
         JOIN clientes ON notas_pedido.cliente_id = clientes.id
     `;
@@ -369,8 +366,19 @@ app.get('/notas-pedido', (req, res) => {
         }
 
         results.forEach(nota => {
-            nota.fecha = new Date(nota.fecha).toISOString().split('T')[0]; // 🔥 Corrige fecha
-            nota.fecha_entrega = new Date(nota.fecha_entrega).toISOString().split('T')[0]; // 🔥 Corrige fecha
+            console.log(`📦 Productos en BD (antes de procesar) para nota ID ${nota.id}:`, nota.productos);
+
+            if (typeof nota.productos === 'string') {
+                try {
+                    nota.productos = JSON.parse(nota.productos);
+                    console.log(`✅ Productos después de parsear para nota ID ${nota.id}:`, nota.productos);
+                } catch (error) {
+                    console.error(`❌ Error parseando productos en nota ID ${nota.id}:`, error);
+                    nota.productos = [];
+                }
+            } else {
+                console.log(`🔄 Productos ya son un objeto JSON para nota ID ${nota.id}, no es necesario parsear.`);
+            }
         });
 
         res.json({ notas: results });
