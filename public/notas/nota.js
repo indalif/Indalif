@@ -237,13 +237,16 @@ async function cargarNotas() {
         const listaNotas = document.getElementById('listaNotas');
         listaNotas.innerHTML = ''; // ✅ Limpia la lista antes de cargar nuevas notas
 
-        // Función para formatear fechas (mejorada)
         const formatFecha = (fechaISO) => {
             if (!fechaISO) return 'Fecha no disponible';
-            const fecha = new Date(fechaISO);
-            return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        };
-
+        
+            console.log("📅 Fecha recibida en el frontend antes de formatear:", fechaISO);
+            
+            // Evita que JavaScript reste un día por zona horaria
+            return new Date(fechaISO + 'T00:00:00').toLocaleDateString('es-ES', { 
+                day: '2-digit', month: '2-digit', year: 'numeric' 
+            });
+        };        
         data.notas.forEach(nota => {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
