@@ -310,39 +310,39 @@ dbModulos.query(`
     console.log('Tabla de notas_pedido verificada/creada.');
 });
 app.post('/notas-pedido', (req, res) => {
-    const { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
+    let { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
 
-    if (!Array.isArray(productos)) {
-        return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
+    if (!numero_nota || !cliente_id || !fecha || !fecha_entrega || !Array.isArray(productos)) {
+        return res.status(400).json({ error: "Datos incompletos o incorrectos" });
     }
 
-    console.log("📥 Productos recibidos en el POST:", productos); // 🔍 DEBUG
+    console.log("📥 Productos recibidos en el POST:", productos);
 
-    // 🔥 CORRECCIÓN: Verificar si el contenido ya es JSON
+    // Verificar si productos ya es un string y convertirlo a JSON si es necesario
     if (typeof productos === 'string') {
-        console.warn("⚠️ productos ya es un string, intentaremos parsearlo.");
         try {
             productos = JSON.parse(productos);
         } catch (error) {
-            console.error("❌ Error al intentar parsear productos recibidos:", error);
+            console.error("❌ Error al parsear productos:", error);
             return res.status(400).json({ error: "Formato de productos inválido" });
         }
     }
 
-    // 🔥 CORRECCIÓN: Asegurar que es un array de objetos antes de convertir a JSON
-    if (!Array.isArray(productos)) {
-        return res.status(400).json({ error: "El campo 'productos' debe ser un array válido" });
-    }
+    // Convertir las fechas al formato YYYY-MM-DD en UTC para evitar desfases de zona horaria
+    const fechaISO = new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0];
+    const fechaEntregaISO = new Date(fecha_entrega + 'T00:00:00Z').toISOString().split('T')[0];
 
-    // ✅ Convertir productos a JSON STRING ANTES de guardarlos en la BD
+    console.log(`📅 Fecha procesada: ${fechaISO}, Fecha de entrega procesada: ${fechaEntregaISO}`);
+
+    // Convertir productos a formato JSON antes de guardarlo en la base de datos
     const productosJSON = JSON.stringify(productos);
 
-    console.log("📦 Guardando productos en BD:", productosJSON); // 🔍 DEBUG
+    console.log("📦 Guardando productos en BD:", productosJSON);
 
     const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
                  VALUES (?, ?, ?, ?, ?)`;
 
-    dbModulos.query(sql, [numero_nota, cliente_id, fecha, fecha_entrega, productosJSON], (err, results) => {
+    dbModulos.query(sql, [numero_nota, cliente_id, fechaISO, fechaEntregaISO, productosJSON], (err, results) => {
         if (err) {
             console.error("❌ Error guardando nota de pedido:", err);
             return res.status(500).json({ error: "Error al guardar la nota de pedido" });
