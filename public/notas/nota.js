@@ -72,8 +72,11 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
     const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
-    const fecha = new Date(document.getElementById('fecha').value + 'T00:00:00Z').toISOString().split('T')[0];
-    const fechaEntrega = new Date(document.getElementById('fecha_entrega').value + 'T00:00:00Z').toISOString().split('T')[0];
+    const fecha = document.getElementById('fecha').value;
+    const fechaEntrega = document.getElementById('fecha_entrega').value;
+
+    console.log("📅 Fecha seleccionada en el input:", fecha);
+    console.log("📅 Fecha enviada al backend:", new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0]);
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
@@ -441,8 +444,11 @@ async function guardarNotaEditada(event) {
 
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
-    const fecha = new Date(document.getElementById('fecha').value + 'T00:00:00Z').toISOString().split('T')[0];
-    const fechaEntrega = new Date(document.getElementById('fecha_entrega').value + 'T00:00:00Z').toISOString().split('T')[0];    
+    const fecha = document.getElementById('fecha').value;
+    const fechaEntrega = document.getElementById('fecha_entrega').value;
+
+    console.log("📅 Fecha seleccionada en el input:", fecha);
+    console.log("📅 Fecha enviada al backend:", new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0]);
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         console.error("❌ Campos incompletos al intentar actualizar la nota.");
