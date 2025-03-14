@@ -389,18 +389,18 @@ app.get('/notas-pedido', (req, res) => {
         }
 
         results.forEach(nota => {
-            console.log(`📦 Productos en BD (antes de procesar) para nota ID ${nota.id}:`, nota.productos);
+            // Asegurar formato correcto de fecha
+            nota.fecha = new Date(nota.fecha).toISOString().split('T')[0];
+            nota.fecha_entrega = new Date(nota.fecha_entrega).toISOString().split('T')[0];
 
+            // Convertir productos de JSON si es necesario
             if (typeof nota.productos === 'string') {
                 try {
                     nota.productos = JSON.parse(nota.productos);
-                    console.log(`✅ Productos después de parsear para nota ID ${nota.id}:`, nota.productos);
                 } catch (error) {
                     console.error(`❌ Error parseando productos en nota ID ${nota.id}:`, error);
                     nota.productos = [];
                 }
-            } else {
-                console.log(`🔄 Productos ya son un objeto JSON para nota ID ${nota.id}, no es necesario parsear.`);
             }
         });
 
@@ -428,18 +428,25 @@ app.get('/notas-pedido/:id', (req, res) => {
             return res.status(404).json({ error: "Nota de pedido no encontrada" });
         }
 
-        if (typeof results[0].productos === "string") {
+        let nota = results[0];
+
+        // Asegurar que las fechas se devuelvan en formato correcto
+        nota.fecha = new Date(nota.fecha).toISOString().split('T')[0];
+        nota.fecha_entrega = new Date(nota.fecha_entrega).toISOString().split('T')[0];
+
+        // Convertir productos de JSON si es necesario
+        if (typeof nota.productos === "string") {
             try {
-                results[0].productos = JSON.parse(results[0].productos);
+                nota.productos = JSON.parse(nota.productos);
             } catch (error) {
                 console.error("Error parseando productos:", error);
-                results[0].productos = [];
+                nota.productos = [];
             }
-        } else if (!Array.isArray(results[0].productos)) {
-            results[0].productos = [];
+        } else if (!Array.isArray(nota.productos)) {
+            nota.productos = [];
         }        
 
-        res.json(results[0]);
+        res.json(nota);
     });
 });
 app.delete('/notas-pedido/:id', (req, res) => {
