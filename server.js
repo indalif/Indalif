@@ -312,20 +312,19 @@ dbModulos.query(`
 app.post('/notas-pedido', (req, res) => {
     let { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
 
-    if (!Array.isArray(productos)) {
-        return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
-    }
+    console.log("📥 Fecha recibida del frontend:", fecha);
+    console.log("📥 Fecha Entrega recibida del frontend:", fecha_entrega);
 
-    // Asegurar que la fecha se almacene correctamente sin cambiar de día
     const fechaUTC = new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0];
     const fechaEntregaUTC = new Date(fecha_entrega + 'T00:00:00Z').toISOString().split('T')[0];
 
-    const productosJSON = JSON.stringify(productos);
+    console.log("📅 Fecha convertida a UTC antes de guardar:", fechaUTC);
+    console.log("📅 Fecha de entrega convertida a UTC antes de guardar:", fechaEntregaUTC);
 
     const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
                  VALUES (?, ?, ?, ?, ?)`;
 
-    dbModulos.query(sql, [numero_nota, cliente_id, fechaUTC, fechaEntregaUTC, productosJSON], (err, results) => {
+    dbModulos.query(sql, [numero_nota, cliente_id, fechaUTC, fechaEntregaUTC, JSON.stringify(productos)], (err, results) => {
         if (err) {
             console.error("❌ Error guardando nota de pedido:", err);
             return res.status(500).json({ error: "Error al guardar la nota de pedido" });
