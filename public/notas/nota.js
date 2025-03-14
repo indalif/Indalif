@@ -72,7 +72,7 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
     const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
-    const fecha = new Date(document.getElementById('fecha').value + 'T00:00:00'); // Forzar UTC
+    const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
@@ -441,7 +441,7 @@ async function guardarNotaEditada(event) {
 
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
-    const fecha = new Date(document.getElementById('fecha').value + 'T00:00:00'); // Forzar UTC
+    const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
