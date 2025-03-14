@@ -75,9 +75,6 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
 
-    console.log("📅 Fecha seleccionada en el input:", fecha);
-    console.log("📅 Fecha enviada al backend:", new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0]);
-
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
     }
@@ -237,16 +234,13 @@ async function cargarNotas() {
         const listaNotas = document.getElementById('listaNotas');
         listaNotas.innerHTML = ''; // ✅ Limpia la lista antes de cargar nuevas notas
 
+        // Función para formatear fechas (mejorada)
         const formatFecha = (fechaISO) => {
             if (!fechaISO) return 'Fecha no disponible';
-        
-            console.log("📅 Fecha recibida en el frontend antes de formatear:", fechaISO);
-            
-            // Evita que JavaScript reste un día por zona horaria
-            return new Date(fechaISO + 'T00:00:00').toLocaleDateString('es-ES', { 
-                day: '2-digit', month: '2-digit', year: 'numeric' 
-            });
-        };        
+            const fecha = new Date(fechaISO);
+            return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        };
+
         data.notas.forEach(nota => {
             let div = document.createElement('div');
             div.classList.add('border', 'p-3', 'mb-2');
@@ -372,7 +366,7 @@ async function cargarNotaParaEditar(notaId) {
         } else {
             productosLista = [];
         }
-        console.log("🔍 Productos cargados para edición:", productosLista);
+        console.log("🔍 Productos cargados para edición:", productosLista);        
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
@@ -450,9 +444,6 @@ async function guardarNotaEditada(event) {
     const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
 
-    console.log("📅 Fecha seleccionada en el input:", fecha);
-    console.log("📅 Fecha enviada al backend:", new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0]);
-
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         console.error("❌ Campos incompletos al intentar actualizar la nota.");
         return;
@@ -478,7 +469,7 @@ async function guardarNotaEditada(event) {
             method: 'PUT',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados)
-        });
+        });        
 
         if (!response.ok) {
             const errorText = await response.text();

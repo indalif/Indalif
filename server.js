@@ -310,21 +310,39 @@ dbModulos.query(`
     console.log('Tabla de notas_pedido verificada/creada.');
 });
 app.post('/notas-pedido', (req, res) => {
-    let { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
+    const { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
 
-    console.log("📥 Fecha recibida del frontend:", fecha);
-    console.log("📥 Fecha Entrega recibida del frontend:", fecha_entrega);
+    if (!Array.isArray(productos)) {
+        return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
+    }
 
-    const fechaUTC = new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0];
-    const fechaEntregaUTC = new Date(fecha_entrega + 'T00:00:00Z').toISOString().split('T')[0];
+    console.log("📥 Productos recibidos en el POST:", productos); // 🔍 DEBUG
 
-    console.log("📅 Fecha convertida a UTC antes de guardar:", fechaUTC);
-    console.log("📅 Fecha de entrega convertida a UTC antes de guardar:", fechaEntregaUTC);
+    // 🔥 CORRECCIÓN: Verificar si el contenido ya es JSON
+    if (typeof productos === 'string') {
+        console.warn("⚠️ productos ya es un string, intentaremos parsearlo.");
+        try {
+            productos = JSON.parse(productos);
+        } catch (error) {
+            console.error("❌ Error al intentar parsear productos recibidos:", error);
+            return res.status(400).json({ error: "Formato de productos inválido" });
+        }
+    }
+
+    // 🔥 CORRECCIÓN: Asegurar que es un array de objetos antes de convertir a JSON
+    if (!Array.isArray(productos)) {
+        return res.status(400).json({ error: "El campo 'productos' debe ser un array válido" });
+    }
+
+    // ✅ Convertir productos a JSON STRING ANTES de guardarlos en la BD
+    const productosJSON = JSON.stringify(productos);
+
+    console.log("📦 Guardando productos en BD:", productosJSON); // 🔍 DEBUG
 
     const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
                  VALUES (?, ?, ?, ?, ?)`;
 
-    dbModulos.query(sql, [numero_nota, cliente_id, fechaUTC, fechaEntregaUTC, JSON.stringify(productos)], (err, results) => {
+    dbModulos.query(sql, [numero_nota, cliente_id, fecha, fecha_entrega, productosJSON], (err, results) => {
         if (err) {
             console.error("❌ Error guardando nota de pedido:", err);
             return res.status(500).json({ error: "Error al guardar la nota de pedido" });
@@ -332,51 +350,13 @@ app.post('/notas-pedido', (req, res) => {
         res.status(201).json({ mensaje: "Nota de pedido guardada con éxito", id: results.insertId });
     });
 });
-app.put('/notas-pedido/:id', (req, res) => {
-    console.log("📌 Datos recibidos en PUT:", req.body);
-
-    const { id } = req.params;
-    let { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
-
-    if (!Array.isArray(productos)) {
-        return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
-    }
-
-    // Convertir la fecha para evitar cambios de día
-    const fechaUTC = new Date(fecha + 'T00:00:00Z').toISOString().split('T')[0];
-    const fechaEntregaUTC = new Date(fecha_entrega + 'T00:00:00Z').toISOString().split('T')[0];
-
-    const productosJSON = JSON.stringify(
-        productos.map(p => ({
-            producto: p.producto,
-            cantidad: p.cantidad,
-            presentacion: p.presentacion,
-            descripcion: p.descripcion || ""
-        }))
-    );
-
-    console.log("📌 JSON de productos antes de guardar:", productosJSON);
-
-    const sql = `UPDATE notas_pedido 
-                 SET numero_nota = ?, cliente_id = ?, fecha = ?, fecha_entrega = ?, productos = ? 
-                 WHERE id = ?`;
-
-    dbModulos.query(sql, [numero_nota, cliente_id, fechaUTC, fechaEntregaUTC, productosJSON, id], (err, results) => {
-        if (err) {
-            console.error("Error actualizando nota de pedido:", err);
-            return res.status(500).json({ error: "Error al actualizar la nota de pedido" });
-        }
-        if (results.affectedRows === 0) {
-            return res.status(404).json({ error: "Nota de pedido no encontrada" });
-        }
-        res.status(200).json({ mensaje: "Nota de pedido actualizada con éxito" });
-    });
-});
 app.get('/notas-pedido', (req, res) => {
     const sql = `
-        SELECT id, numero_nota, cliente_id, 
-               fecha, fecha_entrega, productos
+        SELECT notas_pedido.*, 
+               clientes.nombre AS nombre_cliente, 
+               clientes.direccion AS direccion_cliente
         FROM notas_pedido
+        JOIN clientes ON notas_pedido.cliente_id = clientes.id
     `;
 
     dbModulos.query(sql, (err, results) => {
@@ -386,8 +366,19 @@ app.get('/notas-pedido', (req, res) => {
         }
 
         results.forEach(nota => {
-            console.log("📅 Fecha obtenida de MySQL:", nota.fecha);
-            console.log("📅 Fecha de entrega obtenida de MySQL:", nota.fecha_entrega);
+            console.log(`📦 Productos en BD (antes de procesar) para nota ID ${nota.id}:`, nota.productos);
+
+            if (typeof nota.productos === 'string') {
+                try {
+                    nota.productos = JSON.parse(nota.productos);
+                    console.log(`✅ Productos después de parsear para nota ID ${nota.id}:`, nota.productos);
+                } catch (error) {
+                    console.error(`❌ Error parseando productos en nota ID ${nota.id}:`, error);
+                    nota.productos = [];
+                }
+            } else {
+                console.log(`🔄 Productos ya son un objeto JSON para nota ID ${nota.id}, no es necesario parsear.`);
+            }
         });
 
         res.json({ notas: results });
@@ -414,25 +405,54 @@ app.get('/notas-pedido/:id', (req, res) => {
             return res.status(404).json({ error: "Nota de pedido no encontrada" });
         }
 
-        let nota = results[0];
-
-        // Asegurar que las fechas se devuelvan en formato correcto
-        nota.fecha = new Date(nota.fecha).toISOString().split('T')[0];
-        nota.fecha_entrega = new Date(nota.fecha_entrega).toISOString().split('T')[0];
-
-        // Convertir productos de JSON si es necesario
-        if (typeof nota.productos === "string") {
+        if (typeof results[0].productos === "string") {
             try {
-                nota.productos = JSON.parse(nota.productos);
+                results[0].productos = JSON.parse(results[0].productos);
             } catch (error) {
                 console.error("Error parseando productos:", error);
-                nota.productos = [];
+                results[0].productos = [];
             }
-        } else if (!Array.isArray(nota.productos)) {
-            nota.productos = [];
+        } else if (!Array.isArray(results[0].productos)) {
+            results[0].productos = [];
         }        
 
-        res.json(nota);
+        res.json(results[0]);
+    });
+});
+app.put('/notas-pedido/:id', (req, res) => {
+    console.log("📌 Datos recibidos en PUT:", req.body);
+
+    const { id } = req.params;
+    const { numero_nota, cliente_id, fecha, fecha_entrega, productos } = req.body;
+
+    if (!Array.isArray(productos)) {
+        return res.status(400).json({ error: "El campo 'productos' debe ser un array" });
+    }
+
+    const productosJSON = JSON.stringify(
+        productos.map(p => ({
+            producto: p.producto,
+            cantidad: p.cantidad,
+            presentacion: p.presentacion,
+            descripcion: p.descripcion || ""
+        }))
+    );
+
+    console.log("📌 JSON de productos antes de guardar:", productosJSON);
+
+    const sql = `UPDATE notas_pedido 
+                 SET numero_nota = ?, cliente_id = ?, fecha = ?, fecha_entrega = ?, productos = ? 
+                 WHERE id = ?`;
+
+    dbModulos.query(sql, [numero_nota, cliente_id, fecha, fecha_entrega, productosJSON, id], (err, results) => {
+        if (err) {
+            console.error("Error actualizando nota de pedido:", err);
+            return res.status(500).json({ error: "Error al actualizar la nota de pedido" });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: "Nota de pedido no encontrada" });
+        }
+        res.status(200).json({ mensaje: "Nota de pedido actualizada con éxito" });
     });
 });
 app.delete('/notas-pedido/:id', (req, res) => {
