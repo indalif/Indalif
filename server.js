@@ -355,7 +355,9 @@ app.get('/notas-pedido', (req, res) => {
     const sql = `
         SELECT notas_pedido.*, 
                clientes.nombre AS nombre_cliente, 
-               clientes.direccion AS direccion_cliente
+               clientes.direccion AS direccion_cliente,
+               DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha,
+               DATE_FORMAT(fecha_entrega, '%Y-%m-%d') AS fecha_entrega
         FROM notas_pedido
         JOIN clientes ON notas_pedido.cliente_id = clientes.id
     `;
@@ -367,19 +369,8 @@ app.get('/notas-pedido', (req, res) => {
         }
 
         results.forEach(nota => {
-            console.log(`📦 Productos en BD (antes de procesar) para nota ID ${nota.id}:`, nota.productos);
-
-            if (typeof nota.productos === 'string') {
-                try {
-                    nota.productos = JSON.parse(nota.productos);
-                    console.log(`✅ Productos después de parsear para nota ID ${nota.id}:`, nota.productos);
-                } catch (error) {
-                    console.error(`❌ Error parseando productos en nota ID ${nota.id}:`, error);
-                    nota.productos = [];
-                }
-            } else {
-                console.log(`🔄 Productos ya son un objeto JSON para nota ID ${nota.id}, no es necesario parsear.`);
-            }
+            nota.fecha = new Date(nota.fecha).toISOString().split('T')[0]; // 🔥 Corrige fecha
+            nota.fecha_entrega = new Date(nota.fecha_entrega).toISOString().split('T')[0]; // 🔥 Corrige fecha
         });
 
         res.json({ notas: results });
