@@ -558,15 +558,11 @@ app.delete('/mercaderiaCliente/:id', (req, res) => {
     });
 });
 app.post('/plazos-pago', (req, res) => {
-    let { idCliente, formaPago, totalPagar, fecha, pago, numeroComprobante, fechaEmision } = req.body;
+    const { idCliente, formaPago, totalPagar, fecha, pago, numeroComprobante, fechaEmision } = req.body;
 
     if (!idCliente || !formaPago || !totalPagar || !fecha || !fechaEmision) {
         return res.status(400).json({ message: 'Todos los campos obligatorios deben ser completados.' });
     }
-
-    // Convertir las fechas al formato compatible con MySQL
-    fechaEmision = convertirFechaMySQL(fechaEmision);
-    fecha = convertirFechaMySQL(fecha);
 
     const sql = `
         INSERT INTO plazos_pago (idCliente, fechaEmision, formaPago, totalPagar, fecha, pago, numeroComprobante)
