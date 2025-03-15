@@ -564,11 +564,16 @@ app.post('/plazos-pago', (req, res) => {
         return res.status(400).json({ message: 'Todos los campos obligatorios deben ser completados.' });
     }
 
+    // Convertir fechas al formato 'YYYY-MM-DD'
+    const fechaEmisionFormato = new Date(fechaEmision).toISOString().split('T')[0];  
+    const fechaFormato = new Date(fecha).toISOString().split('T')[0];
+
     const sql = `
         INSERT INTO plazos_pago (idCliente, fechaEmision, formaPago, totalPagar, fecha, pago, numeroComprobante)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    dbModulos.query(sql, [idCliente, fechaEmision, formaPago, totalPagar, fecha, pago, numeroComprobante], (err, result) => {
+
+    dbModulos.query(sql, [idCliente, fechaEmisionFormato, formaPago, totalPagar, fechaFormato, pago, numeroComprobante], (err, result) => {
         if (err) {
             console.error('Error al guardar plazo de pago:', err);
             return res.status(500).json({ message: 'Error al guardar plazo de pago.' });
@@ -576,6 +581,7 @@ app.post('/plazos-pago', (req, res) => {
         res.status(201).json({ id: result.insertId, message: 'Plazo de pago agregado con éxito' });
     });
 });
+
 app.get('/plazos-pago/:idCliente', (req, res) => {
     const { idCliente } = req.params;
 
