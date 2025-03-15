@@ -221,8 +221,8 @@ function cargarPlazosPago(idCliente) {
                     <tr>
                         <td>${plazo.formaPago}</td>
                         <td>${total.toFixed(2)}</td>
-                        <td>${new Date(plazo.fechaEmision).toLocaleDateString('es-ES')}</td>
-                        <td>${new Date(plazo.fecha).toLocaleDateString('es-ES')}</td>
+                        <td>${new Date(plazo.fechaEmision + 'T00:00:00').toLocaleDateString('es-ES')}</td>
+                        <td>${new Date(plazo.fecha + 'T00:00:00').toLocaleDateString('es-ES')}</td>
                         <td>${pago.toFixed(2)}</td>
                         <td>${plazo.numeroComprobante || '-'}</td>
                         <td>${debe === 0 ? '<span class="text-success">Saldada</span>' : debe.toFixed(2)}</td>
@@ -325,7 +325,7 @@ function renderizarTabla(data) {
                 <td>${precio.toFixed(2)}</td>
                 <td>${cantidad}</td>
                 <td>${(precio * cantidad).toFixed(2)}</td>
-                <td>${new Date(item.fecha).toLocaleDateString()}</td>
+                <td>${new Date(item.fecha + 'T00:00:00').toLocaleDateString('es-ES')}</td>
                 <td>
                     <button class="btn btn-danger btn-sm" onclick="eliminarMercaderia(${item.idMercaderia})">
                         Eliminar
