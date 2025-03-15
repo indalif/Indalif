@@ -79,40 +79,40 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
         return;
     }
 
+    // Asegurar que la fecha se mantenga correctamente (sin ajustes de zona horaria)
+    const fechaCorrecta = corregirFecha(fecha);
+    const fechaEntregaCorrecta = corregirFecha(fechaEntrega);
+
     try {
         const response = await fetch('/notas-pedido', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
+            body: JSON.stringify({
+                numero_nota,
+                cliente_id: clienteId,
+                fecha: fechaCorrecta,
+                fecha_entrega: fechaEntregaCorrecta,
+                productos: productosLista
+            })
         });
 
         if (!response.ok) throw new Error('Error al guardar la nota de pedido.');
 
-        const data = await response.json();
         alert('Nota de pedido guardada con éxito!');
         cargarNotas();
-        console.log('Limpiando formulario...');
-        document.getElementById('notaPedidoForm').reset(); // Intenta primero con reset()
-        document.getElementById('numero_nota').value = '';
-        document.getElementById('cliente').value = '';
-        document.getElementById('fecha').value = '';
-        document.getElementById('fecha_entrega').value = '';
-        document.getElementById('producto').value = '';
-        document.getElementById('cantidad').value = '';
-        document.getElementById('presentacion').value = '';
+        document.getElementById('notaPedidoForm').reset();
         productosLista = [];
         document.getElementById('listaProductos').innerHTML = '';
-        const notaVisual = document.getElementById('notaVisual');
-        if (notaVisual) {
-            notaVisual.style.display = 'none';
-        }
-
-        console.log('Formulario limpio.');
 
     } catch (error) {
         console.error('Error:', error);
     }
 });
+function corregirFecha(fecha) {
+    if (!fecha) return '';
+    const partes = fecha.split('-'); // Divide el formato YYYY-MM-DD
+    return `${partes[0]}-${partes[1]}-${partes[2]}`; // Asegura que se mantenga igual
+}
 function imprimirNota(button) {
     let notaDiv = button.parentElement;
     let numeroNota = notaDiv.querySelector("h5").innerText.replace("Número de Nota:", "").trim();
@@ -342,7 +342,8 @@ function agregarBotonEditar(notaDiv, nota) {
     notaDiv.appendChild(botonEditar);
 }
 function formatFechaParaInput(fechaISO) {
-    return fechaISO ? fechaISO.split('T')[0] : '';
+    if (!fechaISO) return '';
+    return fechaISO.split('T')[0]; // Evita que Date modifique la fecha
 }
 async function cargarNotaParaEditar(notaId) {
     try {
