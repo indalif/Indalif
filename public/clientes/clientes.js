@@ -157,11 +157,13 @@ document.getElementById('nombreCliente').addEventListener('input', function (eve
     cargarClientes(filtroNombre);
 });
 cargarClientes();
-function ajustarFechaISO(fecha) {
-    const fechaObj = new Date(fecha);
-    fechaObj.setMinutes(fechaObj.getMinutes() + fechaObj.getTimezoneOffset());
-    return fechaObj.toISOString().split('T')[0];
-}
+const formatearFecha = (fechaISO) => {
+    const fecha = new Date(fechaISO);
+    const dia = fecha.getUTCDate().toString().padStart(2, '0');
+    const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
+    const anio = fecha.getUTCFullYear();
+    return `${dia}/${mes}/${anio}`;
+};
 function abrirPlazosPago(idCliente) {
     clienteActivoId = idCliente;
     const modal = new bootstrap.Modal(document.getElementById('plazosPagoModal'));
@@ -177,19 +179,15 @@ function abrirPlazosPago(idCliente) {
 function guardarPlazosPago(idCliente) {
     const formaPago = document.getElementById('formaPago').value;
     const totalPagar = document.getElementById('totalPagar').value;
-    const fechaPago = ajustarFechaISO(document.getElementById('fechaPago').value);
-    const fechaEmision = ajustarFechaISO(document.getElementById('fechaEmision').value);
+    const fechaPago = new Date(document.getElementById('fechaPago').value + 'T00:00:00Z').toISOString();
+    const fechaEmision = new Date(document.getElementById('fechaEmision').value + 'T00:00:00Z').toISOString();
     const pago = document.getElementById('pago').value || null;
     const numeroComprobante = document.getElementById('numeroComprobante').value || null;
 
-    fetch('/plazos-pago', {
+    fetch(`/plazos-pago`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            idCliente, formaPago, totalPagar, fecha: fechaPago, pago, numeroComprobante, fechaEmision
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idCliente, formaPago, totalPagar, fecha: fechaPago, pago, numeroComprobante, fechaEmision })
     })
         .then(response => {
             if (!response.ok) throw new Error('Error al guardar plazo de pago');
@@ -222,20 +220,25 @@ function cargarPlazosPago(idCliente) {
                 const total = parseFloat(plazo.totalPagar) || 0;
                 const pago = parseFloat(plazo.pago) || 0;
                 const debe = total - pago;
+
                 if (debe > 0) totalDeuda += debe;
 
-                const fila = `<tr>
-                    <td>${plazo.formaPago}</td>
-                    <td>${total.toFixed(2)}</td>
-                    <td>${new Date(plazo.fechaEmision).toLocaleDateString('es-ES')}</td>
-                    <td>${new Date(plazo.fecha).toLocaleDateString('es-ES')}</td>
-                    <td>${pago.toFixed(2)}</td>
-                    <td>${plazo.numeroComprobante || '-'}</td>
-                    <td>${debe === 0 ? '<span class="text-success">Saldada</span>' : debe.toFixed(2)}</td>
-                    <td>
-                        ${debe > 0 ? `<button class="btn btn-success btn-sm" onclick="abrirRegistrarPago(${plazo.idPlazo}, ${debe})">Registrar Pago</button>` : '<span class="text-muted">Pago completo</span>'}
-                    </td>
-                </tr>`;
+                const fila = `
+                    <tr>
+                        <td>${plazo.formaPago}</td>
+                        <td>${total.toFixed(2)}</td>
+                        <td>${formatearFecha(plazo.fechaEmision)}</td> <!-- Aquí aplicamos la función -->
+                        <td>${formatearFecha(plazo.fecha)}</td> <!-- También aquí -->
+                        <td>${pago.toFixed(2)}</td>
+                        <td>${plazo.numeroComprobante || '-'}</td>
+                        <td>${debe === 0 ? '<span class="text-success">Saldada</span>' : debe.toFixed(2)}</td>
+                        <td>
+                            ${debe > 0
+                        ? `<button class="btn btn-success btn-sm" onclick="abrirRegistrarPago(${plazo.idPlazo}, ${debe})">Registrar Pago</button>`
+                        : '<span class="text-muted">Pago completo</span>'}
+                        </td>
+                    </tr>
+                `;
 
                 tabla.insertAdjacentHTML('beforeend', fila);
             });
@@ -294,6 +297,7 @@ let mercaderiaData = []; // Guarda los datos para filtrar
 function cargarMercaderia(idCliente) {
     const tabla = document.getElementById('mercaderiaTabla');
     tabla.innerHTML = '<tr><td colspan="5" class="text-center">Cargando...</td></tr>';
+
     fetch(`/mercaderiaCliente/${idCliente}`)
         .then(response => {
             if (!response.ok) {
@@ -302,8 +306,8 @@ function cargarMercaderia(idCliente) {
             return response.json();
         })
         .then(data => {
-            mercaderiaData = data;
-            renderizarTabla(data);
+            mercaderiaData = data; // Guarda los datos para aplicar filtros
+            renderizarTabla(data); // Renderiza la tabla
         })
         .catch(error => {
             tabla.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar la mercadería.</td></tr>';
@@ -316,20 +320,25 @@ function renderizarTabla(data) {
         tabla.innerHTML = '<tr><td colspan="6" class="text-center">No hay mercadería registrada.</td></tr>';
         return;
     }
+
     tabla.innerHTML = '';
     data.forEach(item => {
         const precio = parseFloat(item.precio) || 0;
         const cantidad = parseInt(item.cantidad, 10) || 0;
-        const fila = `<tr data-id="${item.idMercaderia}">
-            <td>${item.descripcion}</td>
-            <td>${precio.toFixed(2)}</td>
-            <td>${cantidad}</td>
-            <td>${(precio * cantidad).toFixed(2)}</td>
-            <td>${new Date(item.fecha).toLocaleDateString('es-ES')}</td>
-            <td>
-                <button class="btn btn-danger btn-sm" onclick="eliminarMercaderia(${item.idMercaderia})">Eliminar</button>
-            </td>
-        </tr>`;
+        const fila = `
+            <tr data-id="${item.idMercaderia}">
+                <td>${item.descripcion}</td>
+                <td>${precio.toFixed(2)}</td>
+                <td>${cantidad}</td>
+                <td>${(precio * cantidad).toFixed(2)}</td>
+                <td>${new Date(item.fecha).toLocaleDateString()}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarMercaderia(${item.idMercaderia})">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
         tabla.insertAdjacentHTML('beforeend', fila);
     });
 }
