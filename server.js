@@ -517,7 +517,6 @@ app.post('/mercaderiaCliente', (req, res) => {
         INSERT INTO mercaderiaClientes (idCliente, descripcion, cantidad, precio, fecha)
         VALUES (?, ?, ?, ?, ?)
     `;
-
     dbModulos.query(sql, [idCliente, descripcion, cantidad, precio, fechaFormato], (err, result) => {
         if (err) {
             console.error('Error al guardar mercadería:', err);
@@ -530,7 +529,7 @@ app.get('/mercaderiaCliente/:idCliente', (req, res) => {
     const { idCliente } = req.params;
 
     const sql = `
-        SELECT idMercaderia, descripcion, cantidad, CAST(precio AS DECIMAL(10,2)) AS precio, fecha
+        SELECT idMercaderia, descripcion, cantidad, CAST(precio AS DECIMAL(10,2)) AS precio, DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha
         FROM mercaderiaClientes
         WHERE idCliente = ?
     `;

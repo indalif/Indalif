@@ -367,9 +367,6 @@ document.getElementById('mercaderiaForm').addEventListener('submit', function (e
         return;
     }
 
-    // Convertir la fecha al formato correcto 'YYYY-MM-DD'
-    fecha = new Date(fecha).toISOString().split('T')[0];
-
     fetch('/mercaderiaCliente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
