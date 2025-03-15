@@ -72,8 +72,8 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
     const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
-    const fecha = new Date(document.getElementById('fecha').value + "T00:00:00Z").toISOString();
-    const fechaEntrega = new Date(document.getElementById('fecha_entrega').value + "T00:00:00Z").toISOString();    
+    const fecha = document.getElementById('fecha').value;
+    const fechaEntrega = document.getElementById('fecha_entrega').value;
 
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
@@ -368,7 +368,7 @@ async function cargarNotaParaEditar(notaId) {
         } else {
             productosLista = [];
         }
-        console.log("🔍 Productos cargados para edición:", productosLista);        
+        console.log("🔍 Productos cargados para edición:", productosLista);
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
@@ -471,7 +471,7 @@ async function guardarNotaEditada(event) {
             method: 'PUT',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados)
-        });        
+        });
 
         if (!response.ok) {
             const errorText = await response.text();

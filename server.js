@@ -339,10 +339,13 @@ app.post('/notas-pedido', (req, res) => {
 
     console.log("📦 Guardando productos en BD:", productosJSON); // 🔍 DEBUG
 
-    const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos) 
-                 VALUES (?, ?, ?, ?, ?)`;
+    const fechaFormateada = fecha.split("T")[0];
+    const fechaEntregaFormateada = fecha_entrega.split("T")[0];
 
-    dbModulos.query(sql, [numero_nota, cliente_id, fecha, fecha_entrega, productosJSON], (err, results) => {
+    const sql = `INSERT INTO notas_pedido (numero_nota, cliente_id, fecha, fecha_entrega, productos)
+             VALUES (?, ?, ?, ?, ?)`;
+
+    dbModulos.query(sql, [numero_nota, cliente_id, fechaFormateada, fechaEntregaFormateada, productosJSON], (err, results) => {
         if (err) {
             console.error("❌ Error guardando nota de pedido:", err);
             return res.status(500).json({ error: "Error al guardar la nota de pedido" });
@@ -414,7 +417,7 @@ app.get('/notas-pedido/:id', (req, res) => {
             }
         } else if (!Array.isArray(results[0].productos)) {
             results[0].productos = [];
-        }        
+        }
 
         res.json(results[0]);
     });
