@@ -510,11 +510,15 @@ app.post('/mercaderiaCliente', (req, res) => {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
 
+    // Convertir la fecha al formato adecuado 'YYYY-MM-DD'
+    const fechaFormato = new Date(fecha).toISOString().split('T')[0];
+
     const sql = `
         INSERT INTO mercaderiaClientes (idCliente, descripcion, cantidad, precio, fecha)
         VALUES (?, ?, ?, ?, ?)
     `;
-    dbModulos.query(sql, [idCliente, descripcion, cantidad, precio, fecha], (err, result) => {
+
+    dbModulos.query(sql, [idCliente, descripcion, cantidad, precio, fechaFormato], (err, result) => {
         if (err) {
             console.error('Error al guardar mercadería:', err);
             return res.status(500).json({ message: 'Error al guardar mercadería.' });
@@ -581,7 +585,6 @@ app.post('/plazos-pago', (req, res) => {
         res.status(201).json({ id: result.insertId, message: 'Plazo de pago agregado con éxito' });
     });
 });
-
 app.get('/plazos-pago/:idCliente', (req, res) => {
     const { idCliente } = req.params;
 
