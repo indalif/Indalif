@@ -510,8 +510,8 @@ app.post('/mercaderiaCliente', (req, res) => {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
 
-    // Convertir la fecha al formato adecuado 'YYYY-MM-DD'
-    const fechaFormato = new Date(fecha).toISOString().split('T')[0];
+    // Convertir fecha correctamente sin problemas de zona horaria
+    const fechaFormato = new Date(fecha).toLocaleDateString('en-CA');
 
     const sql = `
         INSERT INTO mercaderiaClientes (idCliente, descripcion, cantidad, precio, fecha)

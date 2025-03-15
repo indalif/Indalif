@@ -331,7 +331,7 @@ function renderizarTabla(data) {
                 <td>${precio.toFixed(2)}</td>
                 <td>${cantidad}</td>
                 <td>${(precio * cantidad).toFixed(2)}</td>
-                <td>${new Date(item.fecha).toLocaleDateString()}</td>
+                <td>${new Date(item.fecha).toLocaleDateString('es-ES')}</td>X
                 <td>
                     <button class="btn btn-danger btn-sm" onclick="eliminarMercaderia(${item.idMercaderia})">
                         Eliminar
@@ -360,10 +360,10 @@ document.getElementById('mercaderiaForm').addEventListener('submit', function (e
     const producto = document.getElementById('producto').value.trim();
     const precio = parseFloat(document.getElementById('precio').value);
     const cantidad = parseInt(document.getElementById('cantidad').value, 10);
-    const fecha = document.getElementById('fecha').value;
+    const fecha = new Date(document.getElementById('fecha').value + 'T00:00:00').toISOString().split('T')[0]; // Ajuste de fecha
 
     if (!producto || isNaN(precio) || isNaN(cantidad) || !fecha) {
-        alert('Por favor, complete todos los campos.');
+        alert('Por favor, completa todos los campos.');
         return;
     }
 
@@ -378,9 +378,9 @@ document.getElementById('mercaderiaForm').addEventListener('submit', function (e
             fecha
         })
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
+        .then(respuesta => respuesta.json())
+        .then(datos => {
+            if (datos.mensaje) {
                 alert('Mercadería agregada con éxito.');
                 cargarMercaderia(clienteActivoId); // Actualizar la tabla
             }
