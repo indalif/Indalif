@@ -157,6 +157,14 @@ document.getElementById('nombreCliente').addEventListener('input', function (eve
     cargarClientes(filtroNombre);
 });
 cargarClientes();
+function convertirFechaMySQL(fechaISO) {
+    if (!fechaISO) return null;
+    const fecha = new Date(fechaISO);
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Mes en formato 2 dígitos
+    const dia = String(fecha.getDate()).padStart(2, '0'); // Día en formato 2 dígitos
+    return `${anio}-${mes}-${dia}`; // Formato MySQL
+}
 const formatearFecha = (fechaISO) => {
     const fecha = new Date(fechaISO);
     const dia = fecha.getUTCDate().toString().padStart(2, '0');
@@ -198,13 +206,6 @@ function guardarPlazosPago(idCliente) {
         cargarPlazosPago(idCliente);
     })
     .catch(error => console.error('Error al guardar plazos de pago:', error));
-}
-function convertirFechaMySQL(fechaISO) {
-    const fecha = new Date(fechaISO);
-    const anio = fecha.getFullYear();
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Mes en formato 2 dígitos
-    const dia = fecha.getDate().toString().padStart(2, '0'); // Día en formato 2 dígitos
-    return `${anio}-${mes}-${dia}`; // Formato correcto para MySQL
 }
 function cargarPlazosPago(idCliente) {
     fetch(`/plazos-pago/${idCliente}`)
