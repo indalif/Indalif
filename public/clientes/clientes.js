@@ -360,7 +360,7 @@ document.getElementById('mercaderiaForm').addEventListener('submit', function (e
     const producto = document.getElementById('producto').value.trim();
     const precio = parseFloat(document.getElementById('precio').value);
     const cantidad = parseInt(document.getElementById('cantidad').value, 10);
-    let fecha = document.getElementById('fecha').value;
+    const fecha = document.getElementById('fecha').value;
 
     if (!producto || isNaN(precio) || isNaN(cantidad) || !fecha) {
         alert('Por favor, complete todos los campos.');
