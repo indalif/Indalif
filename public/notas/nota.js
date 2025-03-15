@@ -74,12 +74,9 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
     const fecha = document.getElementById('fecha').value;
     const fechaEntrega = document.getElementById('fecha_entrega').value;
-
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
     }
-
-    // Asegurar que la fecha se mantenga correctamente (sin ajustes de zona horaria)
     const fechaCorrecta = corregirFecha(fecha);
     const fechaEntregaCorrecta = corregirFecha(fechaEntrega);
 
@@ -343,7 +340,7 @@ function agregarBotonEditar(notaDiv, nota) {
 }
 function formatFechaParaInput(fechaISO) {
     if (!fechaISO) return '';
-    return fechaISO.split('T')[0]; // Evita que Date modifique la fecha
+    return fechaISO.split('T')[0];
 }
 async function cargarNotaParaEditar(notaId) {
     try {
@@ -367,7 +364,7 @@ async function cargarNotaParaEditar(notaId) {
         } else {
             productosLista = [];
         }
-        console.log("🔍 Productos cargados para edición:", productosLista);        
+        console.log("🔍 Productos cargados para edición:", productosLista);
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
@@ -470,7 +467,7 @@ async function guardarNotaEditada(event) {
             method: 'PUT',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados)
-        });        
+        });
 
         if (!response.ok) {
             const errorText = await response.text();
