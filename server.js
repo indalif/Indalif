@@ -504,20 +504,22 @@ app.put('/billetes/:id', (req, res) => {
     });
 });
 app.post('/mercaderiaCliente', (req, res) => {
-    const { idCliente, descripcion, cantidad, precio, fecha } = req.body;
+    let { idCliente, descripcion, cantidad, precio, fecha } = req.body;
 
     if (!idCliente || !descripcion || !cantidad || !precio || !fecha) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
 
-    // Convertir fecha correctamente sin problemas de zona horaria
-    const fechaFormato = new Date(fecha).toLocaleDateString('en-CA');
+    // Ajustar la fecha para evitar desajustes de zona horaria
+    const fechaCorregida = new Date(fecha);
+    fechaCorregida.setMinutes(fechaCorregida.getMinutes() + fechaCorregida.getTimezoneOffset()); // Ajuste UTC
 
     const sql = `
         INSERT INTO mercaderiaClientes (idCliente, descripcion, cantidad, precio, fecha)
         VALUES (?, ?, ?, ?, ?)
     `;
-    dbModulos.query(sql, [idCliente, descripcion, cantidad, precio, fechaFormato], (err, result) => {
+
+    dbModulos.query(sql, [idCliente, descripcion, cantidad, precio, fechaCorregida.toISOString().split('T')[0]], (err, result) => {
         if (err) {
             console.error('Error al guardar mercadería:', err);
             return res.status(500).json({ message: 'Error al guardar mercadería.' });
@@ -529,7 +531,7 @@ app.get('/mercaderiaCliente/:idCliente', (req, res) => {
     const { idCliente } = req.params;
 
     const sql = `
-        SELECT idMercaderia, descripcion, cantidad, CAST(precio AS DECIMAL(10,2)) AS precio, DATE_FORMAT(fecha, '%Y-%m-%d') AS fecha
+        SELECT idMercaderia, descripcion, cantidad, CAST(precio AS DECIMAL(10,2)) AS precio, fecha
         FROM mercaderiaClientes
         WHERE idCliente = ?
     `;

@@ -325,13 +325,16 @@ function renderizarTabla(data) {
     data.forEach(item => {
         const precio = parseFloat(item.precio) || 0;
         const cantidad = parseInt(item.cantidad, 10) || 0;
+        const fechaCorregida = new Date(item.fecha);
+        fechaCorregida.setMinutes(fechaCorregida.getMinutes() + fechaCorregida.getTimezoneOffset()); // Ajuste UTC
+
         const fila = `
             <tr data-id="${item.idMercaderia}">
                 <td>${item.descripcion}</td>
                 <td>${precio.toFixed(2)}</td>
                 <td>${cantidad}</td>
                 <td>${(precio * cantidad).toFixed(2)}</td>
-                <td>${new Date(item.fecha).toLocaleDateString('es-ES')}</td>X
+                <td>${fechaCorregida.toLocaleDateString()}</td>
                 <td>
                     <button class="btn btn-danger btn-sm" onclick="eliminarMercaderia(${item.idMercaderia})">
                         Eliminar
@@ -360,10 +363,10 @@ document.getElementById('mercaderiaForm').addEventListener('submit', function (e
     const producto = document.getElementById('producto').value.trim();
     const precio = parseFloat(document.getElementById('precio').value);
     const cantidad = parseInt(document.getElementById('cantidad').value, 10);
-    const fecha = new Date(document.getElementById('fecha').value + 'T00:00:00').toISOString().split('T')[0]; // Ajuste de fecha
+    const fecha = document.getElementById('fecha').value;
 
     if (!producto || isNaN(precio) || isNaN(cantidad) || !fecha) {
-        alert('Por favor, completa todos los campos.');
+        alert('Por favor, complete todos los campos.');
         return;
     }
 
@@ -378,9 +381,9 @@ document.getElementById('mercaderiaForm').addEventListener('submit', function (e
             fecha
         })
     })
-        .then(respuesta => respuesta.json())
-        .then(datos => {
-            if (datos.mensaje) {
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
                 alert('Mercadería agregada con éxito.');
                 cargarMercaderia(clienteActivoId); // Actualizar la tabla
             }
