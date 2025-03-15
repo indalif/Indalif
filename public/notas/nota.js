@@ -72,44 +72,47 @@ document.getElementById('notaPedidoForm').addEventListener('submit', async funct
     const numero_nota = document.getElementById('numero_nota').value;
     const clienteId = document.getElementById('cliente').value;
     const clienteNombre = document.getElementById('cliente').selectedOptions[0]?.text || '';
-    const fecha = document.getElementById('fecha').value;
-    const fechaEntrega = document.getElementById('fecha_entrega').value;
+    const fecha = new Date(document.getElementById('fecha').value + "T00:00:00Z").toISOString();
+    const fechaEntrega = new Date(document.getElementById('fecha_entrega').value + "T00:00:00Z").toISOString();    
+
     if (!numero_nota || !clienteId || !fecha || !fechaEntrega || productosLista.length === 0) {
         return;
     }
-    const fechaCorrecta = corregirFecha(fecha);
-    const fechaEntregaCorrecta = corregirFecha(fechaEntrega);
 
     try {
         const response = await fetch('/notas-pedido', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                numero_nota,
-                cliente_id: clienteId,
-                fecha: fechaCorrecta,
-                fecha_entrega: fechaEntregaCorrecta,
-                productos: productosLista
-            })
+            body: JSON.stringify({ numero_nota, cliente_id: clienteId, fecha, fecha_entrega: fechaEntrega, productos: productosLista })
         });
 
         if (!response.ok) throw new Error('Error al guardar la nota de pedido.');
 
+        const data = await response.json();
         alert('Nota de pedido guardada con éxito!');
         cargarNotas();
-        document.getElementById('notaPedidoForm').reset();
+        console.log('Limpiando formulario...');
+        document.getElementById('notaPedidoForm').reset(); // Intenta primero con reset()
+        document.getElementById('numero_nota').value = '';
+        document.getElementById('cliente').value = '';
+        document.getElementById('fecha').value = '';
+        document.getElementById('fecha_entrega').value = '';
+        document.getElementById('producto').value = '';
+        document.getElementById('cantidad').value = '';
+        document.getElementById('presentacion').value = '';
         productosLista = [];
         document.getElementById('listaProductos').innerHTML = '';
+        const notaVisual = document.getElementById('notaVisual');
+        if (notaVisual) {
+            notaVisual.style.display = 'none';
+        }
+
+        console.log('Formulario limpio.');
 
     } catch (error) {
         console.error('Error:', error);
     }
 });
-function corregirFecha(fecha) {
-    if (!fecha) return '';
-    const partes = fecha.split('-'); // Divide el formato YYYY-MM-DD
-    return `${partes[0]}-${partes[1]}-${partes[2]}`; // Asegura que se mantenga igual
-}
 function imprimirNota(button) {
     let notaDiv = button.parentElement;
     let numeroNota = notaDiv.querySelector("h5").innerText.replace("Número de Nota:", "").trim();
@@ -231,11 +234,13 @@ async function cargarNotas() {
         const listaNotas = document.getElementById('listaNotas');
         listaNotas.innerHTML = ''; // ✅ Limpia la lista antes de cargar nuevas notas
 
-        // Función para formatear fechas (mejorada)
         const formatFecha = (fechaISO) => {
             if (!fechaISO) return 'Fecha no disponible';
             const fecha = new Date(fechaISO);
-            return fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const dia = fecha.getUTCDate().toString().padStart(2, '0');
+            const mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
+            const anio = fecha.getUTCFullYear();
+            return `${dia}/${mes}/${anio}`;
         };
 
         data.notas.forEach(nota => {
@@ -339,8 +344,7 @@ function agregarBotonEditar(notaDiv, nota) {
     notaDiv.appendChild(botonEditar);
 }
 function formatFechaParaInput(fechaISO) {
-    if (!fechaISO) return '';
-    return fechaISO.split('T')[0];
+    return fechaISO ? fechaISO.split('T')[0] : '';
 }
 async function cargarNotaParaEditar(notaId) {
     try {
@@ -364,7 +368,7 @@ async function cargarNotaParaEditar(notaId) {
         } else {
             productosLista = [];
         }
-        console.log("🔍 Productos cargados para edición:", productosLista);
+        console.log("🔍 Productos cargados para edición:", productosLista);        
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
@@ -467,7 +471,7 @@ async function guardarNotaEditada(event) {
             method: 'PUT',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados)
-        });
+        });        
 
         if (!response.ok) {
             const errorText = await response.text();
