@@ -179,8 +179,8 @@ function abrirPlazosPago(idCliente) {
 function guardarPlazosPago(idCliente) {
     const formaPago = document.getElementById('formaPago').value;
     const totalPagar = document.getElementById('totalPagar').value;
-    const fechaPago = new Date(document.getElementById('fechaPago').value + 'T00:00:00Z').toISOString();
-    const fechaEmision = new Date(document.getElementById('fechaEmision').value + 'T00:00:00Z').toISOString();
+    const fechaPago = convertirFechaMySQL(document.getElementById('fechaPago').value);
+    const fechaEmision = convertirFechaMySQL(document.getElementById('fechaEmision').value);
     const pago = document.getElementById('pago').value || null;
     const numeroComprobante = document.getElementById('numeroComprobante').value || null;
 
@@ -189,15 +189,22 @@ function guardarPlazosPago(idCliente) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idCliente, formaPago, totalPagar, fecha: fechaPago, pago, numeroComprobante, fechaEmision })
     })
-        .then(response => {
-            if (!response.ok) throw new Error('Error al guardar plazo de pago');
-            return response.json();
-        })
-        .then(() => {
-            document.getElementById('plazosPagoForm').reset();
-            cargarPlazosPago(idCliente);
-        })
-        .catch(error => console.error('Error al guardar plazos de pago:', error));
+    .then(response => {
+        if (!response.ok) throw new Error('Error al guardar plazo de pago');
+        return response.json();
+    })
+    .then(() => {
+        document.getElementById('plazosPagoForm').reset();
+        cargarPlazosPago(idCliente);
+    })
+    .catch(error => console.error('Error al guardar plazos de pago:', error));
+}
+function convertirFechaMySQL(fechaISO) {
+    const fecha = new Date(fechaISO);
+    const anio = fecha.getFullYear();
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0'); // Mes en formato 2 dígitos
+    const dia = fecha.getDate().toString().padStart(2, '0'); // Día en formato 2 dígitos
+    return `${anio}-${mes}-${dia}`; // Formato correcto para MySQL
 }
 function cargarPlazosPago(idCliente) {
     fetch(`/plazos-pago/${idCliente}`)
