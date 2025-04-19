@@ -327,9 +327,6 @@ function cargarDatosEnFormulario(fila) {
         document.getElementById("precio-plastico").value = fila.children[2].textContent;
     }
 }
-document.getElementById("close-modal").addEventListener("click", () => {
-    document.getElementById("modal-actualizar-precio").style.display = "none";
-});
 function recalcularTotalPlasticoPorProducto(producto) {
     let totalPlasticos = 0;
     document.querySelectorAll(`#plasticos-table-body tr[data-producto="${producto}"] .precio`).forEach(celda => {
@@ -412,7 +409,7 @@ function guardarFilaIngrediente(fila, id) {
         <td>${rinde}</td>
         <td>${totalIngredientes}</td>
         <td>
-            <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+            <button class="btn btn-warning btn-sm actualizar-btn">Editar</button>
             <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
         </td>
     `;
@@ -512,13 +509,6 @@ function actualizarTotalPorPaquete(producto) {
     const totalPaquete = totalIngredientes + totalPlasticos;
     document.getElementById("total-por-paquete").textContent =
         `Total por Paquete (${producto}): $${totalPaquete.toFixed(2)}`;
-}
-function abrirModalActualizarPrecio(id, tipo, precioActual) {
-    const modal = document.getElementById("modal-actualizar-precio");
-    modal.style.display = "flex";
-    document.getElementById("fila-id").value = id;
-    document.getElementById("tipo-tabla").value = tipo;
-    document.getElementById("nuevo-precio").value = precioActual;
 }
 document.getElementById("form-actualizar-precio").addEventListener("submit", (e) => {
     e.preventDefault();
