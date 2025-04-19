@@ -1222,7 +1222,7 @@ app.put('/actualizar_costo/:id', (req, res) => {
     } = req.body;
   
     const sql = `
-      UPDATE ingredientes SET 
+      UPDATE costos SET 
         producto = ?, 
         ingrediente = ?, 
         precio_unitario = ?, 
@@ -1245,7 +1245,7 @@ app.put('/actualizar_plastico/:id', (req, res) => {
     const { producto, tipo_plastico, precio_plastico } = req.body;
   
     const sql = `
-      UPDATE plasticos SET 
+      UPDATE costos SET 
         producto = ?, 
         tipo_plastico = ?, 
         precio_plastico = ?
@@ -1260,21 +1260,19 @@ app.put('/actualizar_plastico/:id', (req, res) => {
       res.json({ success: true });
     });
   });
-app.put('/actualizar_costo', (req, res) => {
+  app.put('/actualizar_costo', (req, res) => {
     const { id, tipo, nuevoPrecio } = req.body;
   
-    let tabla, campo;
-    if (tipo === 'ingrediente' || tipo === 'ingredientes') {
-      tabla = 'ingredientes';
+    let campo;
+    if (tipo === 'ingrediente') {
       campo = 'precio_unitario';
-    } else if (tipo === 'plastico' || tipo === 'plasticos') {
-      tabla = 'plasticos';
+    } else if (tipo === 'plastico') {
       campo = 'precio_plastico';
     } else {
-      return res.status(400).json({ error: 'Tipo de tabla inválido' });
+      return res.status(400).json({ error: 'Tipo inválido' });
     }
   
-    const sql = `UPDATE ${tabla} SET ${campo} = ? WHERE id = ?`;
+    const sql = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
   
     dbModulos.query(sql, [nuevoPrecio, id], (err, result) => {
       if (err) {
@@ -1283,7 +1281,7 @@ app.put('/actualizar_costo', (req, res) => {
       }
       res.json({ success: true });
     });
-  });
+  });  
 app.post('/movimientos_materia_prima', (req, res) => {
     const { producto, tipo, cantidad, lote } = req.body;
 
