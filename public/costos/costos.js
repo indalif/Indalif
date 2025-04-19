@@ -247,7 +247,7 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
                 <td>${row.rinde}</td>
                 <td>${totalIngredientes}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Editar</button>
                     <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
                 </td>
             </tr>
@@ -264,7 +264,7 @@ function mostrarDatosEnTablas(ingredientes, plasticos) {
                 <td>${row.tipo_plastico}</td>
                 <td class="precio">${precioPlastico.toFixed(2)}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+                    <button class="btn btn-warning btn-sm actualizar-btn">Editar</button>
                     <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
                 </td>
             </tr>
@@ -467,7 +467,7 @@ function guardarFilaPlastico(fila, id) {
         <td>${tipoPlastico}</td>
         <td class="precio">${precioPlastico.toFixed(2)}</td>
         <td>
-            <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+            <button class="btn btn-warning btn-sm actualizar-btn">Editar</button>
             <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
         </td>
     `;
