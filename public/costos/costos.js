@@ -341,25 +341,160 @@ function recalcularTotalPlasticoPorProducto(producto) {
 document.addEventListener("click", (e) => {
     if (e.target.classList.contains("actualizar-btn")) {
         const fila = e.target.closest("tr");
+        const tipo = fila.getAttribute("data-tabla");
+        const id = fila.getAttribute("data-id");
+
+        if (tipo === "ingrediente") {
+            editarFilaIngrediente(fila, id);
+        } else if (tipo === "plastico") {
+            editarFilaPlastico(fila, id);
+        }
+    }
+
+    if (e.target.classList.contains("guardar-btn")) {
+        const fila = e.target.closest("tr");
         const id = fila.getAttribute("data-id");
         const tipo = fila.getAttribute("data-tabla");
 
-        if (!id || (tipo !== "ingrediente" && tipo !== "plastico")) {
-            console.error("Tipo de tabla inválido o ID no encontrado.");
-            return;
+        if (tipo === "ingrediente") {
+            guardarFilaIngrediente(fila, id);
+        } else if (tipo === "plastico") {
+            guardarFilaPlastico(fila, id);
         }
-
-        const precioCelda = fila.querySelector(".precio");
-        if (!precioCelda) {
-            console.error("No se encontró la celda de precio en la fila:", fila);
-            return;
-        }
-
-        const precioActual = parseFloat(precioCelda.textContent);
-        console.log("ID:", id, "Tipo de tabla:", tipo, "Precio actual:", precioActual);
-        abrirModalActualizarPrecio(id, tipo, precioActual);
     }
 });
+function editarFilaIngrediente(fila, id) {
+    const celdas = fila.children;
+
+    const producto = celdas[0].textContent;
+    const ingrediente = celdas[1].textContent;
+    const precioUnitario = parseFloat(celdas[2].textContent);
+    const cantidadKg = parseFloat(celdas[3].textContent);
+    const cantidadUtilizo = parseFloat(celdas[4].textContent);
+    const rinde = parseFloat(celdas[6].textContent);
+
+    fila.innerHTML = `
+        <td><input type="text" value="${producto}"></td>
+        <td><input type="text" value="${ingrediente}"></td>
+        <td><input type="number" step="0.01" value="${precioUnitario}"></td>
+        <td><input type="number" step="0.01" value="${cantidadKg}"></td>
+        <td><input type="number" step="0.01" value="${cantidadUtilizo}"></td>
+        <td></td>
+        <td><input type="number" step="0.01" value="${rinde}"></td>
+        <td></td>
+        <td>
+            <button class="btn btn-success btn-sm guardar-btn">Guardar</button>
+        </td>
+    `;
+}
+function guardarFilaIngrediente(fila, id) {
+    const inputs = fila.querySelectorAll("input");
+    const [productoInput, ingredienteInput, precioInput, kgInput, utilizoInput, rindeInput] = inputs;
+
+    const producto = productoInput.value;
+    const ingrediente = ingredienteInput.value;
+    const precioUnitario = parseFloat(precioInput.value) || 0;
+    const cantidadKg = parseFloat(kgInput.value) || 0;
+    const cantidadUtilizo = parseFloat(utilizoInput.value) || 0;
+    const rinde = parseFloat(rindeInput.value) || 1;
+
+    const precioTotal = (cantidadUtilizo * precioUnitario).toFixed(2);
+    const totalIngredientes = (precioTotal / rinde).toFixed(2);
+
+    // Actualizar visualmente la fila
+    fila.innerHTML = `
+        <td>${producto}</td>
+        <td>${ingrediente}</td>
+        <td class="precio">${precioUnitario.toFixed(2)}</td>
+        <td>${cantidadKg}</td>
+        <td>${cantidadUtilizo}</td>
+        <td>${precioTotal}</td>
+        <td>${rinde}</td>
+        <td>${totalIngredientes}</td>
+        <td>
+            <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+            <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+        </td>
+    `;
+    fila.setAttribute("data-producto", producto);
+
+    // Enviar cambios al servidor
+    fetch(`/actualizar_costo/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            producto,
+            ingrediente,
+            precio_unitario: precioUnitario,
+            cantidad_kg: cantidadKg,
+            cantidad_utilizo: cantidadUtilizo,
+            rinde
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                recalcularTotalesProducto(producto);
+            } else {
+                alert("Error al guardar los cambios");
+                console.error(data.error);
+            }
+        });
+}
+function editarFilaPlastico(fila, id) {
+    const celdas = fila.children;
+
+    const producto = celdas[0].textContent;
+    const tipoPlastico = celdas[1].textContent;
+    const precioPlastico = parseFloat(celdas[2].textContent);
+
+    fila.innerHTML = `
+        <td><input type="text" value="${producto}"></td>
+        <td><input type="text" value="${tipoPlastico}"></td>
+        <td><input type="number" step="0.01" value="${precioPlastico}"></td>
+        <td>
+            <button class="btn btn-success btn-sm guardar-btn">Guardar</button>
+        </td>
+    `;
+}
+function guardarFilaPlastico(fila, id) {
+    const inputs = fila.querySelectorAll("input");
+    const [productoInput, tipoInput, precioInput] = inputs;
+
+    const producto = productoInput.value;
+    const tipoPlastico = tipoInput.value;
+    const precioPlastico = parseFloat(precioInput.value) || 0;
+
+    fila.innerHTML = `
+        <td>${producto}</td>
+        <td>${tipoPlastico}</td>
+        <td class="precio">${precioPlastico.toFixed(2)}</td>
+        <td>
+            <button class="btn btn-warning btn-sm actualizar-btn">Actualizar</button>
+            <button class="btn btn-danger btn-sm delete-btn">Eliminar</button>
+        </td>
+    `;
+    fila.setAttribute("data-producto", producto);
+
+    fetch(`/actualizar_plastico/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            producto,
+            tipo_plastico: tipoPlastico,
+            precio_plastico: precioPlastico
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                recalcularTotalPlasticoPorProducto(producto);
+            } else {
+                alert("Error al guardar los cambios");
+                console.error(data.error);
+            }
+        });
+}
 function actualizarTotalPorPaquete(producto) {
     let totalIngredientes = 0;
     let totalPlasticos = 0;

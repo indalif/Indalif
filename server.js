@@ -1210,33 +1210,84 @@ app.delete('/eliminar_costo/:id', (req, res) => {
         res.json({ message: 'Costo eliminado con éxito.' });
     });
 });
-app.put('/actualizar_costo', (req, res) => {
-    const { id, tipo, nuevoPrecio } = req.body;
-
-    // Verificar que el tipo sea válido
-    if (!['ingrediente', 'plastico'].includes(tipo)) {
-        return res.status(400).json({ error: 'Tipo de tabla inválido.' });
-    }
-
-    // Seleccionar la columna correcta según el tipo
-    let campo;
-    if (tipo === "ingrediente") {
-        campo = "precio_unitario";
-    } else if (tipo === "plastico") {
-        campo = "precio_plastico";
-    }
-
-    // Ejecutar la consulta para actualizar el precio en la tabla correcta
-    const query = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
-
-    dbModulos.query(query, [nuevoPrecio, id], (err, result) => {
-        if (err) {
-            console.error('Error al actualizar el costo:', err.message);
-            return res.status(500).json({ error: 'Error al actualizar el costo' });
-        }
-        res.json({ message: 'Costo actualizado correctamente' });
+app.put('/actualizar_costo/:id', (req, res) => {
+    const { id } = req.params;
+    const {
+      producto,
+      ingrediente,
+      precio_unitario,
+      cantidad_kg,
+      cantidad_utilizo,
+      rinde
+    } = req.body;
+  
+    const sql = `
+      UPDATE ingredientes SET 
+        producto = ?, 
+        ingrediente = ?, 
+        precio_unitario = ?, 
+        cantidad_kg = ?, 
+        cantidad_utilizo = ?, 
+        rinde = ?
+      WHERE id = ?
+    `;
+  
+    db.query(sql, [producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, id], (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, error: 'Error en la base de datos' });
+      }
+      res.json({ success: true });
     });
-});
+  });
+  
+  // Ruta para actualizar un plástico
+  app.put('/actualizar_plastico/:id', (req, res) => {
+    const { id } = req.params;
+    const { producto, tipo_plastico, precio_plastico } = req.body;
+  
+    const sql = `
+      UPDATE plasticos SET 
+        producto = ?, 
+        tipo_plastico = ?, 
+        precio_plastico = ?
+      WHERE id = ?
+    `;
+  
+    db.query(sql, [producto, tipo_plastico, precio_plastico, id], (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, error: 'Error en la base de datos' });
+      }
+      res.json({ success: true });
+    });
+  });
+  
+  // Ruta para actualizar precio desde el modal
+  app.put('/actualizar_costo', (req, res) => {
+    const { id, tipo, nuevoPrecio } = req.body;
+  
+    let tabla, campo;
+    if (tipo === 'ingrediente' || tipo === 'ingredientes') {
+      tabla = 'ingredientes';
+      campo = 'precio_unitario';
+    } else if (tipo === 'plastico' || tipo === 'plasticos') {
+      tabla = 'plasticos';
+      campo = 'precio_plastico';
+    } else {
+      return res.status(400).json({ error: 'Tipo de tabla inválido' });
+    }
+  
+    const sql = `UPDATE ${tabla} SET ${campo} = ? WHERE id = ?`;
+  
+    db.query(sql, [nuevoPrecio, id], (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Error al actualizar el precio' });
+      }
+      res.json({ success: true });
+    });
+  });
 app.post('/movimientos_materia_prima', (req, res) => {
     const { producto, tipo, cantidad, lote } = req.body;
 
