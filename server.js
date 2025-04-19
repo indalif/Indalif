@@ -1232,7 +1232,7 @@ app.put('/actualizar_costo/:id', (req, res) => {
       WHERE id = ?
     `;
   
-    db.query(sql, [producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, id], (err, result) => {
+    dbModulos.query(sql, [producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, id], (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ success: false, error: 'Error en la base de datos' });
@@ -1240,9 +1240,7 @@ app.put('/actualizar_costo/:id', (req, res) => {
       res.json({ success: true });
     });
   });
-  
-  // Ruta para actualizar un plástico
-  app.put('/actualizar_plastico/:id', (req, res) => {
+app.put('/actualizar_plastico/:id', (req, res) => {
     const { id } = req.params;
     const { producto, tipo_plastico, precio_plastico } = req.body;
   
@@ -1254,7 +1252,7 @@ app.put('/actualizar_costo/:id', (req, res) => {
       WHERE id = ?
     `;
   
-    db.query(sql, [producto, tipo_plastico, precio_plastico, id], (err, result) => {
+    dbModulos.query(sql, [producto, tipo_plastico, precio_plastico, id], (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ success: false, error: 'Error en la base de datos' });
@@ -1262,9 +1260,7 @@ app.put('/actualizar_costo/:id', (req, res) => {
       res.json({ success: true });
     });
   });
-  
-  // Ruta para actualizar precio desde el modal
-  app.put('/actualizar_costo', (req, res) => {
+app.put('/actualizar_costo', (req, res) => {
     const { id, tipo, nuevoPrecio } = req.body;
   
     let tabla, campo;
@@ -1280,7 +1276,7 @@ app.put('/actualizar_costo/:id', (req, res) => {
   
     const sql = `UPDATE ${tabla} SET ${campo} = ? WHERE id = ?`;
   
-    db.query(sql, [nuevoPrecio, id], (err, result) => {
+    dbModulos.query(sql, [nuevoPrecio, id], (err, result) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: 'Error al actualizar el precio' });
