@@ -83,48 +83,6 @@
                     Fecha</button>
             </div>
         </div>
-        <div class="modal fade" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="historyModalLabel">Ver Historial por Fecha o Mes</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="historyForm">
-                            <div class="form-group">
-                                <label for="historyDate">Seleccionar Fecha:</label>
-                                <input type="date" class="form-control" id="historyDate">
-                            </div>
-                            <button type="button" class="btn btn-primary" onclick="viewHistoryByDate()">Ver
-                                Historial</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card mb-4 shadow border-secondary">
-            <div class="card-body">
-                <h5 class="card-title">Historial de Transacciones</h5>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Descripción</th>
-                            <th>Monto</th>
-                            <th>Método</th>
-                            <th>Tipo</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionHistory"></tbody>
-
-                </table>
-            </div>
-        </div>
         <div class="card mb-4 shadow border-success">
             <div class="card-body">
                 <h5 class="card-title">Control de Efectivo en Caja</h5>
@@ -196,6 +154,48 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historyModalLabel">Ver Historial por Fecha o Mes</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="historyForm">
+                        <div class="form-group">
+                            <label for="historyDate">Seleccionar Fecha:</label>
+                            <input type="date" class="form-control" id="historyDate">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="viewHistoryByDate()">Ver
+                            Historial</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4 shadow border-secondary">
+        <div class="card-body">
+            <h5 class="card-title">Historial de Transacciones</h5>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Método</th>
+                        <th>Tipo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionHistory"></tbody>
+
+            </table>
+        </div>
+    </div>
     </main>
     <script src="caja.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
