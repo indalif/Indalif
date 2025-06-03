@@ -570,7 +570,7 @@ app.post('/plazos-pago', (req, res) => {
     }
 
     // Convertir fechas al formato 'YYYY-MM-DD'
-    const fechaEmisionFormato = new Date(fechaEmision).toISOString().split('T')[0];  
+    const fechaEmisionFormato = new Date(fechaEmision).toISOString().split('T')[0];
     const fechaFormato = new Date(fecha).toISOString().split('T')[0];
 
     const sql = `
@@ -1213,14 +1213,14 @@ app.delete('/eliminar_costo/:id', (req, res) => {
 app.put('/actualizar_costo/:id', (req, res) => {
     const { id } = req.params;
     const {
-      producto,
-      ingrediente,
-      precio_unitario,
-      cantidad_kg,
-      cantidad_utilizo,
-      rinde
+        producto,
+        ingrediente,
+        precio_unitario,
+        cantidad_kg,
+        cantidad_utilizo,
+        rinde
     } = req.body;
-  
+
     const sql = `
       UPDATE costos SET 
         producto = ?, 
@@ -1231,19 +1231,19 @@ app.put('/actualizar_costo/:id', (req, res) => {
         rinde = ?
       WHERE id = ?
     `;
-  
+
     dbModulos.query(sql, [producto, ingrediente, precio_unitario, cantidad_kg, cantidad_utilizo, rinde, id], (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ success: false, error: 'Error en la base de datos' });
-      }
-      res.json({ success: true });
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ success: false, error: 'Error en la base de datos' });
+        }
+        res.json({ success: true });
     });
-  });
+});
 app.put('/actualizar_plastico/:id', (req, res) => {
     const { id } = req.params;
     const { producto, tipo_plastico, precio_plastico } = req.body;
-  
+
     const sql = `
       UPDATE costos SET 
         producto = ?, 
@@ -1251,37 +1251,37 @@ app.put('/actualizar_plastico/:id', (req, res) => {
         precio_plastico = ?
       WHERE id = ?
     `;
-  
+
     dbModulos.query(sql, [producto, tipo_plastico, precio_plastico, id], (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ success: false, error: 'Error en la base de datos' });
-      }
-      res.json({ success: true });
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ success: false, error: 'Error en la base de datos' });
+        }
+        res.json({ success: true });
     });
-  });
-  app.put('/actualizar_costo', (req, res) => {
+});
+app.put('/actualizar_costo', (req, res) => {
     const { id, tipo, nuevoPrecio } = req.body;
-  
+
     let campo;
     if (tipo === 'ingrediente') {
-      campo = 'precio_unitario';
+        campo = 'precio_unitario';
     } else if (tipo === 'plastico') {
-      campo = 'precio_plastico';
+        campo = 'precio_plastico';
     } else {
-      return res.status(400).json({ error: 'Tipo inválido' });
+        return res.status(400).json({ error: 'Tipo inválido' });
     }
-  
+
     const sql = `UPDATE costos SET ${campo} = ? WHERE id = ?`;
-  
+
     dbModulos.query(sql, [nuevoPrecio, id], (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Error al actualizar el precio' });
-      }
-      res.json({ success: true });
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Error al actualizar el precio' });
+        }
+        res.json({ success: true });
     });
-  });  
+});
 app.post('/movimientos_materia_prima', (req, res) => {
     const { producto, tipo, cantidad, lote } = req.body;
 
@@ -1746,25 +1746,27 @@ app.get('/metricas/:idCliente', (req, res) => {
 
     const queries = {
         cambios: `
-            SELECT producto, cantidad, precio, fecha
-            FROM cambios
-            WHERE cliente = (SELECT nombre FROM clientes WHERE id = ?)
-            ${filtros('fecha')}
-        `,
+        SELECT producto, SUM(cantidad) as cantidad, AVG(precio) as precio
+        FROM cambios
+        WHERE cliente = (SELECT nombre FROM clientes WHERE id = ?)
+        ${filtros('fecha')}
+        GROUP BY producto
+    `,
         plazos: `
-            SELECT formaPago, totalPagar, fecha, pago
-            FROM plazos_pago
-            WHERE idCliente = ?
-            ${filtros('fecha')}
-        `,
+        SELECT formaPago, SUM(totalPagar) as totalPagar, SUM(pago) as pago
+        FROM plazos_pago
+        WHERE idCliente = ?
+        ${filtros('fecha')}
+        GROUP BY formaPago
+    `,
         mercaderia: `
-            SELECT descripcion, cantidad, precio, fecha
-            FROM mercaderiaClientes
-            WHERE idCliente = ?
-            ${filtros('fecha')}
-        `
+        SELECT descripcion, SUM(cantidad) as cantidad, AVG(precio) as precio
+        FROM mercaderiaClientes
+        WHERE idCliente = ?
+        ${filtros('fecha')}
+        GROUP BY descripcion
+    `
     };
-
     const resultados = {};
 
     dbModulos.query(queries.cambios, [idCliente], (err1, r1) => {

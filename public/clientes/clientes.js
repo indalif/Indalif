@@ -458,21 +458,21 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                 </ul>
             `;
 
-            html += `<h6 class="mt-3">Detalle Cambios</h6><ul>`;
-            html += data.cambios.length ? data.cambios.map(c => `
-                <li>${c.fecha}: ${c.producto} x${c.cantidad} a $${c.precio}</li>`).join('') : '<li>No hay cambios</li>';
+            html += `<h6 class="mt-3">Detalle Cambios (acumulado por producto)</h6><ul>`;
+            html += data.cambios.length
+                ? data.cambios.map(c => `
+        <li>${c.producto}: ${c.cantidad} unidades a promedio $${parseFloat(c.precio).toFixed(2)}</li>
+      `).join('')
+                : '<li>No hay cambios</li>';
             html += `</ul>`;
 
-            html += `<h6 class="mt-3">Detalle Plazos de Pago</h6><ul>`;
-            html += data.plazos.length ? data.plazos.map(p => `
-                <li>${p.fecha}: ${p.formaPago} - $${p.totalPagar} pagado $${p.pago || 0}</li>`).join('') : '<li>No hay pagos</li>';
+            html += `<h6 class="mt-3">Detalle Mercadería (acumulado por producto)</h6><ul>`;
+            html += data.mercaderia.length
+                ? data.mercaderia.map(m => `
+        <li>${m.descripcion}: ${m.cantidad} unidades a promedio $${parseFloat(m.precio).toFixed(2)}</li>
+      `).join('')
+                : '<li>No hay mercadería</li>';
             html += `</ul>`;
-
-            html += `<h6 class="mt-3">Detalle Mercadería</h6><ul>`;
-            html += data.mercaderia.length ? data.mercaderia.map(m => `
-                <li>${m.fecha}: ${m.descripcion} x${m.cantidad} a $${m.precio}</li>`).join('') : '<li>No hay mercadería</li>';
-            html += `</ul>`;
-
             resultado.innerHTML = html;
         })
         .catch(err => {
