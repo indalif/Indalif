@@ -418,48 +418,8 @@ function verMetricas(idCliente, nombreCliente) {
         <label>Desde: <input type="date" id="filtroDesde" class="form-control mb-2"></label>
         <label>Hasta: <input type="date" id="filtroHasta" class="form-control mb-2"></label>
         <button class="btn btn-primary mb-3" onclick="cargarMetricasCliente(${idCliente}, '${nombreCliente}')">Ver Métricas</button>
-       <div id="resultadoMetricas"></div>
-       <canvas id="graficoMetricas" class="my-4"></canvas>
+        <div id="resultadoMetricas"></div>
     `;
-    // Destruir gráfico anterior si existe
-    if (window.graficoMetricas) {
-        window.graficoMetricas.destroy();
-    }
-
-    // Crear gráfico de torta con Chart.js
-    const ctx = document.getElementById('graficoMetricas').getContext('2d');
-    window.graficoMetricas = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Mercadería', 'Pagado', 'Cambios'],
-            datasets: [{
-                data: [totalMercaderia, totalPagado, totalCambios],
-                backgroundColor: ['#ffda77', '#a4c639', '#f67280']
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        color: '#5b1f0a',
-                        font: {
-                            size: 14
-                        }
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Distribución porcentual de montos',
-                    color: '#5b1f0a',
-                    font: {
-                        size: 18
-                    }
-                }
-            }
-        }
-    });
 
     const body = document.getElementById('metricasBody');
     body.innerHTML = '';
@@ -501,19 +461,61 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             html += `<h6 class="mt-3">Detalle Cambios (acumulado por producto)</h6><ul>`;
             html += data.cambios.length
                 ? data.cambios.map(c => `
-        <li>${c.producto}: ${c.cantidad} unidades a promedio $${parseFloat(c.precio).toFixed(2)}</li>
-      `).join('')
+                    <li>${c.producto}: ${c.cantidad} unidades a promedio $${parseFloat(c.precio).toFixed(2)}</li>
+                  `).join('')
                 : '<li>No hay cambios</li>';
             html += `</ul>`;
 
             html += `<h6 class="mt-3">Detalle Mercadería (acumulado por producto)</h6><ul>`;
             html += data.mercaderia.length
                 ? data.mercaderia.map(m => `
-        <li>${m.descripcion}: ${m.cantidad} unidades a promedio $${parseFloat(m.precio).toFixed(2)}</li>
-      `).join('')
+                    <li>${m.descripcion}: ${m.cantidad} unidades a promedio $${parseFloat(m.precio).toFixed(2)}</li>
+                  `).join('')
                 : '<li>No hay mercadería</li>';
             html += `</ul>`;
+
+            html += `<h6 class="mt-3">Detalle Plazos de Pago</h6><ul><li>Detalle no mostrado</li></ul>`;
+
+            html += `<h6 class="mt-4">Distribución porcentual de montos</h6>`;
+            html += `<canvas id="graficoMetricas" class="my-4"></canvas>`;
+
             resultado.innerHTML = html;
+
+            // Destruir gráfico anterior si existe
+            if (window.graficoMetricas) {
+                window.graficoMetricas.destroy();
+            }
+
+            // Crear gráfico de torta
+            const ctx = document.getElementById('graficoMetricas').getContext('2d');
+            window.graficoMetricas = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Mercadería', 'Pagado', 'Cambios'],
+                    datasets: [{
+                        data: [totalMercaderia, totalPagado, totalCambios],
+                        backgroundColor: ['#ffda77', '#a4c639', '#f67280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#5b1f0a',
+                                font: { size: 14 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución porcentual de montos',
+                            color: '#5b1f0a',
+                            font: { size: 18 }
+                        }
+                    }
+                }
+            });
         })
         .catch(err => {
             console.error('Error al obtener métricas:', err);
