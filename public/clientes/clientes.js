@@ -449,15 +449,21 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             let html = `<h5 class="text-center">Métricas de <strong>${nombreCliente}</strong></h5>`;
 
             html += `
-                <h6 class="mt-3">Totales</h6>
-                <ul>
-                    <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
-                    <li><strong>Total Plazos de Pago:</strong> $${totalPlazos.toFixed(2)}</li>
-                    <li><strong>Total Pagado:</strong> $${totalPagado.toFixed(2)}</li>
-                    <li><strong>Total Mercadería:</strong> $${totalMercaderia.toFixed(2)}</li>
-                </ul>
-            `;
-
+    <div class="row align-items-start mt-3">
+        <div class="col-md-6">
+            <h6>Totales</h6>
+            <ul>
+                <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
+                <li><strong>Total Plazos de Pago:</strong> $${totalPlazos.toFixed(2)}</li>
+                <li><strong>Total Pagado:</strong> $${totalPagado.toFixed(2)}</li>
+                <li><strong>Total Mercadería:</strong> $${totalMercaderia.toFixed(2)}</li>
+            </ul>
+        </div>
+        <div class="col-md-6 text-center">
+            <canvas id="graficoMetricas" style="max-width: 250px; margin: auto;"></canvas>
+        </div>
+    </div>
+`;
             html += `<h6 class="mt-3">Detalle Cambios (acumulado por producto)</h6><ul>`;
             html += data.cambios.length
                 ? data.cambios.map(c => `
@@ -473,12 +479,6 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                   `).join('')
                 : '<li>No hay mercadería</li>';
             html += `</ul>`;
-
-            html += `<h6 class="mt-3">Detalle Plazos de Pago</h6><ul><li>Detalle no mostrado</li></ul>`;
-
-            // Insertar canvas para gráfico
-            html += `<h6 class="mt-4">Distribución porcentual de montos</h6>`;
-            html += `<canvas id="graficoMetricas" class="my-4"></canvas>`;
 
             resultado.innerHTML = html;
 
