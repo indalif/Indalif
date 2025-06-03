@@ -1742,47 +1742,46 @@ app.get('/metricas/:idCliente', (req, res) => {
     const { idCliente } = req.params;
     const { desde, hasta } = req.query;
 
-    const filtros = [];
-    if (desde && hasta) {
-        filtros.push(`fecha BETWEEN '${desde}' AND '${hasta}'`);
-    }
-
-    const filtrosSql = filtros.length > 0 ? `AND ${filtros.join(' AND ')}` : '';
+    const filtros = (campoFecha) => (desde && hasta ? `AND ${campoFecha} BETWEEN '${desde}' AND '${hasta}'` : '');
 
     const queries = {
         cambios: `
             SELECT producto, cantidad, precio, fecha
             FROM cambios
             WHERE cliente = (SELECT nombre FROM clientes WHERE id = ?)
-            ${filtrosSql}
+            ${filtros('fecha')}
         `,
         plazos: `
             SELECT formaPago, totalPagar, fecha, pago
             FROM plazos_pago
             WHERE idCliente = ?
-            ${filtrosSql}
+            ${filtros('fecha')}
         `,
         mercaderia: `
             SELECT descripcion, cantidad, precio, fecha
             FROM mercaderiaClientes
             WHERE idCliente = ?
-            ${filtrosSql}
+            ${filtros('fecha')}
         `
     };
 
     const resultados = {};
 
-    dbModulos.query(queries.cambios, [idCliente], (err1, res1) => {
-        if (err1) return res.status(500).json({ error: 'Error en métricas de cambios' });
-        resultados.cambios = res1;
+    dbModulos.query(queries.cambios, [idCliente], (err1, r1) => {
+        if (err1) return res.status(500).json({ error: 'Error en cambios' });
+        resultados.cambios = r1;
+        resultados.totalCambios = r1.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
 
-        dbModulos.query(queries.plazos, [idCliente], (err2, res2) => {
-            if (err2) return res.status(500).json({ error: 'Error en métricas de plazos de pago' });
-            resultados.plazos = res2;
+        dbModulos.query(queries.plazos, [idCliente], (err2, r2) => {
+            if (err2) return res.status(500).json({ error: 'Error en plazos de pago' });
+            resultados.plazos = r2;
+            resultados.totalPlazos = r2.reduce((sum, p) => sum + (p.totalPagar || 0), 0);
+            resultados.totalPagado = r2.reduce((sum, p) => sum + (p.pago || 0), 0);
 
-            dbModulos.query(queries.mercaderia, [idCliente], (err3, res3) => {
-                if (err3) return res.status(500).json({ error: 'Error en métricas de mercadería' });
-                resultados.mercaderia = res3;
+            dbModulos.query(queries.mercaderia, [idCliente], (err3, r3) => {
+                if (err3) return res.status(500).json({ error: 'Error en mercadería' });
+                resultados.mercaderia = r3;
+                resultados.totalMercaderia = r3.reduce((sum, m) => sum + (m.precio * m.cantidad), 0);
 
                 res.json(resultados);
             });

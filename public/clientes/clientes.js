@@ -412,53 +412,66 @@ function eliminarMercaderia(idMercaderia) {
         });
 }
 function verMetricas(idCliente, nombreCliente) {
-    const desde = prompt("Fecha desde (YYYY-MM-DD):");
-    const hasta = prompt("Fecha hasta (YYYY-MM-DD):");
+    const contenedor = document.createElement('div');
+
+    contenedor.innerHTML = `
+        <label>Desde: <input type="date" id="filtroDesde" class="form-control mb-2"></label>
+        <label>Hasta: <input type="date" id="filtroHasta" class="form-control mb-2"></label>
+        <button class="btn btn-primary mb-3" onclick="cargarMetricasCliente(${idCliente}, '${nombreCliente}')">Ver Métricas</button>
+        <div id="resultadoMetricas"></div>
+    `;
+
+    const body = document.getElementById('metricasBody');
+    body.innerHTML = '';
+    body.appendChild(contenedor);
+
+    new bootstrap.Modal(document.getElementById('metricasModal')).show();
+}
+function cargarMetricasCliente(idCliente, nombreCliente) {
+    const desde = document.getElementById('filtroDesde').value;
+    const hasta = document.getElementById('filtroHasta').value;
 
     if (!desde || !hasta) {
-        alert("Debe ingresar ambas fechas.");
+        alert("Seleccione ambas fechas.");
         return;
     }
 
     fetch(`/metricas/${idCliente}?desde=${desde}&hasta=${hasta}`)
         .then(res => res.json())
         .then(data => {
-            let html = `<h5>Métricas de ${nombreCliente}</h5>`;
+            const resultado = document.getElementById('resultadoMetricas');
 
-            html += `<h6>Cambios</h6>`;
-            if (data.cambios.length > 0) {
-                html += `<ul>${data.cambios.map(c => `
-                    <li>${c.fecha}: ${c.producto} x${c.cantidad} a $${c.precio}</li>`).join('')}
-                </ul>`;
-            } else {
-                html += `<p>No hay cambios en este período.</p>`;
-            }
+            let html = `<h5 class="text-center">Métricas de <strong>${nombreCliente}</strong></h5>`;
 
-            html += `<h6>Plazos de Pago</h6>`;
-            if (data.plazos.length > 0) {
-                html += `<ul>${data.plazos.map(p => `
-                    <li>${p.fecha}: ${p.formaPago} - $${p.totalPagar} pagado $${p.pago || 0}</li>`).join('')}
-                </ul>`;
-            } else {
-                html += `<p>No hay plazos de pago en este período.</p>`;
-            }
+            html += `
+                <h6 class="mt-3">Totales</h6>
+                <ul>
+                    <li><strong>Total Cambios:</strong> $${data.totalCambios.toFixed(2)}</li>
+                    <li><strong>Total Plazos de Pago:</strong> $${data.totalPlazos.toFixed(2)}</li>
+                    <li><strong>Total Pagado:</strong> $${data.totalPagado.toFixed(2)}</li>
+                    <li><strong>Total Mercadería:</strong> $${data.totalMercaderia.toFixed(2)}</li>
+                </ul>
+            `;
 
-            html += `<h6>Mercadería</h6>`;
-            if (data.mercaderia.length > 0) {
-                html += `<ul>${data.mercaderia.map(m => `
-                    <li>${m.fecha}: ${m.descripcion} x${m.cantidad} a $${m.precio}</li>`).join('')}
-                </ul>`;
-            } else {
-                html += `<p>No hay mercadería en este período.</p>`;
-            }
+            html += `<h6 class="mt-3">Detalle Cambios</h6><ul>`;
+            html += data.cambios.length ? data.cambios.map(c => `
+                <li>${c.fecha}: ${c.producto} x${c.cantidad} a $${c.precio}</li>`).join('') : '<li>No hay cambios</li>';
+            html += `</ul>`;
 
-            const modal = new bootstrap.Modal(document.getElementById('cambiosModal'));
-            document.getElementById('modalTitle').innerText = `Métricas de ${nombreCliente}`;
-            document.getElementById('modalBody').innerHTML = html;
-            modal.show();
+            html += `<h6 class="mt-3">Detalle Plazos de Pago</h6><ul>`;
+            html += data.plazos.length ? data.plazos.map(p => `
+                <li>${p.fecha}: ${p.formaPago} - $${p.totalPagar} pagado $${p.pago || 0}</li>`).join('') : '<li>No hay pagos</li>';
+            html += `</ul>`;
+
+            html += `<h6 class="mt-3">Detalle Mercadería</h6><ul>`;
+            html += data.mercaderia.length ? data.mercaderia.map(m => `
+                <li>${m.fecha}: ${m.descripcion} x${m.cantidad} a $${m.precio}</li>`).join('') : '<li>No hay mercadería</li>';
+            html += `</ul>`;
+
+            resultado.innerHTML = html;
         })
         .catch(err => {
-            console.error('Error al cargar métricas:', err);
+            console.error('Error al obtener métricas:', err);
             alert('Error al cargar métricas');
         });
 }
