@@ -498,7 +498,7 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
 
             // Crear el gráfico de torta
             window.graficoMetricas = new Chart(ctx, {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
                     labels: ['Mercadería', 'Pagado', 'Cambios'],
                     datasets: [{
