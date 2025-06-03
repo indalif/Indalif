@@ -70,6 +70,7 @@ function cargarClientes(filtroNombre = '') {
                             <button class="btn btn-primary btn-sm" title="Ver Cambios" onclick="verCambios(${cliente.id}, '${cliente.nombre}')">Cambios</button>
                             <button class="btn btn-primary btn-sm" onclick="abrirPlazosPago(${cliente.id})">Plazos de Pago</button>
                             <button class="btn btn-primary btn-sm" onclick="abrirMercaderia(${cliente.id})">Mercadería</button>
+                            <button class="btn btn-primary btn-sm" onclick="verMetricas(${cliente.id}, '${cliente.nombre}')">Ver Métricas</button>
                         </div>
                     `;
                     lista.appendChild(li);
@@ -408,5 +409,56 @@ function eliminarMercaderia(idMercaderia) {
         .catch(error => {
             console.error('Error al eliminar la mercadería:', error);
             alert('No se pudo eliminar el registro.');
+        });
+}
+function verMetricas(idCliente, nombreCliente) {
+    const desde = prompt("Fecha desde (YYYY-MM-DD):");
+    const hasta = prompt("Fecha hasta (YYYY-MM-DD):");
+
+    if (!desde || !hasta) {
+        alert("Debe ingresar ambas fechas.");
+        return;
+    }
+
+    fetch(`/metricas/${idCliente}?desde=${desde}&hasta=${hasta}`)
+        .then(res => res.json())
+        .then(data => {
+            let html = `<h5>Métricas de ${nombreCliente}</h5>`;
+
+            html += `<h6>Cambios</h6>`;
+            if (data.cambios.length > 0) {
+                html += `<ul>${data.cambios.map(c => `
+                    <li>${c.fecha}: ${c.producto} x${c.cantidad} a $${c.precio}</li>`).join('')}
+                </ul>`;
+            } else {
+                html += `<p>No hay cambios en este período.</p>`;
+            }
+
+            html += `<h6>Plazos de Pago</h6>`;
+            if (data.plazos.length > 0) {
+                html += `<ul>${data.plazos.map(p => `
+                    <li>${p.fecha}: ${p.formaPago} - $${p.totalPagar} pagado $${p.pago || 0}</li>`).join('')}
+                </ul>`;
+            } else {
+                html += `<p>No hay plazos de pago en este período.</p>`;
+            }
+
+            html += `<h6>Mercadería</h6>`;
+            if (data.mercaderia.length > 0) {
+                html += `<ul>${data.mercaderia.map(m => `
+                    <li>${m.fecha}: ${m.descripcion} x${m.cantidad} a $${m.precio}</li>`).join('')}
+                </ul>`;
+            } else {
+                html += `<p>No hay mercadería en este período.</p>`;
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('cambiosModal'));
+            document.getElementById('modalTitle').innerText = `Métricas de ${nombreCliente}`;
+            document.getElementById('modalBody').innerHTML = html;
+            modal.show();
+        })
+        .catch(err => {
+            console.error('Error al cargar métricas:', err);
+            alert('Error al cargar métricas');
         });
 }

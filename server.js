@@ -1738,6 +1738,57 @@ app.delete('/clientes/:id', (req, res) => {
         res.json({ message: 'Cliente eliminado con éxito' });
     });
 });
+app.get('/metricas/:idCliente', (req, res) => {
+    const { idCliente } = req.params;
+    const { desde, hasta } = req.query;
+
+    const filtros = [];
+    if (desde && hasta) {
+        filtros.push(`fecha BETWEEN '${desde}' AND '${hasta}'`);
+    }
+
+    const filtrosSql = filtros.length > 0 ? `AND ${filtros.join(' AND ')}` : '';
+
+    const queries = {
+        cambios: `
+            SELECT producto, cantidad, precio, fecha
+            FROM cambios
+            WHERE cliente = (SELECT nombre FROM clientes WHERE id = ?)
+            ${filtrosSql}
+        `,
+        plazos: `
+            SELECT formaPago, totalPagar, fecha, pago
+            FROM plazos_pago
+            WHERE idCliente = ?
+            ${filtrosSql}
+        `,
+        mercaderia: `
+            SELECT descripcion, cantidad, precio, fecha
+            FROM mercaderiaClientes
+            WHERE idCliente = ?
+            ${filtrosSql}
+        `
+    };
+
+    const resultados = {};
+
+    dbModulos.query(queries.cambios, [idCliente], (err1, res1) => {
+        if (err1) return res.status(500).json({ error: 'Error en métricas de cambios' });
+        resultados.cambios = res1;
+
+        dbModulos.query(queries.plazos, [idCliente], (err2, res2) => {
+            if (err2) return res.status(500).json({ error: 'Error en métricas de plazos de pago' });
+            resultados.plazos = res2;
+
+            dbModulos.query(queries.mercaderia, [idCliente], (err3, res3) => {
+                if (err3) return res.status(500).json({ error: 'Error en métricas de mercadería' });
+                resultados.mercaderia = res3;
+
+                res.json(resultados);
+            });
+        });
+    });
+});
 app.use((req, res) => {
     res.status(404).json({ message: 'Página no encontrada' });
 });
