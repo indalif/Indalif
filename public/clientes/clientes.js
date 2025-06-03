@@ -418,8 +418,48 @@ function verMetricas(idCliente, nombreCliente) {
         <label>Desde: <input type="date" id="filtroDesde" class="form-control mb-2"></label>
         <label>Hasta: <input type="date" id="filtroHasta" class="form-control mb-2"></label>
         <button class="btn btn-primary mb-3" onclick="cargarMetricasCliente(${idCliente}, '${nombreCliente}')">Ver Métricas</button>
-        <div id="resultadoMetricas"></div>
+       <div id="resultadoMetricas"></div>
+       <canvas id="graficoMetricas" class="my-4"></canvas>
     `;
+    // Destruir gráfico anterior si existe
+    if (window.graficoMetricas) {
+        window.graficoMetricas.destroy();
+    }
+
+    // Crear gráfico de torta con Chart.js
+    const ctx = document.getElementById('graficoMetricas').getContext('2d');
+    window.graficoMetricas = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Mercadería', 'Pagado', 'Cambios'],
+            datasets: [{
+                data: [totalMercaderia, totalPagado, totalCambios],
+                backgroundColor: ['#ffda77', '#a4c639', '#f67280']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#5b1f0a',
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Distribución porcentual de montos',
+                    color: '#5b1f0a',
+                    font: {
+                        size: 18
+                    }
+                }
+            }
+        }
+    });
 
     const body = document.getElementById('metricasBody');
     body.innerHTML = '';
