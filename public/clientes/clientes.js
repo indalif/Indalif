@@ -476,18 +476,27 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
 
             html += `<h6 class="mt-3">Detalle Plazos de Pago</h6><ul><li>Detalle no mostrado</li></ul>`;
 
+            // Insertar canvas para gráfico
             html += `<h6 class="mt-4">Distribución porcentual de montos</h6>`;
             html += `<canvas id="graficoMetricas" class="my-4"></canvas>`;
 
             resultado.innerHTML = html;
 
-            // Destruir gráfico anterior si existe
-            if (window.graficoMetricas) {
+            // Esperar a que el canvas esté en el DOM
+            const canvas = document.getElementById('graficoMetricas');
+            if (!canvas) {
+                console.error('Canvas para el gráfico no encontrado');
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            // Destruir gráfico anterior si existe y es válido
+            if (window.graficoMetricas instanceof Chart) {
                 window.graficoMetricas.destroy();
             }
 
-            // Crear gráfico de torta
-            const ctx = document.getElementById('graficoMetricas').getContext('2d');
+            // Crear el gráfico de torta
             window.graficoMetricas = new Chart(ctx, {
                 type: 'pie',
                 data: {
