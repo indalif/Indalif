@@ -1770,18 +1770,18 @@ app.get('/metricas/:idCliente', (req, res) => {
     dbModulos.query(queries.cambios, [idCliente], (err1, r1) => {
         if (err1) return res.status(500).json({ error: 'Error en cambios' });
         resultados.cambios = r1;
-        resultados.totalCambios = r1.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+        resultados.totalCambios = r1.reduce((sum, c) => sum + (parseFloat(c.precio) * c.cantidad), 0);
 
         dbModulos.query(queries.plazos, [idCliente], (err2, r2) => {
             if (err2) return res.status(500).json({ error: 'Error en plazos de pago' });
             resultados.plazos = r2;
-            resultados.totalPlazos = r2.reduce((sum, p) => sum + (p.totalPagar || 0), 0);
-            resultados.totalPagado = r2.reduce((sum, p) => sum + (p.pago || 0), 0);
+            resultados.totalPlazos = r2.reduce((sum, p) => sum + (parseFloat(p.totalPagar) || 0), 0);
+            resultados.totalPagado = r2.reduce((sum, p) => sum + (parseFloat(p.pago) || 0), 0);
 
             dbModulos.query(queries.mercaderia, [idCliente], (err3, r3) => {
                 if (err3) return res.status(500).json({ error: 'Error en mercadería' });
                 resultados.mercaderia = r3;
-                resultados.totalMercaderia = r3.reduce((sum, m) => sum + (m.precio * m.cantidad), 0);
+                resultados.totalMercaderia = r3.reduce((sum, m) => sum + (parseFloat(m.precio) * m.cantidad), 0);
 
                 res.json(resultados);
             });

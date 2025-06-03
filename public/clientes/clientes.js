@@ -441,15 +441,20 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
         .then(data => {
             const resultado = document.getElementById('resultadoMetricas');
 
+            const totalCambios = parseFloat(data.totalCambios) || 0;
+            const totalPlazos = parseFloat(data.totalPlazos) || 0;
+            const totalPagado = parseFloat(data.totalPagado) || 0;
+            const totalMercaderia = parseFloat(data.totalMercaderia) || 0;
+
             let html = `<h5 class="text-center">Métricas de <strong>${nombreCliente}</strong></h5>`;
 
             html += `
                 <h6 class="mt-3">Totales</h6>
                 <ul>
-                    <li><strong>Total Cambios:</strong> $${data.totalCambios.toFixed(2)}</li>
-                    <li><strong>Total Plazos de Pago:</strong> $${data.totalPlazos.toFixed(2)}</li>
-                    <li><strong>Total Pagado:</strong> $${data.totalPagado.toFixed(2)}</li>
-                    <li><strong>Total Mercadería:</strong> $${data.totalMercaderia.toFixed(2)}</li>
+                    <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
+                    <li><strong>Total Plazos de Pago:</strong> $${totalPlazos.toFixed(2)}</li>
+                    <li><strong>Total Pagado:</strong> $${totalPagado.toFixed(2)}</li>
+                    <li><strong>Total Mercadería:</strong> $${totalMercaderia.toFixed(2)}</li>
                 </ul>
             `;
 
