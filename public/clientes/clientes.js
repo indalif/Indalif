@@ -442,29 +442,28 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             const resultado = document.getElementById('resultadoMetricas');
 
             const totalCambios = parseFloat(data.totalCambios) || 0;
-            const totalPlazos = parseFloat(data.totalPlazos) || 0;
-            const totalPagado = parseFloat(data.totalPagado) || 0;
             const totalMercaderia = parseFloat(data.totalMercaderia) || 0;
+            const totalACobrar = totalMercaderia - totalCambios;
 
             let html = `<h5 class="text-center">Métricas de <strong>${nombreCliente}</strong></h5>`;
 
             html += `
-    <div class="row align-items-start mt-3">
-        <div class="col-md-6">
-            <h6>Totales</h6>
-            <ul>
-                <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
-                <li><strong>Total Plazos de Pago:</strong> $${totalPlazos.toFixed(2)}</li>
-                <li><strong>Total Pagado:</strong> $${totalPagado.toFixed(2)}</li>
-                <li><strong>Total Mercadería:</strong> $${totalMercaderia.toFixed(2)}</li>
-            </ul>
-        </div>
-        <div class="col-md-6 text-center">
-            <canvas id="graficoMetricas" style="max-width: 250px; margin: auto;"></canvas>
-        </div>
-    </div>
-`;
-            html += `<h6 class="mt-3">Detalle Cambios (acumulado por producto)</h6><ul>`;
+                <div class="row align-items-start mt-3">
+                    <div class="col-md-6">
+                        <h6>Totales</h6>
+                        <ul>
+                            <li><strong>Total Mercadería:</strong> $${totalMercaderia.toFixed(2)}</li>
+                            <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
+                            <li><strong>Total a Cobrar:</strong> $${totalACobrar.toFixed(2)}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <canvas id="graficoMetricas" style="max-width: 250px; margin: auto;"></canvas>
+                    </div>
+                </div>
+            `;
+
+            html += `<h6 class="mt-4">Detalle Cambios (acumulado por producto)</h6><ul>`;
             html += data.cambios.length
                 ? data.cambios.map(c => `
                     <li>${c.producto}: ${c.cantidad} unidades a promedio $${parseFloat(c.precio).toFixed(2)}</li>
@@ -480,9 +479,11 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                 : '<li>No hay mercadería</li>';
             html += `</ul>`;
 
+            html += `<h6 class="mt-3">Detalle Plazos de Pago</h6><ul><li>Detalle no mostrado</li></ul>`;
+
             resultado.innerHTML = html;
 
-            // Esperar a que el canvas esté en el DOM
+            // Crear el gráfico después de insertar el canvas
             const canvas = document.getElementById('graficoMetricas');
             if (!canvas) {
                 console.error('Canvas para el gráfico no encontrado');
@@ -491,19 +492,17 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
 
             const ctx = canvas.getContext('2d');
 
-            // Destruir gráfico anterior si existe y es válido
             if (window.graficoMetricas instanceof Chart) {
                 window.graficoMetricas.destroy();
             }
 
-            // Crear el gráfico de torta
             window.graficoMetricas = new Chart(ctx, {
-                type: 'pie',
+                type: 'pie', // podés cambiar a 'doughnut' si preferís tipo donut
                 data: {
-                    labels: ['Mercadería', 'Pagado', 'Cambios'],
+                    labels: ['Mercadería', 'Cambios'],
                     datasets: [{
-                        data: [totalMercaderia, totalPagado, totalCambios],
-                        backgroundColor: ['#ffda77', '#a4c639', '#f67280']
+                        data: [totalMercaderia, totalCambios],
+                        backgroundColor: ['#ffda77', '#f67280']
                     }]
                 },
                 options: {
@@ -518,7 +517,7 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                         },
                         title: {
                             display: true,
-                            text: 'Distribución porcentual de montos',
+                            text: 'Distribución Mercadería vs. Cambios',
                             color: '#5b1f0a',
                             font: { size: 18 }
                         }
