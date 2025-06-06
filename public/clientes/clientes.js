@@ -457,7 +457,7 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             </ul>
         </div>
         <div class="col-md-6 text-center">
-            <canvas id="graficoMetricas" style="max-width: 220px; margin: auto;"></canvas>
+            <canvas id="graficoMetricas" style="max-width: 260px; margin: auto;"></canvas>
         </div>
     </div>
 
