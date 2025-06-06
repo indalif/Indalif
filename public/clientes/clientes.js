@@ -446,6 +446,9 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             const totalACobrar = totalMercaderia - totalCambios;
 
             let html = `
+    <div class="text-end mb-2">
+        <button class="btn btn-sm btn-primary" onclick="capturarMetricas()">📸 Descargar captura</button>
+    </div>
     <h5 class="text-center mb-2">Métricas de <strong>${nombreCliente}</strong></h5>
     <div class="row align-items-start">
         <div class="col-md-6">
@@ -455,6 +458,9 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                 <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
                 <li><strong>Total a Cobrar:</strong> $${totalACobrar.toFixed(2)}</li>
             </ul>
+        </div>
+        <div class="col-md-6 text-center">
+            <canvas id="graficoMetricas" style="max-width: 240px; margin: auto;"></canvas>
         </div>
     </div>
 
@@ -479,9 +485,6 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                     : '<li>No hay mercadería</li>'
                 }
             </ul>
-             <div class="col-md-6 text-center">
-            <canvas id="graficoMetricas" style="max-width: 240px; margin: auto;"></canvas>
-        </div>
             `;
 
             resultado.innerHTML = html;
@@ -531,4 +534,24 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             console.error('Error al obtener métricas:', err);
             alert('Error al cargar métricas');
         });
+}
+function capturarMetricas() {
+    const container = document.getElementById('resultadoMetricas');
+    if (!container) {
+        alert("No se encontró el área de métricas para capturar.");
+        return;
+    }
+
+    html2canvas(container, {
+        scale: 2, // Mejora la resolución
+        useCORS: true
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'metricas_cliente.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }).catch(err => {
+        console.error('Error al capturar imagen:', err);
+        alert("Ocurrió un error al generar la captura.");
+    });
 }
