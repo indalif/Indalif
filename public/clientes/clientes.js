@@ -456,9 +456,6 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                 <li><strong>Total a Cobrar:</strong> $${totalACobrar.toFixed(2)}</li>
             </ul>
         </div>
-        <div class="col-md-6 text-center">
-            <canvas id="graficoMetricas" style="max-width: 260px; margin: auto;"></canvas>
-        </div>
     </div>
 
     <div class="row mt-1">
@@ -482,6 +479,9 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
                     : '<li>No hay mercadería</li>'
                 }
             </ul>
+             <div class="col-md-6 text-center">
+            <canvas id="graficoMetricas" style="max-width: 240px; margin: auto;"></canvas>
+        </div>
             `;
 
             resultado.innerHTML = html;
