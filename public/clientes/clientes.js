@@ -485,7 +485,6 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             `;
 
             resultado.innerHTML = html;
-
             // Crear el gráfico después de insertar el canvas
             const canvas = document.getElementById('graficoMetricas');
             if (!canvas) {
