@@ -445,41 +445,44 @@ function cargarMetricasCliente(idCliente, nombreCliente) {
             const totalMercaderia = parseFloat(data.totalMercaderia) || 0;
             const totalACobrar = totalMercaderia - totalCambios;
 
-            let html = `<h5 class="text-center">Métricas de <strong>${nombreCliente}</strong></h5>`;
+            let html = `
+    <h5 class="text-center mb-2">Métricas de <strong>${nombreCliente}</strong></h5>
+    <div class="row align-items-start">
+        <div class="col-md-6">
+            <h6 class="mb-2">Totales</h6>
+            <ul class="mb-3" style="font-size: 0.95rem;">
+                <li><strong>Total Mercadería:</strong> $${totalMercaderia.toFixed(2)}</li>
+                <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
+                <li><strong>Total a Cobrar:</strong> $${totalACobrar.toFixed(2)}</li>
+            </ul>
+        </div>
+        <div class="col-md-6 text-center">
+            <canvas id="graficoMetricas" style="max-width: 220px; margin: auto;"></canvas>
+        </div>
+    </div>
 
-            html += `
-                <div class="row align-items-start mt-3">
-                    <div class="col-md-6">
-                        <h6>Totales</h6>
-                        <ul>
-                            <li><strong>Total Mercadería:</strong> $${totalMercaderia.toFixed(2)}</li>
-                            <li><strong>Total Cambios:</strong> $${totalCambios.toFixed(2)}</li>
-                            <li><strong>Total a Cobrar:</strong> $${totalACobrar.toFixed(2)}</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6 text-center">
-                        <canvas id="graficoMetricas" style="max-width: 250px; margin: auto;"></canvas>
-                    </div>
-                </div>
+    <div class="row mt-1">
+        <div class="col">
+            <h6 class="mb-2">Detalle Cambios (acumulado por producto)</h6>
+            <ul class="mb-2" style="font-size: 0.9rem;">
+                ${data.cambios.length
+                    ? data.cambios.map(c => `
+                            <li>${c.producto}: ${c.cantidad} unidades a promedio $${parseFloat(c.precio).toFixed(2)}</li>
+                        `).join('')
+                    : '<li>No hay cambios</li>'
+                }
+            </ul>
+
+            <h6 class="mb-2">Detalle Mercadería (acumulado por producto)</h6>
+            <ul class="mb-2" style="font-size: 0.9rem;">
+                ${data.mercaderia.length
+                    ? data.mercaderia.map(m => `
+                            <li>${m.descripcion}: ${m.cantidad} unidades a promedio $${parseFloat(m.precio).toFixed(2)}</li>
+                        `).join('')
+                    : '<li>No hay mercadería</li>'
+                }
+            </ul>
             `;
-
-            html += `<h6 class="mt-4">Detalle Cambios (acumulado por producto)</h6><ul>`;
-            html += data.cambios.length
-                ? data.cambios.map(c => `
-                    <li>${c.producto}: ${c.cantidad} unidades a promedio $${parseFloat(c.precio).toFixed(2)}</li>
-                  `).join('')
-                : '<li>No hay cambios</li>';
-            html += `</ul>`;
-
-            html += `<h6 class="mt-3">Detalle Mercadería (acumulado por producto)</h6><ul>`;
-            html += data.mercaderia.length
-                ? data.mercaderia.map(m => `
-                    <li>${m.descripcion}: ${m.cantidad} unidades a promedio $${parseFloat(m.precio).toFixed(2)}</li>
-                  `).join('')
-                : '<li>No hay mercadería</li>';
-            html += `</ul>`;
-
-            html += `<h6 class="mt-3">Detalle Plazos de Pago</h6><ul><li>Detalle no mostrado</li></ul>`;
 
             resultado.innerHTML = html;
 
