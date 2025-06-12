@@ -217,6 +217,9 @@ function cargarPlazosPago(idCliente) {
                 return;
             }
 
+            // ORDENAR por fecha de pago (plazo.fecha) en orden descendente
+            data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
             data.forEach(plazo => {
                 const total = parseFloat(plazo.totalPagar) || 0;
                 const pago = parseFloat(plazo.pago) || 0;
@@ -225,21 +228,21 @@ function cargarPlazosPago(idCliente) {
                 if (debe > 0) totalDeuda += debe;
 
                 const fila = `
-                    <tr>
-                        <td>${plazo.formaPago}</td>
-                        <td>${total.toFixed(2)}</td>
-                        <td>${formatearFecha(plazo.fechaEmision)}</td> <!-- Aquí aplicamos la función -->
-                        <td>${formatearFecha(plazo.fecha)}</td> <!-- También aquí -->
-                        <td>${pago.toFixed(2)}</td>
-                        <td>${plazo.numeroComprobante || '-'}</td>
-                        <td>${debe === 0 ? '<span class="text-success">Saldada</span>' : debe.toFixed(2)}</td>
-                        <td>
-                            ${debe > 0
+            <tr>
+                <td>${plazo.formaPago}</td>
+                <td>${total.toFixed(2)}</td>
+                <td>${formatearFecha(plazo.fechaEmision)}</td>
+                <td>${formatearFecha(plazo.fecha)}</td>
+                <td>${pago.toFixed(2)}</td>
+                <td>${plazo.numeroComprobante || '-'}</td>
+                <td>${debe === 0 ? '<span class="text-success">Saldada</span>' : debe.toFixed(2)}</td>
+                <td>
+                    ${debe > 0
                         ? `<button class="btn btn-success btn-sm" onclick="abrirRegistrarPago(${plazo.idPlazo}, ${debe})">Registrar Pago</button>`
                         : '<span class="text-muted">Pago completo</span>'}
-                        </td>
-                    </tr>
-                `;
+                </td>
+            </tr>
+        `;
 
                 tabla.insertAdjacentHTML('beforeend', fila);
             });
