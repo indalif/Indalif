@@ -217,7 +217,6 @@ function cargarPlazosPago(idCliente) {
                 return;
             }
 
-            document.getElementById('totalDeuda').textContent = totalDeuda.toFixed(2);
             // ORDENAR por fecha de pago (plazo.fecha) en orden descendente
             data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
@@ -247,6 +246,8 @@ function cargarPlazosPago(idCliente) {
 
                 tabla.insertAdjacentHTML('beforeend', fila);
             });
+
+            document.getElementById('totalDeuda').textContent = totalDeuda.toFixed(2);
         })
         .catch(error => console.error('Error al cargar plazos de pago:', error));
 }
