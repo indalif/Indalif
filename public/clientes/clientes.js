@@ -322,6 +322,9 @@ function renderizarTabla(data) {
         return;
     }
 
+    // Ordenar por fecha descendente (más reciente primero)
+    data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
     tabla.innerHTML = '';
     data.forEach(item => {
         const precio = parseFloat(item.precio) || 0;
@@ -348,7 +351,11 @@ function renderizarTabla(data) {
 }
 function filtrarProducto() {
     const filtro = document.getElementById('filtroProducto').value;
-    const datosFiltrados = filtro ? mercaderiaData.filter(item => item.descripcion === filtro) : mercaderiaData;
+    let datosFiltrados = filtro ? mercaderiaData.filter(item => item.descripcion === filtro) : mercaderiaData;
+
+    // Ordenar los datos filtrados por fecha descendente
+    datosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
     renderizarTabla(datosFiltrados);
 }
 function abrirMercaderia(idCliente) {
