@@ -48,15 +48,17 @@ function mostrarEmpleados() {
             let totalMensuales = 0;
             let totalPorHora = 0;
 
-            empleados.forEach((empleado) => {
-                const row = document.createElement('tr');
-                row.setAttribute('data-id', empleado.id); // Asocia la fila al ID del empleado
+            empleados
+                .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                .forEach((empleado) => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-id', empleado.id); // Asocia la fila al ID del empleado
 
-                const totalPago = parseFloat(empleado.total_pago) || 0;
+                    const totalPago = parseFloat(empleado.total_pago) || 0;
 
-                if (empleado.tipo_pago === 'Mensual') {
-                    totalMensuales += totalPago;
-                    row.innerHTML = `
+                    if (empleado.tipo_pago === 'Mensual') {
+                        totalMensuales += totalPago;
+                        row.innerHTML = `
                         <td>${empleado.tipo_pago}</td>
                         <td>${empleado.nombre}</td>
                         <td>${empleado.dni}</td>
@@ -73,10 +75,10 @@ function mostrarEmpleados() {
                             <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
                         </td>                
                     `;
-                    tablaMensuales.appendChild(row);
-                } else if (empleado.tipo_pago === 'PorHora') {
-                    totalPorHora += totalPago;
-                    row.innerHTML = `
+                        tablaMensuales.appendChild(row);
+                    } else if (empleado.tipo_pago === 'PorHora') {
+                        totalPorHora += totalPago;
+                        row.innerHTML = `
                         <td>${empleado.tipo_pago}</td>
                         <td>${empleado.nombre}</td>
                         <td>${empleado.dni}</td>
@@ -93,9 +95,9 @@ function mostrarEmpleados() {
                             <button class="btn btn-primary btn-sm" onclick="mostrarActualizarSueldo(${empleado.id}, '${empleado.tipo_pago}', ${empleado.salario_base})">Actualizar Sueldo</button>
                         </td>                
                     `;
-                    tablaPorHora.appendChild(row);
-                }
-            });
+                        tablaPorHora.appendChild(row);
+                    }
+                });
             document.getElementById('totalMensuales').textContent = `Total Mensuales: $${totalMensuales.toFixed(2)}`;
             document.getElementById('totalPorHora').textContent = `Total Por Hora: $${totalPorHora.toFixed(2)}`;
         })
