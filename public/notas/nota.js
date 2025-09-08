@@ -38,6 +38,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 let productosLista = [];
+// 🔸 Agregá esto arriba del archivo (después de las variables globales)
+const normalizarProductos = (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr
+        .filter(p => p && typeof p === 'object') // saca null/undefined/strings
+        .map(p => ({
+            producto: String(p.producto ?? '').trim(),
+            cantidad: Number(p.cantidad ?? 0),
+            presentacion: String(p.presentacion ?? '').trim(),
+            descripcion: String(p.descripcion ?? '')
+        }))
+        .filter(p => p.producto && p.cantidad && p.presentacion); // solo válidos
+};
 document.getElementById('agregarProducto').addEventListener('click', function (event) {
     event.preventDefault();
     const producto = document.getElementById('producto').value;
@@ -249,27 +262,24 @@ async function cargarNotas() {
             div.setAttribute('data-id', nota.id);
 
             let productos = [];
-
             try {
                 if (Array.isArray(nota.productos)) {
                     productos = nota.productos;
-                } else if (typeof nota.productos === 'string') {
+                } else if (typeof nota.productos === 'string' && nota.productos.trim()) {
                     productos = JSON.parse(nota.productos);
-                    if (!Array.isArray(productos)) throw new Error("Productos no es un array después de parsear.");
-                } else {
-                    throw new Error("Formato desconocido de productos.");
                 }
             } catch (error) {
                 console.error("❌ Error parseando productos en nota ID", nota.id, ":", error);
                 productos = [];
             }
 
-            console.log("✅ Productos en nota ID", nota.id, ":", productos); // 🔍 DEBUG
+            // ✅ Normalizamos para evitar nulls/formatos raros
+            productos = normalizarProductos(productos);
+            console.log("✅ Productos normalizados en nota ID", nota.id, ":", productos);
 
             let productosHTML = productos.length > 0
                 ? productos.map(p => `<li>${p.producto} - Cantidad: ${p.cantidad}, Presentación: ${p.presentacion}${p.descripcion ? " - " + p.descripcion : ""}</li>`).join("")
                 : '<li class="text-warning">⚠️ No hay productos registrados</li>';
-
             div.innerHTML = `
                 <h5>Número de Nota: ${nota.numero_nota}</h5>
                 <p><strong>Cliente:</strong> ${nota.nombre_cliente}</p>
@@ -356,19 +366,16 @@ async function cargarNotaParaEditar(notaId) {
         document.getElementById('fecha').value = formatFechaParaInput(nota.fecha);
         document.getElementById('fecha_entrega').value = formatFechaParaInput(nota.fecha_entrega);
 
+        let parsed = [];
         if (Array.isArray(nota.productos)) {
-            productosLista = nota.productos;
-        } else if (typeof nota.productos === "string") {
-            try {
-                productosLista = JSON.parse(nota.productos);
-            } catch (error) {
-                console.error("Error parseando productos:", error);
-                productosLista = [];
-            }
-        } else {
-            productosLista = [];
+            parsed = nota.productos;
+        } else if (typeof nota.productos === "string" && nota.productos.trim()) {
+            try { parsed = JSON.parse(nota.productos); }
+            catch (error) { console.error("Error parseando productos:", error); }
         }
-        console.log("🔍 Productos cargados para edición:", productosLista);
+        productosLista = normalizarProductos(parsed);
+
+        console.log("🔍 Productos cargados para edición (normalizados):", productosLista);
         actualizarListaProductos();
 
         let btnEditar = document.getElementById('guardarNotaEditada');
@@ -388,15 +395,16 @@ async function cargarNotaParaEditar(notaId) {
 }
 function actualizarListaProductos() {
     console.log("Lista de productos:", productosLista);
-
     const listaProductos = document.getElementById('listaProductos');
     listaProductos.innerHTML = '';
+
+    productosLista = normalizarProductos(productosLista);
 
     if (!Array.isArray(productosLista) || productosLista.length === 0) {
         listaProductos.innerHTML = '<li class="text-danger">No hay productos registrados</li>';
         return;
     }
-
+    // ...
     productosLista.forEach((producto, index) => {
         let item = document.createElement('li');
         item.classList.add('list-group-item');
@@ -424,7 +432,7 @@ function editarProducto(index) {
     document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
     document.getElementById('agregarProducto').innerHTML = `<i class="fas fa-save me-2"></i>Actualizar Producto`;
 
-    event.preventDefault();
+    // event.preventDefault();
 }
 function eliminarProducto(index) {
     if (confirm('¿Estás seguro de eliminar este producto?')) {
