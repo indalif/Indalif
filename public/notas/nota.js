@@ -432,7 +432,7 @@ function editarProducto(index) {
     document.getElementById('agregarProducto').setAttribute('data-edit-index', index);
     document.getElementById('agregarProducto').innerHTML = `<i class="fas fa-save me-2"></i>Actualizar Producto`;
 
-    // event.preventDefault();
+    event.preventDefault();
 }
 function eliminarProducto(index) {
     if (confirm('¿Estás seguro de eliminar este producto?')) {
