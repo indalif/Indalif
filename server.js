@@ -24,9 +24,6 @@ app.use((err, req, res, next) => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login', 'login.html'));
 });
-
-const nodemailer = require('nodemailer');
-
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
