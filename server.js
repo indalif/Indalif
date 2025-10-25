@@ -25,12 +25,24 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login', 'login.html'));
 });
 
+const nodemailer = require('nodemailer');
+
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // Usa SSL
     auth: {
         user: 'fabricaaranda@gmail.com',
-        pass: 'tfww odff zsxy zyzp',
+        pass: 'uinc xziv vdit ulwf', // 🔒 reemplazá por tu nueva contraseña de aplicación de Gmail
     },
+});
+
+transporter.verify((error, success) => {
+    if (error) {
+        console.error('❌ Error en conexión SMTP:', error);
+    } else {
+        console.log('✅ Conexión SMTP exitosa, listo para enviar correos.');
+    }
 });
 
 const dbModulos = mysql.createPool({
@@ -949,33 +961,36 @@ app.put('/actualizar_estado', (req, res) => {
         res.json({ message: 'Estado actualizado con éxito.' });
     });
 });
-app.post('/send-authorization-email', (req, res) => {
-    const { username, email, userType } = req.body;
+app.post('/send-authorization-email', async (req, res) => {
+    try {
+        const { username, email, userType } = req.body;
+        console.log('📩 Body recibido:', req.body);
 
-    if (!email || !username || !userType) {
-        return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
-    }
-
-    const mailOptions = {
-        from: 'fabricaaranda@gmail.com',
-        to: email,
-        subject: 'Autorización de registro en el sistema',
-        html: `
-            <h1>Solicitud de Autorización</h1>
-            <p>El usuario <strong>${username}</strong> ha solicitado registrarse como <strong>${userType}</strong> en el sistema.</p>
-            <p>Por favor, autorice o rechace la solicitud:</p>
-            <a href="https://fabrica-production.up.railway.app/approve?username=${username}" style="margin-right: 10px;">Autorizar</a>
-            <a href="https://fabrica-production.up.railway.app/reject?username=${username}">Rechazar</a>
-        `,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('Error al enviar correo:', error);
-            return res.status(500).json({ message: 'Error al enviar correo.' });
+        if (!email || !username || !userType) {
+            return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
         }
-        res.status(200).json({ message: 'Correo enviado con éxito.', info });
-    });
+
+        const mailOptions = {
+            from: 'fabricaaranda@gmail.com',
+            to: email,
+            subject: 'Autorización de registro en el sistema',
+            html: `
+        <h2>Solicitud de Autorización</h2>
+        <p>El usuario <strong>${username}</strong> ha solicitado registrarse como <strong>${userType}</strong> en el sistema.</p>
+        <p>Por favor, autorice o rechace la solicitud:</p>
+        <a href="https://fabrica-production.up.railway.app/approve?username=${username}" style="color: green; margin-right: 10px;">Autorizar</a>
+        <a href="https://fabrica-production.up.railway.app/reject?username=${username}" style="color: red;">Rechazar</a>
+      `,
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('✅ Correo enviado:', info.response);
+
+        res.status(200).json({ message: 'Correo enviado con éxito.' });
+    } catch (error) {
+        console.error('❌ Error al enviar correo:', error);
+        res.status(500).json({ message: 'Error al enviar correo.', error: error.message });
+    }
 });
 app.get('/approve', (req, res) => {
     const { username } = req.query;
